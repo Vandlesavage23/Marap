@@ -1,0 +1,8 @@
+# 2 approvals required (branch protection) for the paths below — Bible §4.3
+/backend/mc/billing/        @marriage-connect/tech-leads
+/backend/mc/entitlements/   @marriage-connect/tech-leads
+/backend/mc/safety/         @marriage-connect/tech-leads
+/backend/mc/audit/          @marriage-connect/tech-leads
+/backend/mc/accounts/       @marriage-connect/tech-leads
+/backend/mc/common/crypto*  @marriage-connect/tech-leads
+*                           @marriage-connect/engineers
