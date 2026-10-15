@@ -165,6 +165,17 @@ class SessionDetailView(APIView):
 class ConsentsView(APIView):
     permission_classes = [IsAuthenticatedAnyStatus]
 
+    @extend_schema(responses={200: dict})
+    def get(self, request):  # type: ignore[no-untyped-def]
+        current = selectors.current_consents(request.user)
+        return Response(
+            {
+                "consents": {
+                    k: {"version": v.version, "granted": v.granted} for k, v in current.items()
+                }
+            }
+        )
+
     @extend_schema(request=s.ConsentsSerializer, responses={201: dict})
     def post(self, request):  # type: ignore[no-untyped-def]
         data = s.ConsentsSerializer(data=request.data)

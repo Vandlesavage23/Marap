@@ -58,3 +58,13 @@ def test_otp_send_spike_raises_one_alert(settings, caplog):
             post("start", {"phone": f"+25677299900{i}"})
     alerts = [r for r in caplog.records if getattr(r, "alert", "") == "otp_send_spike"]
     assert len(alerts) == 1
+
+
+def test_get_consents_returns_current_map_and_requires_auth():
+    from mc.accounts.tests.helpers import bearer
+    from mc.verification.tests.helpers import CONSENTS, new_user
+
+    c, r = new_user("+256772888050")
+    got = c.get("/api/v1/me/consents", **bearer(r)).json()["consents"]
+    assert set(got) == {x["kind"] for x in CONSENTS} and all(v["granted"] for v in got.values())
+    assert Client(headers={"host": "api.mc.test"}).get("/api/v1/me/consents").status_code == 401
