@@ -84,7 +84,7 @@ variable "static_cors_origins" {
 variable "alb_health_check_matcher" {
   description = "ALB health check success codes. See modules/alb_waf (Host header caveat)."
   type        = string
-  default     = "200,400"
+  default     = "200"
 }
 
 variable "alert_emails" {
