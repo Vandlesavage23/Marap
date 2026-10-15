@@ -3,6 +3,7 @@ settings/DB, never from code paths in other modules."""
 
 import secrets
 import uuid
+from datetime import datetime
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
@@ -61,7 +62,7 @@ def create_invites(
     *,
     count: int,
     max_uses: int = 1,
-    expires_at=None,
+    expires_at: datetime | None = None,
     note: str = "",
     created_by: uuid.UUID | None = None,
 ) -> list[str]:

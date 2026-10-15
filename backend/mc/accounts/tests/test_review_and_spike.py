@@ -1,0 +1,60 @@
+import logging
+
+import pytest
+from django.core.management import call_command
+from django.test import Client
+
+from mc.accounts.models import Account
+from mc.accounts.providers.sms import FakeSms
+from mc.audit.models import AuditEvent
+from mc.verification.tests.helpers import J
+
+pytestmark = pytest.mark.django_db
+PHONE = "+256772888001"
+
+
+def post(path, body):
+    return Client(headers={"host": "api.mc.test"}).post(f"/api/v1/auth/otp/{path}", body, **J)
+
+
+def test_review_account_is_disabled_by_default():
+    assert post("start", {"phone": PHONE}).status_code == 202
+    assert FakeSms.outbox  # a normal SMS was sent
+    assert post("verify", {"phone": PHONE, "code": "123456"}).status_code == 422
+
+
+def test_review_account_signs_in_with_fixed_code_without_sms_and_is_audited(settings):
+    settings.REVIEW_ACCOUNT_PHONE, settings.REVIEW_ACCOUNT_CODE = PHONE, "424242"
+    call_command("create_review_account", "--confirm")
+    assert Account.objects.filter(phone_e164=PHONE).exists()
+    assert post("start", {"phone": PHONE}).status_code == 202 and FakeSms.outbox == []
+    assert post("verify", {"phone": PHONE, "code": "000000"}).status_code == 422
+    r = post("verify", {"phone": PHONE, "code": "424242"})
+    assert r.status_code == 200 and r.json()["access"]
+    assert AuditEvent.objects.filter(action="auth.review_account_login").count() == 1
+    # other numbers are unaffected by the fixed code
+    post("start", {"phone": "+256772888002"})
+    assert post("verify", {"phone": "+256772888002", "code": "424242"}).status_code == 422
+
+
+def test_review_code_attempts_are_rate_limited(settings):
+    settings.REVIEW_ACCOUNT_PHONE, settings.REVIEW_ACCOUNT_CODE = PHONE, "424242"
+    codes = [post("verify", {"phone": PHONE, "code": f"{i:06d}"}).status_code for i in range(12)]
+    assert 429 in codes
+
+
+def test_command_refuses_without_configuration():
+    from django.core.management.base import CommandError
+
+    with pytest.raises(CommandError):
+        call_command("create_review_account", "--confirm")
+
+
+def test_otp_send_spike_raises_one_alert(settings, caplog):
+    settings.OTP_SPIKE_ALERT_PER_HOUR = 3
+    settings.OTP_SENDS_PER_IP_PER_HOUR = 100
+    with caplog.at_level(logging.WARNING):
+        for i in range(5):
+            post("start", {"phone": f"+25677299900{i}"})
+    alerts = [r for r in caplog.records if getattr(r, "alert", "") == "otp_send_spike"]
+    assert len(alerts) == 1

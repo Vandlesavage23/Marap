@@ -123,3 +123,16 @@ RETENTION_TERMINAL_INTERESTS_DAYS = _int("RETENTION_TERMINAL_INTERESTS_DAYS", 18
 
 RECOVERY_TTL_MINUTES = _int("RECOVERY_TTL_MINUTES", 30)
 RECOVERY_EMAIL_OTPS_PER_HOUR = _int("RECOVERY_EMAIL_OTPS_PER_HOUR", 3)
+
+# Store-review account (MC-125, OPEN_QUESTIONS Q26): empty = disabled. The code must come from the secrets store.
+REVIEW_ACCOUNT_PHONE = os.environ.get("REVIEW_ACCOUNT_PHONE", "")
+REVIEW_ACCOUNT_CODE = os.environ.get("REVIEW_ACCOUNT_CODE", "")
+OTP_SPIKE_ALERT_PER_HOUR = _int(
+    "OTP_SPIKE_ALERT_PER_HOUR", 1000
+)  # global sends/hour that raises the SMS-pumping alert
+MODERATION_AWS_REGION = os.environ.get(
+    "MODERATION_AWS_REGION", ""
+)  # empty = AWS_REGION (Rekognition availability, Q28)
+SUPPORT_EMAIL = os.environ.get(
+    "SUPPORT_EMAIL", "support@marriageconnect.ug"
+)  # shown on the public deletion page (PENDING: confirm mailbox)

@@ -44,7 +44,9 @@ class RekognitionModeration:
     def analyse(self, path: Path) -> ModerationResult:  # pragma: no cover - needs AWS
         import boto3
 
-        client = boto3.client("rekognition", region_name=settings.AWS_REGION)
+        client = boto3.client(
+            "rekognition", region_name=settings.MODERATION_AWS_REGION or settings.AWS_REGION
+        )
         image = {"Bytes": path.read_bytes()}
         labels = client.detect_moderation_labels(Image=image, MinConfidence=80)["ModerationLabels"]
         names = sorted(

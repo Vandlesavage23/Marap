@@ -131,3 +131,16 @@ def status(request: HttpRequest, purchase_id: uuid.UUID) -> HttpResponse:
         return _render(request, "error.html", 404, error="We couldn't find that payment.")
     state = {"pending": "pending", "active": "paid"}.get(p.status, "failed")
     return _render(request, "status.html", p=p, state=state)
+
+
+def delete_account_info(request: HttpRequest) -> HttpResponse:
+    """Public page (no sign-in) describing how to delete an account and what is erased — the URL Google Play's
+    Data Safety form asks for. The actual deletion needs the in-app re-auth code (privacy module)."""
+    from django.conf import settings
+
+    return _render(
+        request,
+        "delete_account.html",
+        support_email=settings.SUPPORT_EMAIL,
+        grace_days=settings.DELETION_GRACE_DAYS,
+    )

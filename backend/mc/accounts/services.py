@@ -1,6 +1,7 @@
 """Accounts write operations (Bible §6.1, §10.1). Services raise domain errors, never HTTP."""
 
 import hmac
+import logging
 import secrets
 import uuid
 from dataclasses import dataclass
@@ -11,6 +12,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
+from mc.audit import services as audit
 from mc.beta import services as beta_services
 from mc.common import events, ratelimit
 from mc.common.crypto import hmac_value
@@ -24,6 +26,7 @@ from .models import Account, ConsentRecord, Device, Session
 from .providers.sms import get_sms_provider
 from .tasks import send_new_device_alert
 
+log = logging.getLogger(__name__)
 HOUR = 3600
 GENERIC_BAD_CODE = "That code is invalid or has expired."
 
@@ -63,7 +66,10 @@ def start_otp(*, phone: str, purpose: str, ip: str) -> None:
 
     if purpose == "recover" and selectors.get_account_by_phone(e164) is None:
         return
+    if _is_review_phone(e164):
+        return  # store reviewers use the configured code; no SMS is sent
 
+    _count_global_send()
     code = f"{secrets.randbelow(10**6):06d}"
     r = get_redis()
     key = _otp_key(purpose, e164)
@@ -75,6 +81,35 @@ def start_otp(*, phone: str, purpose: str, ip: str) -> None:
     get_sms_provider().send(
         to_e164=e164,
         body=f"Your Marriage Connect code is {code}. Never share it with anyone.",
+    )
+
+
+def _is_review_phone(e164: str) -> bool:
+    return bool(
+        settings.REVIEW_ACCOUNT_PHONE
+        and settings.REVIEW_ACCOUNT_CODE
+        and e164 == settings.REVIEW_ACCOUNT_PHONE
+    )
+
+
+def _count_global_send() -> None:
+    """SMS-pumping tripwire: one WARNING (alert=otp_send_spike) when global sends in the hour cross the threshold."""
+    r = get_redis()
+    key = f"otp:global:{timezone.now():%Y%m%d%H}"
+    n = r.incr(key)
+    if n == 1:
+        r.expire(key, 2 * HOUR)
+    if n == settings.OTP_SPIKE_ALERT_PER_HOUR:
+        log.warning("otp send spike", extra={"alert": "otp_send_spike", "sends_this_hour": n})
+
+
+def _check_review_code(e164: str, code: str) -> None:
+    """Fixed code for the single store-review account. Tightly rate limited and every use is audited."""
+    ratelimit.hit("otp:review", limit=10, window_seconds=HOUR)
+    if not hmac.compare_digest(code, settings.REVIEW_ACCOUNT_CODE):
+        raise ValidationFailed(GENERIC_BAD_CODE)
+    audit.record(
+        actor_type="system", action="auth.review_account_login", reason="store review sign-in"
     )
 
 
@@ -148,7 +183,10 @@ def verify_otp(
     )
     if beta_services.invite_required() and selectors.get_account_by_phone(e164) is None:
         beta_services.assert_invite_valid(invite_code)  # before the SMS code is spent
-    _check_otp(e164=e164, code=code, purpose="login")
+    if _is_review_phone(e164):
+        _check_review_code(e164, code)
+    else:
+        _check_otp(e164=e164, code=code, purpose="login")
 
     with transaction.atomic():
         account = selectors.get_account_by_phone(e164)

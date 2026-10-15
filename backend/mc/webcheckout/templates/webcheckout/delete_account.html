@@ -1,0 +1,10 @@
+{% extends "webcheckout/base.html" %}{% block body %}
+<h2>Delete your Marriage Connect account</h2>
+<h3>In the app (fastest)</h3>
+<ol><li>Open <strong>Settings → Privacy and account → Delete my account</strong>.</li><li>Confirm with the 6-digit code we text to your phone.</li><li>Your account is switched off straight away.</li></ol>
+<h3>What happens next</h3>
+<p>You have {{ grace_days }} days to change your mind by contacting us. After that your profile, photos, answers, messages and sign-in details are permanently erased.</p>
+<p>We keep only what the law or safety requires: payment records for tax, a one-way fingerprint of your verified ID so a banned person cannot return, and records of safety reports.</p>
+<h3>Can't open the app?</h3>
+<p>Email <a href="mailto:{{ support_email }}">{{ support_email }}</a> from the address on your account, or tell us the phone number, and we will help you verify it is you.</p>
+{% endblock %}

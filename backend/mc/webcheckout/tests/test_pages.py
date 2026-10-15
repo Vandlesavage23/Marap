@@ -128,3 +128,14 @@ def test_security_headers_on_pay_host():
 
 
 _ = HASH
+
+
+def test_public_deletion_info_page_needs_no_sign_in_and_explains_the_process():
+    r = browser().get("/delete-account")
+    assert r.status_code == 200
+    body = r.content.decode()
+    assert (
+        "Delete my account" in body
+        and "support@marriageconnect.ug" in body
+        and "permanently erased" in body
+    )
