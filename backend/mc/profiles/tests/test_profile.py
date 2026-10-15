@@ -52,6 +52,7 @@ def test_patch_valid_and_completeness():
 
 def test_birth_date_and_unknown_fields_are_not_editable():
     c, r, _ = verified_client()
+    c.get("/api/v1/me/profile", **bearer(r))
     assert patch(c, r, birth_date="1990-01-01").status_code in (422,)
     assert Profile.objects.get().birth_date.year == 1995
     assert patch(c, r, status="live").status_code == 422
