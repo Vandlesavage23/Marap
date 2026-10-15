@@ -689,5 +689,273 @@
   "verifAppealBack": "Back to verification",
   "verifPassedTitle": "You're verified",
   "verifPassedBody": "Thank you. Next, let's build your profile.",
-  "verifPassedContinue": "Build my profile"
+  "verifPassedContinue": "Build my profile",
+  "profileBuilderTitle": "Build your profile",
+  "profileLoading": "Loading your profile",
+  "profileBack": "Back",
+  "profileSaveContinue": "Save and continue",
+  "profileSkip": "Skip for now",
+  "profileOptionalNote": "These are optional. Share only what you're comfortable with.",
+  "profileStepProgress": "Step {current} of {total}: {title}",
+  "@profileStepProgress": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "profileStepBasics": "The basics",
+  "profileStepAbout": "About you",
+  "profileStepIntention": "What you're looking for",
+  "profileStepLocation": "Where you are",
+  "profileStepPhotos": "Photos",
+  "profileStepQuestions": "Questions",
+  "profileStepDescription": "In your own words",
+  "profileStepPreview": "Preview and go live",
+  "profileNameLabel": "Name people will see",
+  "profileNameHelp": "A first name or nickname is best.",
+  "profileGenderLabel": "I am",
+  "profileGenderMale": "A man",
+  "profileGenderFemale": "A woman",
+  "profileGenderNote": "You can't change this later.",
+  "profileMaritalLabel": "Marital status",
+  "profileMaritalNever": "Never married",
+  "profileMaritalDivorced": "Divorced",
+  "profileMaritalWidowed": "Widowed",
+  "profileMaritalMarried": "Married",
+  "profileHasChildrenLabel": "Do you have children?",
+  "profileHasChildrenWithMe": "Yes, living with me",
+  "profileHasChildrenNotWithMe": "Yes, not living with me",
+  "profileWantsChildrenLabel": "Do you want children?",
+  "profileYes": "Yes",
+  "profileNo": "No",
+  "profileUnsure": "Not sure yet",
+  "profileEducationLabel": "Education",
+  "profileEduPrimary": "Primary",
+  "profileEduSecondary": "Secondary",
+  "profileEduDiploma": "Certificate or diploma",
+  "profileEduBachelors": "Bachelor's degree",
+  "profileEduPostgraduate": "Postgraduate",
+  "profileOccupationLabel": "Occupation",
+  "profileLanguagesLabel": "Languages you speak",
+  "profileLangEnglish": "English",
+  "profileLangLuganda": "Luganda",
+  "profileLangSwahili": "Swahili",
+  "profileLangRunyankole": "Runyankole",
+  "profileLangAcholi": "Acholi",
+  "profileLangAteso": "Ateso",
+  "profileIntentionLabel": "How soon are you hoping to marry?",
+  "profileIntentionSoon": "Marriage soon",
+  "profileIntentionOpen": "Marriage, with an open timeline",
+  "profileTimelineLabel": "Your ideal timeline",
+  "profileTimelineWithin1y": "Within a year",
+  "profileTimeline1to2y": "In 1 to 2 years",
+  "profileTimeline2to4y": "In 2 to 4 years",
+  "profileTimelineOpen": "No fixed timeline",
+  "profileMarriageFormLabel": "Marriage form you're open to (optional)",
+  "profileFormMonogamous": "One spouse only",
+  "profileFormOpen": "Open to customary or Islamic marriage",
+  "profileDistrictLabel": "District",
+  "profileDistrictAbroad": "I live outside Uganda",
+  "profileCountryLabel": "Country code (2 letters, for example KE)",
+  "profilePrefsHeading": "Who you'd like to meet",
+  "profileAgeRange": "Age range: {min} to {max}",
+  "@profileAgeRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "profileDistanceLabel": "Maximum distance",
+  "profileDistanceAny": "Any distance",
+  "profileDistanceKm": "{km} km",
+  "@profileDistanceKm": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "profileIncludeDiaspora": "Include people living abroad",
+  "profileAcceptChildren": "Open to people who have children",
+  "profilePhotosIntro": "Add clear photos of your face. Every photo is checked before anyone else can see it.",
+  "profilePhotosAdd": "Add a photo",
+  "profilePhotosFromGallery": "Choose from gallery",
+  "profilePhotosFromCamera": "Take a photo",
+  "profilePhotosCount": "{count} of {max} photos",
+  "@profilePhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "profilePhotosEmpty": "No photos yet",
+  "profilePhotoPending": "Being checked",
+  "profilePhotoApproved": "Approved",
+  "profilePhotoRejected": "Not accepted",
+  "profilePhotoMain": "Main photo",
+  "profilePhotoDelete": "Remove photo",
+  "profilePhotoMoveUp": "Move earlier",
+  "profilePhotoMoveDown": "Move later",
+  "profilePhotoSemantic": "Photo {position}, {status}",
+  "@profilePhotoSemantic": {
+    "placeholders": {
+      "position": {
+        "type": "int"
+      },
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "profilePhotoViewFull": "View full size",
+  "profilePhotoUploading": "Uploading...",
+  "profilePhotoProcessing": "Checking your photo...",
+  "profilePhotoDismiss": "Dismiss",
+  "profilePhotoRejectedReason": "This photo wasn't accepted. Please choose a different one.",
+  "profilePhotoErrUploadFailed": "The upload didn't go through. Please try again.",
+  "profilePhotoErrTimeout": "Checking is taking longer than expected. Please try again.",
+  "profilePhotoPickFailed": "We couldn't open that photo.",
+  "profilePhotoLimit": "You can add up to {max} photos.",
+  "@profilePhotoLimit": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "profileDataSaverNote": "Data saver is on: photos load small until you tap them.",
+  "profileQuestionsIntro": "A few questions help us show you people who really fit what you're looking for.",
+  "profileQuestionsOpen": "Open the questions",
+  "profileQuestionsDone": "Core questions done",
+  "profileDescIntro": "In your own words: who you are and what you're looking for in a marriage. This is what someone reads when you show interest in them.",
+  "profileDescTip": "Be specific and kind: your values, your daily life, and what a good marriage means to you.",
+  "profileDescLabel": "Your description",
+  "profileDescCount": "{count} of {max} characters",
+  "@profileDescCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "profileDescNeedMore": "{count} more characters to go",
+  "@profileDescNeedMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "profileDescTooLong": "That is over the {max} character limit.",
+  "@profileDescTooLong": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "profileDescContactWarn": "Please don't include phone numbers, email addresses or links. They aren't allowed and the text will be refused.",
+  "profileDescShoutWarn": "Writing in normal capitals reads warmer.",
+  "profileDescSubmit": "Submit description",
+  "profileDescSubmitted": "Description submitted.",
+  "profileDescHistoryHeading": "Your latest description",
+  "profileDescStatusPending": "Waiting for a quick review",
+  "profileDescStatusApproved": "Approved and showing on your profile",
+  "profileDescStatusRejected": "Not accepted",
+  "profileDescRejected": "Your description can't include contact details, links or requests for money. Please edit it and try again.",
+  "profilePreviewHeading": "This is how others see you",
+  "profilePreviewNote": "Your legal name, phone number and ID details are never shown.",
+  "profilePreviewNoPhoto": "No approved photo yet",
+  "profilePreviewNoDescription": "No description yet",
+  "profilePreviewPhotoLabel": "Your main photo",
+  "profilePreviewAge": "{age} years",
+  "@profilePreviewAge": {
+    "placeholders": {
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "profilePreviewBadgeVerified": "Identity verified",
+  "profileGoLive": "Go live",
+  "profileGoLiveHelp": "Once you're live, people who fit what you're looking for can find you. You can hide your profile any time.",
+  "profileMissingHeading": "Still to do",
+  "profileMissingDisplayName": "Your name",
+  "profileMissingGender": "Your gender",
+  "profileMissingDistrict": "Your district",
+  "profileMissingIntention": "What you're looking for",
+  "profileMissingTimeline": "Your timeline",
+  "profileMissingMarital": "Your marital status",
+  "profileMissingVerification": "Identity verification",
+  "profileMissingPhotos": "At least two approved photos",
+  "profileMissingDescription": "An approved description",
+  "profileMissingQuestionnaire": "The core questions",
+  "profileFix": "Fix",
+  "profileErrorIncomplete": "Your profile isn't ready yet. See what's left below.",
+  "profileErrorConflict": "That change couldn't be saved. Please reload and try again.",
+  "profileErrorLimit": "You've reached the limit for this.",
+  "questTitle": "Your answers",
+  "questLoading": "Loading the questions",
+  "questEmpty": "There are no questions right now. Please check back soon.",
+  "questIntro": "Answer honestly; there are no right answers. Mark how much each one matters to you.",
+  "questProgress": "{answered} of {total} core questions answered",
+  "@questProgress": {
+    "placeholders": {
+      "answered": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "questDimIntent": "Marriage plans",
+  "questDimChildren": "Children",
+  "questDimMarriageForm": "Kind of marriage",
+  "questDimFamily": "Family",
+  "questDimRoles": "Roles at home",
+  "questDimCommunication": "Communication",
+  "questDimLifestyle": "Lifestyle",
+  "questDimLocation": "Where to live",
+  "questDimFaith": "Faith",
+  "questDimMoney": "Money",
+  "questImportanceLabel": "How important is this to you?",
+  "questImportanceLow": "A little",
+  "questImportanceMedium": "Quite",
+  "questImportanceHigh": "Very",
+  "questDealbreaker": "This is a deal-breaker",
+  "questDealbreakerHelp": "Only show me people who answer the same way.",
+  "questSpecialHeading": "Optional and personal",
+  "questSpecialNote": "These questions are about faith and money. You never have to answer them, and they are never used to rank or recommend people.",
+  "questOptionalBadge": "Optional",
+  "questSave": "Save answers",
+  "questSaved": "Your answers are saved.",
+  "questDone": "Done",
+  "questErrorConsent": "Please agree to share this optional information first.",
+  "questConsentReligionTitle": "Share your faith? (optional)",
+  "questConsentReligionBody": "These questions are about religion. Answering is your choice. Your answers are stored encrypted, are never used to rank or recommend people, and are deleted if you withdraw consent in Settings.",
+  "questConsentFinanceTitle": "Share your attitude to money? (optional)",
+  "questConsentFinanceBody": "These questions are about money. Answering is your choice. Your answers are stored encrypted, are never used to rank or recommend people, and are deleted if you withdraw consent in Settings.",
+  "questConsentGenericTitle": "Share this? (optional)",
+  "questConsentGenericBody": "This question is personal and optional. Your answer is stored encrypted, is never used to rank or recommend people, and is deleted if you withdraw consent in Settings.",
+  "questConsentAgree": "I agree",
+  "questConsentSkip": "Not now"
 }

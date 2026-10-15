@@ -10,10 +10,16 @@ class FlushResult {
     required this.sent,
     required this.failed,
     required this.pending,
+    this.messages = const [],
   });
   final int sent;
   final int failed;
   final int pending;
+
+  /// Server copies (`Message` JSON) of the messages delivered by this pass, so
+  /// the UI can show them without waiting for another history fetch (the sender
+  /// never receives its own `msg.new`).
+  final List<Map<String, dynamic>> messages;
 }
 
 /// Offline-first sending (Bible §5.4). A message is written to the local outbox
@@ -80,6 +86,7 @@ class OutboxRepository {
     _flushing = true;
     var sent = 0;
     var failed = 0;
+    final delivered = <Map<String, dynamic>>[];
     try {
       final rows = await (_db.select(_db.outboxMessages)
             ..where((t) => t.failedCode.isNull())
@@ -87,7 +94,7 @@ class OutboxRepository {
           .get();
       for (final m in rows) {
         try {
-          await _dio.post<dynamic>(
+          final res = await _dio.post<dynamic>(
             '/matches/${m.matchId}/messages',
             data: {
               'client_msg_id': m.clientMsgId,
@@ -96,6 +103,8 @@ class OutboxRepository {
             },
           );
           await discard(m.clientMsgId);
+          final data = res.data;
+          if (data is Map<String, dynamic>) delivered.add(data);
           sent++;
         } on DioException catch (e) {
           final f = e.failure;
@@ -115,7 +124,12 @@ class OutboxRepository {
       final pending = await (_db.select(_db.outboxMessages)
             ..where((t) => t.failedCode.isNull()))
           .get();
-      return FlushResult(sent: sent, failed: failed, pending: pending.length);
+      return FlushResult(
+        sent: sent,
+        failed: failed,
+        pending: pending.length,
+        messages: delivered,
+      );
     } finally {
       _flushing = false;
     }

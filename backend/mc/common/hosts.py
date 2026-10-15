@@ -6,7 +6,6 @@ from django.conf import settings
 from django.core.exceptions import DisallowedHost
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 
-
 PROBE_PATHS = frozenset({"/ready", "/health"})
 
 

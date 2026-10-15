@@ -2601,6 +2601,1026 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Build my profile'**
   String get verifPassedContinue;
+
+  /// No description provided for @profileBuilderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Build your profile'**
+  String get profileBuilderTitle;
+
+  /// No description provided for @profileLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading your profile'**
+  String get profileLoading;
+
+  /// No description provided for @profileBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get profileBack;
+
+  /// No description provided for @profileSaveContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Save and continue'**
+  String get profileSaveContinue;
+
+  /// No description provided for @profileSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get profileSkip;
+
+  /// No description provided for @profileOptionalNote.
+  ///
+  /// In en, this message translates to:
+  /// **'These are optional. Share only what you\'re comfortable with.'**
+  String get profileOptionalNote;
+
+  /// No description provided for @profileStepProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}: {title}'**
+  String profileStepProgress(int current, int total, String title);
+
+  /// No description provided for @profileStepBasics.
+  ///
+  /// In en, this message translates to:
+  /// **'The basics'**
+  String get profileStepBasics;
+
+  /// No description provided for @profileStepAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About you'**
+  String get profileStepAbout;
+
+  /// No description provided for @profileStepIntention.
+  ///
+  /// In en, this message translates to:
+  /// **'What you\'re looking for'**
+  String get profileStepIntention;
+
+  /// No description provided for @profileStepLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you are'**
+  String get profileStepLocation;
+
+  /// No description provided for @profileStepPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get profileStepPhotos;
+
+  /// No description provided for @profileStepQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get profileStepQuestions;
+
+  /// No description provided for @profileStepDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'In your own words'**
+  String get profileStepDescription;
+
+  /// No description provided for @profileStepPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview and go live'**
+  String get profileStepPreview;
+
+  /// No description provided for @profileNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name people will see'**
+  String get profileNameLabel;
+
+  /// No description provided for @profileNameHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'A first name or nickname is best.'**
+  String get profileNameHelp;
+
+  /// No description provided for @profileGenderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'I am'**
+  String get profileGenderLabel;
+
+  /// No description provided for @profileGenderMale.
+  ///
+  /// In en, this message translates to:
+  /// **'A man'**
+  String get profileGenderMale;
+
+  /// No description provided for @profileGenderFemale.
+  ///
+  /// In en, this message translates to:
+  /// **'A woman'**
+  String get profileGenderFemale;
+
+  /// No description provided for @profileGenderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t change this later.'**
+  String get profileGenderNote;
+
+  /// No description provided for @profileMaritalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Marital status'**
+  String get profileMaritalLabel;
+
+  /// No description provided for @profileMaritalNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never married'**
+  String get profileMaritalNever;
+
+  /// No description provided for @profileMaritalDivorced.
+  ///
+  /// In en, this message translates to:
+  /// **'Divorced'**
+  String get profileMaritalDivorced;
+
+  /// No description provided for @profileMaritalWidowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Widowed'**
+  String get profileMaritalWidowed;
+
+  /// No description provided for @profileMaritalMarried.
+  ///
+  /// In en, this message translates to:
+  /// **'Married'**
+  String get profileMaritalMarried;
+
+  /// No description provided for @profileHasChildrenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you have children?'**
+  String get profileHasChildrenLabel;
+
+  /// No description provided for @profileHasChildrenWithMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, living with me'**
+  String get profileHasChildrenWithMe;
+
+  /// No description provided for @profileHasChildrenNotWithMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, not living with me'**
+  String get profileHasChildrenNotWithMe;
+
+  /// No description provided for @profileWantsChildrenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want children?'**
+  String get profileWantsChildrenLabel;
+
+  /// No description provided for @profileYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get profileYes;
+
+  /// No description provided for @profileNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get profileNo;
+
+  /// No description provided for @profileUnsure.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sure yet'**
+  String get profileUnsure;
+
+  /// No description provided for @profileEducationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get profileEducationLabel;
+
+  /// No description provided for @profileEduPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary'**
+  String get profileEduPrimary;
+
+  /// No description provided for @profileEduSecondary.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary'**
+  String get profileEduSecondary;
+
+  /// No description provided for @profileEduDiploma.
+  ///
+  /// In en, this message translates to:
+  /// **'Certificate or diploma'**
+  String get profileEduDiploma;
+
+  /// No description provided for @profileEduBachelors.
+  ///
+  /// In en, this message translates to:
+  /// **'Bachelor\'s degree'**
+  String get profileEduBachelors;
+
+  /// No description provided for @profileEduPostgraduate.
+  ///
+  /// In en, this message translates to:
+  /// **'Postgraduate'**
+  String get profileEduPostgraduate;
+
+  /// No description provided for @profileOccupationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupation'**
+  String get profileOccupationLabel;
+
+  /// No description provided for @profileLanguagesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages you speak'**
+  String get profileLanguagesLabel;
+
+  /// No description provided for @profileLangEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get profileLangEnglish;
+
+  /// No description provided for @profileLangLuganda.
+  ///
+  /// In en, this message translates to:
+  /// **'Luganda'**
+  String get profileLangLuganda;
+
+  /// No description provided for @profileLangSwahili.
+  ///
+  /// In en, this message translates to:
+  /// **'Swahili'**
+  String get profileLangSwahili;
+
+  /// No description provided for @profileLangRunyankole.
+  ///
+  /// In en, this message translates to:
+  /// **'Runyankole'**
+  String get profileLangRunyankole;
+
+  /// No description provided for @profileLangAcholi.
+  ///
+  /// In en, this message translates to:
+  /// **'Acholi'**
+  String get profileLangAcholi;
+
+  /// No description provided for @profileLangAteso.
+  ///
+  /// In en, this message translates to:
+  /// **'Ateso'**
+  String get profileLangAteso;
+
+  /// No description provided for @profileIntentionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'How soon are you hoping to marry?'**
+  String get profileIntentionLabel;
+
+  /// No description provided for @profileIntentionSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Marriage soon'**
+  String get profileIntentionSoon;
+
+  /// No description provided for @profileIntentionOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Marriage, with an open timeline'**
+  String get profileIntentionOpen;
+
+  /// No description provided for @profileTimelineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your ideal timeline'**
+  String get profileTimelineLabel;
+
+  /// No description provided for @profileTimelineWithin1y.
+  ///
+  /// In en, this message translates to:
+  /// **'Within a year'**
+  String get profileTimelineWithin1y;
+
+  /// No description provided for @profileTimeline1to2y.
+  ///
+  /// In en, this message translates to:
+  /// **'In 1 to 2 years'**
+  String get profileTimeline1to2y;
+
+  /// No description provided for @profileTimeline2to4y.
+  ///
+  /// In en, this message translates to:
+  /// **'In 2 to 4 years'**
+  String get profileTimeline2to4y;
+
+  /// No description provided for @profileTimelineOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'No fixed timeline'**
+  String get profileTimelineOpen;
+
+  /// No description provided for @profileMarriageFormLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Marriage form you\'re open to (optional)'**
+  String get profileMarriageFormLabel;
+
+  /// No description provided for @profileFormMonogamous.
+  ///
+  /// In en, this message translates to:
+  /// **'One spouse only'**
+  String get profileFormMonogamous;
+
+  /// No description provided for @profileFormOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open to customary or Islamic marriage'**
+  String get profileFormOpen;
+
+  /// No description provided for @profileDistrictLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'District'**
+  String get profileDistrictLabel;
+
+  /// No description provided for @profileDistrictAbroad.
+  ///
+  /// In en, this message translates to:
+  /// **'I live outside Uganda'**
+  String get profileDistrictAbroad;
+
+  /// No description provided for @profileCountryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Country code (2 letters, for example KE)'**
+  String get profileCountryLabel;
+
+  /// No description provided for @profilePrefsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Who you\'d like to meet'**
+  String get profilePrefsHeading;
+
+  /// No description provided for @profileAgeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Age range: {min} to {max}'**
+  String profileAgeRange(int min, int max);
+
+  /// No description provided for @profileDistanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum distance'**
+  String get profileDistanceLabel;
+
+  /// No description provided for @profileDistanceAny.
+  ///
+  /// In en, this message translates to:
+  /// **'Any distance'**
+  String get profileDistanceAny;
+
+  /// No description provided for @profileDistanceKm.
+  ///
+  /// In en, this message translates to:
+  /// **'{km} km'**
+  String profileDistanceKm(int km);
+
+  /// No description provided for @profileIncludeDiaspora.
+  ///
+  /// In en, this message translates to:
+  /// **'Include people living abroad'**
+  String get profileIncludeDiaspora;
+
+  /// No description provided for @profileAcceptChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Open to people who have children'**
+  String get profileAcceptChildren;
+
+  /// No description provided for @profilePhotosIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Add clear photos of your face. Every photo is checked before anyone else can see it.'**
+  String get profilePhotosIntro;
+
+  /// No description provided for @profilePhotosAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get profilePhotosAdd;
+
+  /// No description provided for @profilePhotosFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get profilePhotosFromGallery;
+
+  /// No description provided for @profilePhotosFromCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get profilePhotosFromCamera;
+
+  /// No description provided for @profilePhotosCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max} photos'**
+  String profilePhotosCount(int count, int max);
+
+  /// No description provided for @profilePhotosEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No photos yet'**
+  String get profilePhotosEmpty;
+
+  /// No description provided for @profilePhotoPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Being checked'**
+  String get profilePhotoPending;
+
+  /// No description provided for @profilePhotoApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get profilePhotoApproved;
+
+  /// No description provided for @profilePhotoRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not accepted'**
+  String get profilePhotoRejected;
+
+  /// No description provided for @profilePhotoMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Main photo'**
+  String get profilePhotoMain;
+
+  /// No description provided for @profilePhotoDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get profilePhotoDelete;
+
+  /// No description provided for @profilePhotoMoveUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move earlier'**
+  String get profilePhotoMoveUp;
+
+  /// No description provided for @profilePhotoMoveDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move later'**
+  String get profilePhotoMoveDown;
+
+  /// No description provided for @profilePhotoSemantic.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo {position}, {status}'**
+  String profilePhotoSemantic(int position, String status);
+
+  /// No description provided for @profilePhotoViewFull.
+  ///
+  /// In en, this message translates to:
+  /// **'View full size'**
+  String get profilePhotoViewFull;
+
+  /// No description provided for @profilePhotoUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading...'**
+  String get profilePhotoUploading;
+
+  /// No description provided for @profilePhotoProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your photo...'**
+  String get profilePhotoProcessing;
+
+  /// No description provided for @profilePhotoDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get profilePhotoDismiss;
+
+  /// No description provided for @profilePhotoRejectedReason.
+  ///
+  /// In en, this message translates to:
+  /// **'This photo wasn\'t accepted. Please choose a different one.'**
+  String get profilePhotoRejectedReason;
+
+  /// No description provided for @profilePhotoErrUploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The upload didn\'t go through. Please try again.'**
+  String get profilePhotoErrUploadFailed;
+
+  /// No description provided for @profilePhotoErrTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking is taking longer than expected. Please try again.'**
+  String get profilePhotoErrTimeout;
+
+  /// No description provided for @profilePhotoPickFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t open that photo.'**
+  String get profilePhotoPickFailed;
+
+  /// No description provided for @profilePhotoLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You can add up to {max} photos.'**
+  String profilePhotoLimit(int max);
+
+  /// No description provided for @profileDataSaverNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver is on: photos load small until you tap them.'**
+  String get profileDataSaverNote;
+
+  /// No description provided for @profileQuestionsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'A few questions help us show you people who really fit what you\'re looking for.'**
+  String get profileQuestionsIntro;
+
+  /// No description provided for @profileQuestionsOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open the questions'**
+  String get profileQuestionsOpen;
+
+  /// No description provided for @profileQuestionsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Core questions done'**
+  String get profileQuestionsDone;
+
+  /// No description provided for @profileDescIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'In your own words: who you are and what you\'re looking for in a marriage. This is what someone reads when you show interest in them.'**
+  String get profileDescIntro;
+
+  /// No description provided for @profileDescTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Be specific and kind: your values, your daily life, and what a good marriage means to you.'**
+  String get profileDescTip;
+
+  /// No description provided for @profileDescLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your description'**
+  String get profileDescLabel;
+
+  /// No description provided for @profileDescCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max} characters'**
+  String profileDescCount(int count, int max);
+
+  /// No description provided for @profileDescNeedMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more characters to go'**
+  String profileDescNeedMore(int count);
+
+  /// No description provided for @profileDescTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'That is over the {max} character limit.'**
+  String profileDescTooLong(int max);
+
+  /// No description provided for @profileDescContactWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Please don\'t include phone numbers, email addresses or links. They aren\'t allowed and the text will be refused.'**
+  String get profileDescContactWarn;
+
+  /// No description provided for @profileDescShoutWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Writing in normal capitals reads warmer.'**
+  String get profileDescShoutWarn;
+
+  /// No description provided for @profileDescSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit description'**
+  String get profileDescSubmit;
+
+  /// No description provided for @profileDescSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Description submitted.'**
+  String get profileDescSubmitted;
+
+  /// No description provided for @profileDescHistoryHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Your latest description'**
+  String get profileDescHistoryHeading;
+
+  /// No description provided for @profileDescStatusPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for a quick review'**
+  String get profileDescStatusPending;
+
+  /// No description provided for @profileDescStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved and showing on your profile'**
+  String get profileDescStatusApproved;
+
+  /// No description provided for @profileDescStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not accepted'**
+  String get profileDescStatusRejected;
+
+  /// No description provided for @profileDescRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Your description can\'t include contact details, links or requests for money. Please edit it and try again.'**
+  String get profileDescRejected;
+
+  /// No description provided for @profilePreviewHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'This is how others see you'**
+  String get profilePreviewHeading;
+
+  /// No description provided for @profilePreviewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your legal name, phone number and ID details are never shown.'**
+  String get profilePreviewNote;
+
+  /// No description provided for @profilePreviewNoPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'No approved photo yet'**
+  String get profilePreviewNoPhoto;
+
+  /// No description provided for @profilePreviewNoDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'No description yet'**
+  String get profilePreviewNoDescription;
+
+  /// No description provided for @profilePreviewPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your main photo'**
+  String get profilePreviewPhotoLabel;
+
+  /// No description provided for @profilePreviewAge.
+  ///
+  /// In en, this message translates to:
+  /// **'{age} years'**
+  String profilePreviewAge(int age);
+
+  /// No description provided for @profilePreviewBadgeVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity verified'**
+  String get profilePreviewBadgeVerified;
+
+  /// No description provided for @profileGoLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Go live'**
+  String get profileGoLive;
+
+  /// No description provided for @profileGoLiveHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Once you\'re live, people who fit what you\'re looking for can find you. You can hide your profile any time.'**
+  String get profileGoLiveHelp;
+
+  /// No description provided for @profileMissingHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Still to do'**
+  String get profileMissingHeading;
+
+  /// No description provided for @profileMissingDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Your name'**
+  String get profileMissingDisplayName;
+
+  /// No description provided for @profileMissingGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Your gender'**
+  String get profileMissingGender;
+
+  /// No description provided for @profileMissingDistrict.
+  ///
+  /// In en, this message translates to:
+  /// **'Your district'**
+  String get profileMissingDistrict;
+
+  /// No description provided for @profileMissingIntention.
+  ///
+  /// In en, this message translates to:
+  /// **'What you\'re looking for'**
+  String get profileMissingIntention;
+
+  /// No description provided for @profileMissingTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Your timeline'**
+  String get profileMissingTimeline;
+
+  /// No description provided for @profileMissingMarital.
+  ///
+  /// In en, this message translates to:
+  /// **'Your marital status'**
+  String get profileMissingMarital;
+
+  /// No description provided for @profileMissingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity verification'**
+  String get profileMissingVerification;
+
+  /// No description provided for @profileMissingPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'At least two approved photos'**
+  String get profileMissingPhotos;
+
+  /// No description provided for @profileMissingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'An approved description'**
+  String get profileMissingDescription;
+
+  /// No description provided for @profileMissingQuestionnaire.
+  ///
+  /// In en, this message translates to:
+  /// **'The core questions'**
+  String get profileMissingQuestionnaire;
+
+  /// No description provided for @profileFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix'**
+  String get profileFix;
+
+  /// No description provided for @profileErrorIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile isn\'t ready yet. See what\'s left below.'**
+  String get profileErrorIncomplete;
+
+  /// No description provided for @profileErrorConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'That change couldn\'t be saved. Please reload and try again.'**
+  String get profileErrorConflict;
+
+  /// No description provided for @profileErrorLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve reached the limit for this.'**
+  String get profileErrorLimit;
+
+  /// No description provided for @questTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answers'**
+  String get questTitle;
+
+  /// No description provided for @questLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the questions'**
+  String get questLoading;
+
+  /// No description provided for @questEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no questions right now. Please check back soon.'**
+  String get questEmpty;
+
+  /// No description provided for @questIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer honestly; there are no right answers. Mark how much each one matters to you.'**
+  String get questIntro;
+
+  /// No description provided for @questProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{answered} of {total} core questions answered'**
+  String questProgress(int answered, int total);
+
+  /// No description provided for @questDimIntent.
+  ///
+  /// In en, this message translates to:
+  /// **'Marriage plans'**
+  String get questDimIntent;
+
+  /// No description provided for @questDimChildren.
+  ///
+  /// In en, this message translates to:
+  /// **'Children'**
+  String get questDimChildren;
+
+  /// No description provided for @questDimMarriageForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Kind of marriage'**
+  String get questDimMarriageForm;
+
+  /// No description provided for @questDimFamily.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get questDimFamily;
+
+  /// No description provided for @questDimRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Roles at home'**
+  String get questDimRoles;
+
+  /// No description provided for @questDimCommunication.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication'**
+  String get questDimCommunication;
+
+  /// No description provided for @questDimLifestyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifestyle'**
+  String get questDimLifestyle;
+
+  /// No description provided for @questDimLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Where to live'**
+  String get questDimLocation;
+
+  /// No description provided for @questDimFaith.
+  ///
+  /// In en, this message translates to:
+  /// **'Faith'**
+  String get questDimFaith;
+
+  /// No description provided for @questDimMoney.
+  ///
+  /// In en, this message translates to:
+  /// **'Money'**
+  String get questDimMoney;
+
+  /// No description provided for @questImportanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'How important is this to you?'**
+  String get questImportanceLabel;
+
+  /// No description provided for @questImportanceLow.
+  ///
+  /// In en, this message translates to:
+  /// **'A little'**
+  String get questImportanceLow;
+
+  /// No description provided for @questImportanceMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Quite'**
+  String get questImportanceMedium;
+
+  /// No description provided for @questImportanceHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Very'**
+  String get questImportanceHigh;
+
+  /// No description provided for @questDealbreaker.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a deal-breaker'**
+  String get questDealbreaker;
+
+  /// No description provided for @questDealbreakerHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only show me people who answer the same way.'**
+  String get questDealbreakerHelp;
+
+  /// No description provided for @questSpecialHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional and personal'**
+  String get questSpecialHeading;
+
+  /// No description provided for @questSpecialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'These questions are about faith and money. You never have to answer them, and they are never used to rank or recommend people.'**
+  String get questSpecialNote;
+
+  /// No description provided for @questOptionalBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get questOptionalBadge;
+
+  /// No description provided for @questSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save answers'**
+  String get questSave;
+
+  /// No description provided for @questSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answers are saved.'**
+  String get questSaved;
+
+  /// No description provided for @questDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get questDone;
+
+  /// No description provided for @questErrorConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please agree to share this optional information first.'**
+  String get questErrorConsent;
+
+  /// No description provided for @questConsentReligionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your faith? (optional)'**
+  String get questConsentReligionTitle;
+
+  /// No description provided for @questConsentReligionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These questions are about religion. Answering is your choice. Your answers are stored encrypted, are never used to rank or recommend people, and are deleted if you withdraw consent in Settings.'**
+  String get questConsentReligionBody;
+
+  /// No description provided for @questConsentFinanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your attitude to money? (optional)'**
+  String get questConsentFinanceTitle;
+
+  /// No description provided for @questConsentFinanceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'These questions are about money. Answering is your choice. Your answers are stored encrypted, are never used to rank or recommend people, and are deleted if you withdraw consent in Settings.'**
+  String get questConsentFinanceBody;
+
+  /// No description provided for @questConsentGenericTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share this? (optional)'**
+  String get questConsentGenericTitle;
+
+  /// No description provided for @questConsentGenericBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This question is personal and optional. Your answer is stored encrypted, is never used to rank or recommend people, and is deleted if you withdraw consent in Settings.'**
+  String get questConsentGenericBody;
+
+  /// No description provided for @questConsentAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree'**
+  String get questConsentAgree;
+
+  /// No description provided for @questConsentSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get questConsentSkip;
 }
 
 class _AppLocalizationsDelegate

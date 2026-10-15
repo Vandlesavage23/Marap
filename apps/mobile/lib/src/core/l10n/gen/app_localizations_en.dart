@@ -1449,4 +1449,562 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get verifPassedContinue => 'Build my profile';
+
+  @override
+  String get profileBuilderTitle => 'Build your profile';
+
+  @override
+  String get profileLoading => 'Loading your profile';
+
+  @override
+  String get profileBack => 'Back';
+
+  @override
+  String get profileSaveContinue => 'Save and continue';
+
+  @override
+  String get profileSkip => 'Skip for now';
+
+  @override
+  String get profileOptionalNote =>
+      'These are optional. Share only what you\'re comfortable with.';
+
+  @override
+  String profileStepProgress(int current, int total, String title) {
+    return 'Step $current of $total: $title';
+  }
+
+  @override
+  String get profileStepBasics => 'The basics';
+
+  @override
+  String get profileStepAbout => 'About you';
+
+  @override
+  String get profileStepIntention => 'What you\'re looking for';
+
+  @override
+  String get profileStepLocation => 'Where you are';
+
+  @override
+  String get profileStepPhotos => 'Photos';
+
+  @override
+  String get profileStepQuestions => 'Questions';
+
+  @override
+  String get profileStepDescription => 'In your own words';
+
+  @override
+  String get profileStepPreview => 'Preview and go live';
+
+  @override
+  String get profileNameLabel => 'Name people will see';
+
+  @override
+  String get profileNameHelp => 'A first name or nickname is best.';
+
+  @override
+  String get profileGenderLabel => 'I am';
+
+  @override
+  String get profileGenderMale => 'A man';
+
+  @override
+  String get profileGenderFemale => 'A woman';
+
+  @override
+  String get profileGenderNote => 'You can\'t change this later.';
+
+  @override
+  String get profileMaritalLabel => 'Marital status';
+
+  @override
+  String get profileMaritalNever => 'Never married';
+
+  @override
+  String get profileMaritalDivorced => 'Divorced';
+
+  @override
+  String get profileMaritalWidowed => 'Widowed';
+
+  @override
+  String get profileMaritalMarried => 'Married';
+
+  @override
+  String get profileHasChildrenLabel => 'Do you have children?';
+
+  @override
+  String get profileHasChildrenWithMe => 'Yes, living with me';
+
+  @override
+  String get profileHasChildrenNotWithMe => 'Yes, not living with me';
+
+  @override
+  String get profileWantsChildrenLabel => 'Do you want children?';
+
+  @override
+  String get profileYes => 'Yes';
+
+  @override
+  String get profileNo => 'No';
+
+  @override
+  String get profileUnsure => 'Not sure yet';
+
+  @override
+  String get profileEducationLabel => 'Education';
+
+  @override
+  String get profileEduPrimary => 'Primary';
+
+  @override
+  String get profileEduSecondary => 'Secondary';
+
+  @override
+  String get profileEduDiploma => 'Certificate or diploma';
+
+  @override
+  String get profileEduBachelors => 'Bachelor\'s degree';
+
+  @override
+  String get profileEduPostgraduate => 'Postgraduate';
+
+  @override
+  String get profileOccupationLabel => 'Occupation';
+
+  @override
+  String get profileLanguagesLabel => 'Languages you speak';
+
+  @override
+  String get profileLangEnglish => 'English';
+
+  @override
+  String get profileLangLuganda => 'Luganda';
+
+  @override
+  String get profileLangSwahili => 'Swahili';
+
+  @override
+  String get profileLangRunyankole => 'Runyankole';
+
+  @override
+  String get profileLangAcholi => 'Acholi';
+
+  @override
+  String get profileLangAteso => 'Ateso';
+
+  @override
+  String get profileIntentionLabel => 'How soon are you hoping to marry?';
+
+  @override
+  String get profileIntentionSoon => 'Marriage soon';
+
+  @override
+  String get profileIntentionOpen => 'Marriage, with an open timeline';
+
+  @override
+  String get profileTimelineLabel => 'Your ideal timeline';
+
+  @override
+  String get profileTimelineWithin1y => 'Within a year';
+
+  @override
+  String get profileTimeline1to2y => 'In 1 to 2 years';
+
+  @override
+  String get profileTimeline2to4y => 'In 2 to 4 years';
+
+  @override
+  String get profileTimelineOpen => 'No fixed timeline';
+
+  @override
+  String get profileMarriageFormLabel =>
+      'Marriage form you\'re open to (optional)';
+
+  @override
+  String get profileFormMonogamous => 'One spouse only';
+
+  @override
+  String get profileFormOpen => 'Open to customary or Islamic marriage';
+
+  @override
+  String get profileDistrictLabel => 'District';
+
+  @override
+  String get profileDistrictAbroad => 'I live outside Uganda';
+
+  @override
+  String get profileCountryLabel => 'Country code (2 letters, for example KE)';
+
+  @override
+  String get profilePrefsHeading => 'Who you\'d like to meet';
+
+  @override
+  String profileAgeRange(int min, int max) {
+    return 'Age range: $min to $max';
+  }
+
+  @override
+  String get profileDistanceLabel => 'Maximum distance';
+
+  @override
+  String get profileDistanceAny => 'Any distance';
+
+  @override
+  String profileDistanceKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String get profileIncludeDiaspora => 'Include people living abroad';
+
+  @override
+  String get profileAcceptChildren => 'Open to people who have children';
+
+  @override
+  String get profilePhotosIntro =>
+      'Add clear photos of your face. Every photo is checked before anyone else can see it.';
+
+  @override
+  String get profilePhotosAdd => 'Add a photo';
+
+  @override
+  String get profilePhotosFromGallery => 'Choose from gallery';
+
+  @override
+  String get profilePhotosFromCamera => 'Take a photo';
+
+  @override
+  String profilePhotosCount(int count, int max) {
+    return '$count of $max photos';
+  }
+
+  @override
+  String get profilePhotosEmpty => 'No photos yet';
+
+  @override
+  String get profilePhotoPending => 'Being checked';
+
+  @override
+  String get profilePhotoApproved => 'Approved';
+
+  @override
+  String get profilePhotoRejected => 'Not accepted';
+
+  @override
+  String get profilePhotoMain => 'Main photo';
+
+  @override
+  String get profilePhotoDelete => 'Remove photo';
+
+  @override
+  String get profilePhotoMoveUp => 'Move earlier';
+
+  @override
+  String get profilePhotoMoveDown => 'Move later';
+
+  @override
+  String profilePhotoSemantic(int position, String status) {
+    return 'Photo $position, $status';
+  }
+
+  @override
+  String get profilePhotoViewFull => 'View full size';
+
+  @override
+  String get profilePhotoUploading => 'Uploading...';
+
+  @override
+  String get profilePhotoProcessing => 'Checking your photo...';
+
+  @override
+  String get profilePhotoDismiss => 'Dismiss';
+
+  @override
+  String get profilePhotoRejectedReason =>
+      'This photo wasn\'t accepted. Please choose a different one.';
+
+  @override
+  String get profilePhotoErrUploadFailed =>
+      'The upload didn\'t go through. Please try again.';
+
+  @override
+  String get profilePhotoErrTimeout =>
+      'Checking is taking longer than expected. Please try again.';
+
+  @override
+  String get profilePhotoPickFailed => 'We couldn\'t open that photo.';
+
+  @override
+  String profilePhotoLimit(int max) {
+    return 'You can add up to $max photos.';
+  }
+
+  @override
+  String get profileDataSaverNote =>
+      'Data saver is on: photos load small until you tap them.';
+
+  @override
+  String get profileQuestionsIntro =>
+      'A few questions help us show you people who really fit what you\'re looking for.';
+
+  @override
+  String get profileQuestionsOpen => 'Open the questions';
+
+  @override
+  String get profileQuestionsDone => 'Core questions done';
+
+  @override
+  String get profileDescIntro =>
+      'In your own words: who you are and what you\'re looking for in a marriage. This is what someone reads when you show interest in them.';
+
+  @override
+  String get profileDescTip =>
+      'Be specific and kind: your values, your daily life, and what a good marriage means to you.';
+
+  @override
+  String get profileDescLabel => 'Your description';
+
+  @override
+  String profileDescCount(int count, int max) {
+    return '$count of $max characters';
+  }
+
+  @override
+  String profileDescNeedMore(int count) {
+    return '$count more characters to go';
+  }
+
+  @override
+  String profileDescTooLong(int max) {
+    return 'That is over the $max character limit.';
+  }
+
+  @override
+  String get profileDescContactWarn =>
+      'Please don\'t include phone numbers, email addresses or links. They aren\'t allowed and the text will be refused.';
+
+  @override
+  String get profileDescShoutWarn => 'Writing in normal capitals reads warmer.';
+
+  @override
+  String get profileDescSubmit => 'Submit description';
+
+  @override
+  String get profileDescSubmitted => 'Description submitted.';
+
+  @override
+  String get profileDescHistoryHeading => 'Your latest description';
+
+  @override
+  String get profileDescStatusPending => 'Waiting for a quick review';
+
+  @override
+  String get profileDescStatusApproved =>
+      'Approved and showing on your profile';
+
+  @override
+  String get profileDescStatusRejected => 'Not accepted';
+
+  @override
+  String get profileDescRejected =>
+      'Your description can\'t include contact details, links or requests for money. Please edit it and try again.';
+
+  @override
+  String get profilePreviewHeading => 'This is how others see you';
+
+  @override
+  String get profilePreviewNote =>
+      'Your legal name, phone number and ID details are never shown.';
+
+  @override
+  String get profilePreviewNoPhoto => 'No approved photo yet';
+
+  @override
+  String get profilePreviewNoDescription => 'No description yet';
+
+  @override
+  String get profilePreviewPhotoLabel => 'Your main photo';
+
+  @override
+  String profilePreviewAge(int age) {
+    return '$age years';
+  }
+
+  @override
+  String get profilePreviewBadgeVerified => 'Identity verified';
+
+  @override
+  String get profileGoLive => 'Go live';
+
+  @override
+  String get profileGoLiveHelp =>
+      'Once you\'re live, people who fit what you\'re looking for can find you. You can hide your profile any time.';
+
+  @override
+  String get profileMissingHeading => 'Still to do';
+
+  @override
+  String get profileMissingDisplayName => 'Your name';
+
+  @override
+  String get profileMissingGender => 'Your gender';
+
+  @override
+  String get profileMissingDistrict => 'Your district';
+
+  @override
+  String get profileMissingIntention => 'What you\'re looking for';
+
+  @override
+  String get profileMissingTimeline => 'Your timeline';
+
+  @override
+  String get profileMissingMarital => 'Your marital status';
+
+  @override
+  String get profileMissingVerification => 'Identity verification';
+
+  @override
+  String get profileMissingPhotos => 'At least two approved photos';
+
+  @override
+  String get profileMissingDescription => 'An approved description';
+
+  @override
+  String get profileMissingQuestionnaire => 'The core questions';
+
+  @override
+  String get profileFix => 'Fix';
+
+  @override
+  String get profileErrorIncomplete =>
+      'Your profile isn\'t ready yet. See what\'s left below.';
+
+  @override
+  String get profileErrorConflict =>
+      'That change couldn\'t be saved. Please reload and try again.';
+
+  @override
+  String get profileErrorLimit => 'You\'ve reached the limit for this.';
+
+  @override
+  String get questTitle => 'Your answers';
+
+  @override
+  String get questLoading => 'Loading the questions';
+
+  @override
+  String get questEmpty =>
+      'There are no questions right now. Please check back soon.';
+
+  @override
+  String get questIntro =>
+      'Answer honestly; there are no right answers. Mark how much each one matters to you.';
+
+  @override
+  String questProgress(int answered, int total) {
+    return '$answered of $total core questions answered';
+  }
+
+  @override
+  String get questDimIntent => 'Marriage plans';
+
+  @override
+  String get questDimChildren => 'Children';
+
+  @override
+  String get questDimMarriageForm => 'Kind of marriage';
+
+  @override
+  String get questDimFamily => 'Family';
+
+  @override
+  String get questDimRoles => 'Roles at home';
+
+  @override
+  String get questDimCommunication => 'Communication';
+
+  @override
+  String get questDimLifestyle => 'Lifestyle';
+
+  @override
+  String get questDimLocation => 'Where to live';
+
+  @override
+  String get questDimFaith => 'Faith';
+
+  @override
+  String get questDimMoney => 'Money';
+
+  @override
+  String get questImportanceLabel => 'How important is this to you?';
+
+  @override
+  String get questImportanceLow => 'A little';
+
+  @override
+  String get questImportanceMedium => 'Quite';
+
+  @override
+  String get questImportanceHigh => 'Very';
+
+  @override
+  String get questDealbreaker => 'This is a deal-breaker';
+
+  @override
+  String get questDealbreakerHelp =>
+      'Only show me people who answer the same way.';
+
+  @override
+  String get questSpecialHeading => 'Optional and personal';
+
+  @override
+  String get questSpecialNote =>
+      'These questions are about faith and money. You never have to answer them, and they are never used to rank or recommend people.';
+
+  @override
+  String get questOptionalBadge => 'Optional';
+
+  @override
+  String get questSave => 'Save answers';
+
+  @override
+  String get questSaved => 'Your answers are saved.';
+
+  @override
+  String get questDone => 'Done';
+
+  @override
+  String get questErrorConsent =>
+      'Please agree to share this optional information first.';
+
+  @override
+  String get questConsentReligionTitle => 'Share your faith? (optional)';
+
+  @override
+  String get questConsentReligionBody =>
+      'These questions are about religion. Answering is your choice. Your answers are stored encrypted, are never used to rank or recommend people, and are deleted if you withdraw consent in Settings.';
+
+  @override
+  String get questConsentFinanceTitle =>
+      'Share your attitude to money? (optional)';
+
+  @override
+  String get questConsentFinanceBody =>
+      'These questions are about money. Answering is your choice. Your answers are stored encrypted, are never used to rank or recommend people, and are deleted if you withdraw consent in Settings.';
+
+  @override
+  String get questConsentGenericTitle => 'Share this? (optional)';
+
+  @override
+  String get questConsentGenericBody =>
+      'This question is personal and optional. Your answer is stored encrypted, is never used to rank or recommend people, and is deleted if you withdraw consent in Settings.';
+
+  @override
+  String get questConsentAgree => 'I agree';
+
+  @override
+  String get questConsentSkip => 'Not now';
 }
