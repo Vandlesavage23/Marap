@@ -44,7 +44,9 @@ void main() {
         .pumpWidget(host(ErrorState(onRetry: () => taps++), Brightness.light));
     await t.pumpAndSettle();
     expect(
-        find.text("We couldn't load this. Please try again."), findsOneWidget);
+      find.text("We couldn't load this. Please try again."),
+      findsOneWidget,
+    );
     await t.tap(find.text('Try again'));
     expect(taps, 1);
   });

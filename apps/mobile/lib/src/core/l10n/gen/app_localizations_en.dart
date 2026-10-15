@@ -71,4 +71,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineBanner => 'No connection. Some things may be out of date.';
+
+  @override
+  String get howTitle => 'How it works';
+
+  @override
+  String get howStep1 =>
+      'Verify who you are. Everyone here is a verified adult.';
+
+  @override
+  String get howStep2 =>
+      'See people who fit what you\'re looking for, and why.';
+
+  @override
+  String get howStep3 =>
+      'Send an interest. If it\'s mutual, you can start talking.';
+
+  @override
+  String get phoneTitle => 'Your phone number';
+
+  @override
+  String get phoneHint => '0772 000 000';
+
+  @override
+  String get phoneBody =>
+      'We\'ll text you a 6-digit code. We never show your number to anyone.';
+
+  @override
+  String get phoneSend => 'Send code';
+
+  @override
+  String get phoneInvalid => 'Enter a valid phone number.';
+
+  @override
+  String get otpTitle => 'Enter the code';
+
+  @override
+  String otpBody(String phone) {
+    return 'We sent a 6-digit code to $phone.';
+  }
+
+  @override
+  String get otpVerify => 'Verify';
+
+  @override
+  String get otpResend => 'Send a new code';
+
+  @override
+  String otpResendIn(int seconds) {
+    return 'You can ask for a new code in ${seconds}s';
+  }
+
+  @override
+  String get otpInvalid => 'That code didn\'t work. Check it and try again.';
+
+  @override
+  String get consentsTitle => 'Before we start';
+
+  @override
+  String get consentTerms => 'I agree to the Terms of Use';
+
+  @override
+  String get consentPrivacy => 'I have read the Privacy Notice';
+
+  @override
+  String get consentTransfer =>
+      'I understand my data is processed on servers outside Uganda as described in the Privacy Notice';
+
+  @override
+  String get consentsNote => 'You can withdraw consent later in Settings.';
+
+  @override
+  String get consentsAgree => 'Agree and continue';
+
+  @override
+  String get errorValidation => 'Please check what you entered.';
 }

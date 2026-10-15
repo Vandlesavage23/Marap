@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
-import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/onboarding_screens.dart';
 
 /// Guard skeleton (Bible §5.4): unauthenticated → onboarding; unverified →
 /// verification; profile incomplete → builder; else home. The latter two read
@@ -14,6 +14,8 @@ String? appRedirect(SessionState session, String location) {
   if (session == SessionState.signedOut) {
     return location.startsWith('/onboarding') ? null : '/onboarding';
   }
+  // Signing in happens mid-onboarding: the consents step comes right after.
+  if (location == '/onboarding/consents') return null;
   if (location == '/splash' || location.startsWith('/onboarding')) {
     return '/home';
   }
@@ -42,33 +44,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/onboarding',
-        builder: (context, _) {
-          final l = AppLocalizations.of(context);
-          return Scaffold(
-            body: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      l.welcomeTitle,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(l.welcomeBody),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: () {},
-                      child: Text(l.continueLabel),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        },
+        builder: (_, __) => const WelcomeScreen(),
+        routes: [
+          GoRoute(path: 'how', builder: (_, __) => const HowItWorksScreen()),
+          GoRoute(path: 'phone', builder: (_, __) => const PhoneScreen()),
+          GoRoute(path: 'otp', builder: (_, __) => const OtpScreen()),
+          GoRoute(
+            path: 'consents',
+            builder: (_, __) => const ConsentsScreen(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/home',

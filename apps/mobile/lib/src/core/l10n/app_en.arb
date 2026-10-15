@@ -19,5 +19,41 @@
   "errorEntitlementRequired": "This needs an active trial or membership.",
   "errorNotVerified": "Please verify your identity first.",
   "errorUnauthenticated": "Please sign in again.",
-  "offlineBanner": "No connection. Some things may be out of date."
+  "offlineBanner": "No connection. Some things may be out of date.",
+  "howTitle": "How it works",
+  "howStep1": "Verify who you are. Everyone here is a verified adult.",
+  "howStep2": "See people who fit what you're looking for, and why.",
+  "howStep3": "Send an interest. If it's mutual, you can start talking.",
+  "phoneTitle": "Your phone number",
+  "phoneHint": "0772 000 000",
+  "phoneBody": "We'll text you a 6-digit code. We never show your number to anyone.",
+  "phoneSend": "Send code",
+  "phoneInvalid": "Enter a valid phone number.",
+  "otpTitle": "Enter the code",
+  "otpBody": "We sent a 6-digit code to {phone}.",
+  "@otpBody": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "otpVerify": "Verify",
+  "otpResend": "Send a new code",
+  "otpResendIn": "You can ask for a new code in {seconds}s",
+  "@otpResendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "otpInvalid": "That code didn't work. Check it and try again.",
+  "consentsTitle": "Before we start",
+  "consentTerms": "I agree to the Terms of Use",
+  "consentPrivacy": "I have read the Privacy Notice",
+  "consentTransfer": "I understand my data is processed on servers outside Uganda as described in the Privacy Notice",
+  "consentsNote": "You can withdraw consent later in Settings.",
+  "consentsAgree": "Agree and continue",
+  "errorValidation": "Please check what you entered."
 }

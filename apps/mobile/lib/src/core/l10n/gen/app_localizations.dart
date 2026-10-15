@@ -213,6 +213,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No connection. Some things may be out of date.'**
   String get offlineBanner;
+
+  /// No description provided for @howTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How it works'**
+  String get howTitle;
+
+  /// No description provided for @howStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify who you are. Everyone here is a verified adult.'**
+  String get howStep1;
+
+  /// No description provided for @howStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'See people who fit what you\'re looking for, and why.'**
+  String get howStep2;
+
+  /// No description provided for @howStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'Send an interest. If it\'s mutual, you can start talking.'**
+  String get howStep3;
+
+  /// No description provided for @phoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your phone number'**
+  String get phoneTitle;
+
+  /// No description provided for @phoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'0772 000 000'**
+  String get phoneHint;
+
+  /// No description provided for @phoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll text you a 6-digit code. We never show your number to anyone.'**
+  String get phoneBody;
+
+  /// No description provided for @phoneSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get phoneSend;
+
+  /// No description provided for @phoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid phone number.'**
+  String get phoneInvalid;
+
+  /// No description provided for @otpTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code'**
+  String get otpTitle;
+
+  /// No description provided for @otpBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a 6-digit code to {phone}.'**
+  String otpBody(String phone);
+
+  /// No description provided for @otpVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get otpVerify;
+
+  /// No description provided for @otpResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a new code'**
+  String get otpResend;
+
+  /// No description provided for @otpResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You can ask for a new code in {seconds}s'**
+  String otpResendIn(int seconds);
+
+  /// No description provided for @otpInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'That code didn\'t work. Check it and try again.'**
+  String get otpInvalid;
+
+  /// No description provided for @consentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before we start'**
+  String get consentsTitle;
+
+  /// No description provided for @consentTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the Terms of Use'**
+  String get consentTerms;
+
+  /// No description provided for @consentPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read the Privacy Notice'**
+  String get consentPrivacy;
+
+  /// No description provided for @consentTransfer.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand my data is processed on servers outside Uganda as described in the Privacy Notice'**
+  String get consentTransfer;
+
+  /// No description provided for @consentsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'You can withdraw consent later in Settings.'**
+  String get consentsNote;
+
+  /// No description provided for @consentsAgree.
+  ///
+  /// In en, this message translates to:
+  /// **'Agree and continue'**
+  String get consentsAgree;
+
+  /// No description provided for @errorValidation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check what you entered.'**
+  String get errorValidation;
 }
 
 class _AppLocalizationsDelegate
