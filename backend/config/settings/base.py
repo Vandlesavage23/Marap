@@ -280,3 +280,7 @@ CELERY_BEAT_SCHEDULE["privacy-retention"] = {
     "task": "mc.privacy.tasks.run_retention",
     "schedule": 86400.0,
 }
+
+# Email (recovery + notices)
+EMAIL_PROVIDER = env("EMAIL_PROVIDER", "mc.accounts.providers.email.FakeEmail")
+EMAIL_FROM = env("EMAIL_FROM", "no-reply@marriageconnect.ug")

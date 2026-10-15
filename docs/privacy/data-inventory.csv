@@ -49,3 +49,5 @@ profiles.Profile.(has_children/wants_children/marriage_timeline/marriage_form_pr
 questionnaire.Answer.(account/question),questionnaire.Answer,links an answer to its member and question,contract,deleted with account,none,af-south-1 Postgres
 questionnaire.Question.*,questionnaire.Question,seeded reference data (no personal data),n/a,n/a,none,af-south-1 Postgres
 verification.VerificationAttempt.(account/vendor/vendor_job_id/submitted_at/decided_at/reviewed_by),verification.VerificationAttempt,verification bookkeeping (vendor job id; no images stored),legal obligation/fraud prevention,retained after deletion (account link cleared),Smile ID,af-south-1 Postgres
+accounts.RecoverySession.*,accounts.RecoverySession,lost-phone recovery audit trail (ip as HMAC),legitimate interest (account security),retained while account exists,Smile ID (biometric re-check) / SES (email),af-south-1 Postgres
+verification.VerificationAppeal.*,verification.VerificationAppeal,appeal of a verification failure (message field-encrypted),legal obligation/fairness,retained with the attempt,none,af-south-1 Postgres

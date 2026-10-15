@@ -121,3 +121,29 @@ class ConsentRecord(BaseModel):
 
     class Meta:
         indexes = [models.Index(fields=["account", "kind", "-id"])]
+
+
+class RecoverySession(BaseModel):
+    """Lost-phone recovery (Bible §10.1 step 4): email OTP → biometric re-check → verify the NEW phone → swap.
+    Rows are the audit trail of who recovered what and when."""
+
+    class State(models.TextChoices):
+        EMAIL_SENT = "email_sent"
+        EMAIL_VERIFIED = "email_verified"
+        BIOMETRIC_PENDING = "biometric_pending"
+        BIOMETRIC_PASSED = "biometric_passed"
+        COMPLETED = "completed"
+        FAILED = "failed"
+
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name="recoveries")
+    state = models.CharField(max_length=20, choices=State.choices, default=State.EMAIL_SENT)
+    biometric_job_id = models.CharField(max_length=64, blank=True, default="")
+    expires_at = models.DateTimeField()
+    completed_at = models.DateTimeField(null=True, blank=True)
+    ip_hmac = models.BinaryField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["account", "-created_at"]),
+            models.Index(fields=["biometric_job_id"]),
+        ]

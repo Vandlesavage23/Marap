@@ -110,6 +110,18 @@ def handle_vendor_callback(
         result = provider.parse_callback(body=body)
     except (ValueError, KeyError) as exc:
         raise ValidationFailed("Malformed callback.") from exc
+    if result.job_id.startswith(
+        "mcr_"
+    ):  # lost-phone recovery biometric check, not an ID verification
+        from mc.accounts import recovery
+
+        recovery.biometric_result(
+            job_id=result.job_id,
+            passed=result.outcome == "passed"
+            and result.liveness_passed
+            and result.face_match_passed,
+        )
+        return None
     return apply_result(result)
 
 

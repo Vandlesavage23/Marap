@@ -94,3 +94,12 @@ def _fake_gateway():
     FakeGateway.reset()
     yield FakeGateway
     FakeGateway.reset()
+
+
+@pytest.fixture(autouse=True)
+def _fake_email():
+    from mc.accounts.providers.email import FakeEmail
+
+    FakeEmail.reset()
+    yield FakeEmail
+    FakeEmail.reset()

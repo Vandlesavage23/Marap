@@ -45,3 +45,32 @@ class RegisterDeviceSerializer(DeviceInfoSerializer):
     push_token = serializers.CharField(
         max_length=512, allow_null=True, required=False, default=None
     )
+
+
+class EmailStartSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=254)
+
+
+class CodeSerializer(serializers.Serializer):
+    code = serializers.RegexField(r"^\d{6}$", max_length=6)
+
+
+class RecoverStartSerializer(serializers.Serializer):
+    phone = serializers.CharField(max_length=32)
+
+
+class RecoverVerifyEmailSerializer(serializers.Serializer):
+    phone = serializers.CharField(max_length=32)
+    code = serializers.RegexField(r"^\d{6}$", max_length=6)
+
+
+class RecoveryTokenSerializer(serializers.Serializer):
+    recovery_token = serializers.CharField(max_length=500)
+
+
+class RecoverNewPhoneSerializer(RecoveryTokenSerializer):
+    new_phone = serializers.CharField(max_length=32)
+
+
+class RecoverCompleteSerializer(RecoveryTokenSerializer):
+    code = serializers.RegexField(r"^\d{6}$", max_length=6)

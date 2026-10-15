@@ -4,12 +4,13 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mc.accounts import selectors, services
+from mc.accounts import recovery, selectors, services
 from mc.accounts.models import Account
-from mc.accounts.permissions import IsAuthenticatedAnyStatus
+from mc.accounts.permissions import IsActiveMember, IsAuthenticatedAnyStatus
 from mc.accounts.policies import can_manage_session
 from mc.common.errors import NotFound
 from mc.common.net import client_ip
+from mc.common.serializers import reject_unknown_fields
 from mc.profiles import selectors as profile_selectors
 from mc.safety import enforcement as safety_enforcement
 from mc.verification import selectors as verification_selectors
@@ -193,3 +194,92 @@ class DevicesView(APIView):
         data.is_valid(raise_exception=True)
         device = services.register_device(account=request.user, **data.validated_data)
         return Response({"id": str(device.id)})
+
+
+class EmailStartView(APIView):
+    permission_classes = [IsActiveMember]
+
+    @extend_schema(request=s.EmailStartSerializer, responses={202: dict})
+    def post(self, request):  # type: ignore[no-untyped-def]
+        data = s.EmailStartSerializer(data=request.data)
+        reject_unknown_fields(data, request.data)
+        data.is_valid(raise_exception=True)
+        recovery.start_email_verification(
+            account=request.user, email=data.validated_data["email"], ip=client_ip(request)
+        )
+        return Response({"status": "accepted"}, status=status.HTTP_202_ACCEPTED)
+
+
+class EmailVerifyView(APIView):
+    permission_classes = [IsActiveMember]
+
+    @extend_schema(request=s.CodeSerializer, responses={200: dict})
+    def post(self, request):  # type: ignore[no-untyped-def]
+        data = s.CodeSerializer(data=request.data)
+        reject_unknown_fields(data, request.data)
+        data.is_valid(raise_exception=True)
+        acct = recovery.confirm_email(account=request.user, code=data.validated_data["code"])
+        return Response(_account_summary(acct))
+
+
+class _PublicPost(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes: list = []
+    serializer: type = s.RecoverStartSerializer
+
+    def parsed(self, request):  # type: ignore[no-untyped-def]
+        data = self.serializer(data=request.data)
+        reject_unknown_fields(data, request.data)
+        data.is_valid(raise_exception=True)
+        return data.validated_data
+
+
+class RecoverStartView(_PublicPost):
+    serializer = s.RecoverStartSerializer
+
+    @extend_schema(request=s.RecoverStartSerializer, responses={202: dict}, auth=[])
+    def post(self, request):  # type: ignore[no-untyped-def]
+        recovery.start_recovery(phone=self.parsed(request)["phone"], ip=client_ip(request))
+        return Response({"status": "accepted"}, status=status.HTTP_202_ACCEPTED)
+
+
+class RecoverVerifyEmailView(_PublicPost):
+    serializer = s.RecoverVerifyEmailSerializer
+
+    @extend_schema(request=s.RecoverVerifyEmailSerializer, responses={200: dict}, auth=[])
+    def post(self, request):  # type: ignore[no-untyped-def]
+        v = self.parsed(request)
+        token, params = recovery.verify_email(phone=v["phone"], code=v["code"])
+        return Response({"recovery_token": token, "sdk_params": params})
+
+
+class RecoverStatusView(_PublicPost):
+    serializer = s.RecoveryTokenSerializer
+
+    @extend_schema(request=s.RecoveryTokenSerializer, responses={200: dict}, auth=[])
+    def post(self, request):  # type: ignore[no-untyped-def]
+        return Response(
+            {"state": recovery.biometric_state(token=self.parsed(request)["recovery_token"])}
+        )
+
+
+class RecoverNewPhoneView(_PublicPost):
+    serializer = s.RecoverNewPhoneSerializer
+
+    @extend_schema(request=s.RecoverNewPhoneSerializer, responses={202: dict}, auth=[])
+    def post(self, request):  # type: ignore[no-untyped-def]
+        v = self.parsed(request)
+        recovery.start_new_phone(
+            token=v["recovery_token"], new_phone=v["new_phone"], ip=client_ip(request)
+        )
+        return Response({"status": "accepted"}, status=status.HTTP_202_ACCEPTED)
+
+
+class RecoverCompleteView(_PublicPost):
+    serializer = s.RecoverCompleteSerializer
+
+    @extend_schema(request=s.RecoverCompleteSerializer, responses={200: dict}, auth=[])
+    def post(self, request):  # type: ignore[no-untyped-def]
+        v = self.parsed(request)
+        recovery.complete(token=v["recovery_token"], code=v["code"], ip=client_ip(request))
+        return Response({"status": "phone_changed"})
