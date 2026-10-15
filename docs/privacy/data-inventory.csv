@@ -40,3 +40,12 @@ privacy.PrivacyRequest.*,privacy.PrivacyRequest,export and deletion requests (ac
 billing.Product.*,billing.Product,catalogue (no personal data),n/a,n/a,none,af-south-1 Postgres
 billing.PaymentEvent.*,billing.PaymentEvent,append-only payment ledger,legal obligation (tax),retained after account deletion,Apple/Google/Flutterwave,af-south-1 Postgres
 billing.Purchase.*,billing.Purchase,membership purchases (store token field-encrypted),contract/legal obligation (tax),retained after account deletion (account link cleared),Apple/Google/Flutterwave,af-south-1 Postgres
+accounts.Account.(email_verified_at/role),accounts.Account,recovery email verification and role (member only),consent,until account deletion,none,af-south-1 Postgres
+media.MediaObject.(owner/declared_mime/declared_bytes/declared_sha256/upload_key/storage_key/processed_at/moderation_labels),media.MediaObject,upload pipeline bookkeeping (keys contain no account id),contract,deleted with account; rejected rows 30 days,AWS S3,af-south-1 Postgres/S3
+profiles.Photo.(profile/media),profiles.Photo,links a photo to its profile,contract,deleted with account,none,af-south-1 Postgres
+profiles.Profile.(account/status/completeness/current_description),profiles.Profile,profile state and completeness,contract,deleted with account,none,af-south-1 Postgres
+profiles.Profile.(gender/diaspora_country/location_lat/location_lng),profiles.Profile,opposite-gender matching and coarse (~1 km) distance filter,contract,deleted with account,none,af-south-1 Postgres
+profiles.Profile.(has_children/wants_children/marriage_timeline/marriage_form_preference),profiles.Profile,compatibility filters and display,contract,deleted with account,none,af-south-1 Postgres
+questionnaire.Answer.(account/question),questionnaire.Answer,links an answer to its member and question,contract,deleted with account,none,af-south-1 Postgres
+questionnaire.Question.*,questionnaire.Question,seeded reference data (no personal data),n/a,n/a,none,af-south-1 Postgres
+verification.VerificationAttempt.(account/vendor/vendor_job_id/submitted_at/decided_at/reviewed_by),verification.VerificationAttempt,verification bookkeeping (vendor job id; no images stored),legal obligation/fraud prevention,retained after deletion (account link cleared),Smile ID,af-south-1 Postgres

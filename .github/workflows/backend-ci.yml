@@ -32,6 +32,9 @@ jobs:
       - run: uv run ruff format --check .
       - run: uv run mypy mc
       - run: uv run lint-imports
+      - name: Data inventory covers every model field (Bible §12.2)
+        run: uv run python manage.py check_data_inventory
+        env: {DJANGO_SETTINGS_MODULE: config.settings.test}
       - name: Migration check (a model change without a migration fails the build)
         run: uv run python manage.py makemigrations --check --dry-run
         env: {DJANGO_SETTINGS_MODULE: config.settings.test}

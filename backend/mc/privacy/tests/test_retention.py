@@ -29,14 +29,32 @@ def later(days):
 def test_impressions_expire_after_180_days_but_not_relevant_tombstones_stay():
     m, f = pair()
     third = member("female")
-    old = Impression.objects.create(viewer=m[2], candidate=f[2], score=0.5, model_version="v1", position=0, shown_at=timezone.now())
-    hidden = Impression.objects.create(viewer=m[2], candidate=third[2], score=0.5, model_version="v1", position=0, shown_at=timezone.now(), action="not_relevant")
+    old = Impression.objects.create(
+        viewer=m[2],
+        candidate=f[2],
+        score=0.5,
+        model_version="v1",
+        position=0,
+        shown_at=timezone.now(),
+    )
+    hidden = Impression.objects.create(
+        viewer=m[2],
+        candidate=third[2],
+        score=0.5,
+        model_version="v1",
+        position=0,
+        shown_at=timezone.now(),
+        action="not_relevant",
+    )
     with later(179):
         assert retention.run()["impressions"] == 0
     with later(181):
         assert retention.run()["impressions"] == 1
         assert retention.run()["impressions"] == 0
-    assert not Impression.objects.filter(id=old.id).exists() and Impression.objects.filter(id=hidden.id).exists()
+    assert (
+        not Impression.objects.filter(id=old.id).exists()
+        and Impression.objects.filter(id=hidden.id).exists()
+    )
 
 
 def test_ended_chats_deleted_after_90_days_match_row_kept():
@@ -51,7 +69,9 @@ def test_ended_chats_deleted_after_90_days_match_row_kept():
         assert retention.run()["ended_chats"] == 0
     with later(91):
         assert retention.run()["ended_chats"] >= 1
-    assert not Message.objects.filter(match_id=mid).exists() and Match.objects.filter(id=mid).exists()
+    assert (
+        not Message.objects.filter(match_id=mid).exists() and Match.objects.filter(id=mid).exists()
+    )
 
 
 def test_active_chats_are_never_purged():
@@ -72,7 +92,13 @@ def test_report_hold_keeps_an_ended_chat():
     M.objects.update(created_at=timezone.now() - timedelta(days=10))
     say(f, mid, "evidence")
     reporter = m
-    reporter[0].post("/api/v1/reports", {"profile_id": f[3], "category": "scam", "context_type": "profile"}, HTTP_AUTHORIZATION=f"Bearer {m[1].json()['access']}", HTTP_IDEMPOTENCY_KEY=uuid.uuid4().hex, content_type="application/json")
+    reporter[0].post(
+        "/api/v1/reports",
+        {"profile_id": f[3], "category": "scam", "context_type": "profile"},
+        HTTP_AUTHORIZATION=f"Bearer {m[1].json()['access']}",
+        HTTP_IDEMPOTENCY_KEY=uuid.uuid4().hex,
+        content_type="application/json",
+    )
     match_services.unmatch(match_id=mid, by=m[2].id)
     with later(120):
         assert retention.run()["ended_chats"] == 0  # open case about a member → hold
@@ -84,19 +110,39 @@ def test_report_hold_keeps_an_ended_chat():
 
 def test_rejected_media_rows_purged_after_30_days_ready_media_kept():
     who = member("female", trial=False)
-    rej = MediaObject.objects.create(owner=who[2], purpose="chat_image", declared_mime="image/jpeg", declared_bytes=1, upload_key="uploads/x", status="rejected", reject_reason="malware", processed_at=timezone.now())
+    rej = MediaObject.objects.create(
+        owner=who[2],
+        purpose="chat_image",
+        declared_mime="image/jpeg",
+        declared_bytes=1,
+        upload_key="uploads/x",
+        status="rejected",
+        reject_reason="malware",
+        processed_at=timezone.now(),
+    )
     ready_count = MediaObject.objects.filter(owner=who[2], status="ready").count()
     with later(29):
         assert retention.run()["rejected_media"] == 0
     with later(31):
         assert retention.run()["rejected_media"] == 1
-    assert not MediaObject.objects.filter(id=rej.id).exists() and MediaObject.objects.filter(owner=who[2], status="ready").count() == ready_count
+    assert (
+        not MediaObject.objects.filter(id=rej.id).exists()
+        and MediaObject.objects.filter(owner=who[2], status="ready").count() == ready_count
+    )
 
 
 def test_dead_sessions_purged_after_90_days_live_ones_kept():
     who = member("female", trial=False)
     live = Session.objects.get(account=who[2], revoked_at__isnull=True)
-    dead = Session.objects.create(account=who[2], chain_id=uuid.uuid4(), refresh_token_hash="h" * 64, issued_at=timezone.now(), expires_at=timezone.now() + 30 * DAY, revoked_at=timezone.now(), revoke_reason="logout")
+    dead = Session.objects.create(
+        account=who[2],
+        chain_id=uuid.uuid4(),
+        refresh_token_hash="h" * 64,
+        issued_at=timezone.now(),
+        expires_at=timezone.now() + 30 * DAY,
+        revoked_at=timezone.now(),
+        revoke_reason="logout",
+    )
     with later(89):
         assert retention.run()["dead_sessions"] == 0
     with later(91):
@@ -127,11 +173,23 @@ def test_finished_interests_and_snapshots_purged_after_180_days_pending_kept():
         assert retention.run()["terminal_interests"] == 0
     with later(181):
         assert retention.run()["terminal_interests"] == 1
-    assert Interest.objects.filter(status="pending").count() == 1 and InterestSnapshot.objects.count() == 1
+    assert (
+        Interest.objects.filter(status="pending").count() == 1
+        and InterestSnapshot.objects.count() == 1
+    )
 
 
 def test_task_wrapper_runs_everything_and_is_idempotent():
     out = tasks.run_retention()
-    assert set(out) == {"impressions", "ended_chats", "rejected_media", "dead_sessions", "notifications", "terminal_interests", "export_files", "deletions"}
+    assert set(out) == {
+        "impressions",
+        "ended_chats",
+        "rejected_media",
+        "dead_sessions",
+        "notifications",
+        "terminal_interests",
+        "export_files",
+        "deletions",
+    }
     again = tasks.run_retention()
     assert all(v in (0, {"deleted": 0, "held": 0}) for v in again.values())
