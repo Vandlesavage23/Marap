@@ -1,0 +1,14 @@
+variable "name_prefix" {
+  type = string
+}
+
+variable "deletion_window_days" {
+  description = "Waiting period before a scheduled key deletion takes effect (7-30)."
+  type        = number
+  default     = 30
+}
+
+variable "tags" {
+  type    = map(string)
+  default = {}
+}

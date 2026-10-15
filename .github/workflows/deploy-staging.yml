@@ -1,0 +1,107 @@
+name: deploy-staging
+# Bible 13.3: tag rc-* -> same as dev + smoke tests + k6 light.
+# Environment variables (Settings > Environments > staging > Variables): AWS_DEPLOY_ROLE_ARN, MC_DOMAIN,
+# optional AWS_REGION. The role trust policy only accepts refs/tags/rc-* of this repository.
+on:
+  push:
+    tags: ["rc-*"]
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ENVIRONMENT: staging
+  AWS_REGION: ${{ vars.AWS_REGION || 'af-south-1' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Release candidates must come from main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} (${GITHUB_SHA}) is not on main"
+            exit 1
+          fi
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-deploy-staging-${{ github.run_id }}
+
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Compute image reference
+        id: image
+        run: |
+          TAG="${GITHUB_SHA::12}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "ref=${{ steps.ecr.outputs.registry }}/mc-${ENVIRONMENT}-backend:${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether the image already exists
+        id: exists
+        run: |
+          if aws ecr describe-images --repository-name "mc-${ENVIRONMENT}-backend" \
+               --image-ids "imageTag=${{ steps.image.outputs.tag }}" >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.exists.outputs.found == 'false'
+
+      - name: Build and push image
+        if: steps.exists.outputs.found == 'false'
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.image.outputs.ref }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run database migrations (one-off ECS task)
+        run: infra/scripts/ecs-run-migrate.sh "$ENVIRONMENT" "${{ steps.image.outputs.ref }}"
+
+      - name: Deploy services (rolling, auto-rollback)
+        run: infra/scripts/ecs-deploy.sh "$ENVIRONMENT" "${{ steps.image.outputs.ref }}"
+
+      - name: Smoke test /ready
+        run: infra/scripts/smoke-test.sh "${{ vars.MC_DOMAIN }}"
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: k6 light load check
+        run: k6 run -e BASE="https://api.${{ vars.MC_DOMAIN }}" infra/scripts/k6_light.js
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### deploy-staging"
+            echo "- tag: \`${GITHUB_REF_NAME}\`"
+            echo "- image: \`${{ steps.image.outputs.ref }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

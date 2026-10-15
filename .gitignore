@@ -17,3 +17,5 @@ apps/mobile/env/*.json
 !apps/mobile/env/*.example.json
 infra/terraform/**/.terraform/
 *.tfstate*
+infra/terraform/**/*.tfvars
+infra/terraform/**/backend.hcl

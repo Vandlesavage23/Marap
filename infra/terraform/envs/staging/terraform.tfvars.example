@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars (git-ignored if it holds anything environment specific). NO SECRETS HERE.
+domain            = "staging.marriageconnect.example" # replace with the real domain
+certificate_arn   = "arn:aws:acm:af-south-1:000000000000:certificate/replace-me"
+github_repository = "ORG/marriage-connect"
+admin_ip_allowlist = [] # e.g. ["203.0.113.10/32"]; REQUIRED (non-empty) in staging and prod
+
+# app_extra_environment = {
+#   SMS_PROVIDER      = "mc.accounts.providers.sms.AfricasTalkingSms"
+#   IDENTITY_PROVIDER = "mc.verification.providers.smile_id.SmileIdProvider"
+#   MALWARE_SCANNER   = "mc.media.providers.scanner.ClamdScanner"
+#   ...
+# }

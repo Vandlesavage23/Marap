@@ -275,3 +275,13 @@ def test_events_failing_handler_does_not_block_others(django_capture_on_commit_c
     with django_capture_on_commit_callbacks(execute=True):
         events.publish(Pong())
     assert got == [1]
+
+
+def test_probe_paths_work_with_any_host_but_nothing_else_does():
+    from django.test import Client
+
+    c = Client(headers={"host": "10.0.3.17:8000"})
+    assert c.get("/ready").status_code == 200
+    assert c.get("/health").status_code == 200
+    assert c.get("/api/v1/me").status_code == 400
+    assert Client(headers={"host": "evil.example"}).get("/api/v1/health").status_code == 400

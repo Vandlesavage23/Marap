@@ -1,0 +1,95 @@
+name: deploy-dev
+# MC-020 / Bible 13.3: merge to main -> build image -> push ECR -> run migrate task -> deploy ECS services.
+# Uses GitHub OIDC; there are no long-lived AWS keys. Repository/environment variables required
+# (Settings > Environments > dev > Variables): AWS_DEPLOY_ROLE_ARN (terraform output github_deploy_role_arn),
+# MC_DOMAIN (e.g. dev.example.ug), optional AWS_REGION (default af-south-1).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - "infra/scripts/**"
+      - ".github/workflows/deploy-dev.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  ENVIRONMENT: dev
+  AWS_REGION: ${{ vars.AWS_REGION || 'af-south-1' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-deploy-dev-${{ github.run_id }}
+
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Compute image reference
+        id: image
+        run: |
+          TAG="${GITHUB_SHA::12}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "ref=${{ steps.ecr.outputs.registry }}/mc-${ENVIRONMENT}-backend:${TAG}" >> "$GITHUB_OUTPUT"
+
+      # ECR tags are immutable: re-running a workflow for the same commit reuses the existing image.
+      - name: Check whether the image already exists
+        id: exists
+        run: |
+          if aws ecr describe-images --repository-name "mc-${ENVIRONMENT}-backend" \
+               --image-ids "imageTag=${{ steps.image.outputs.tag }}" >/dev/null 2>&1; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: docker/setup-buildx-action@v3
+        if: steps.exists.outputs.found == 'false'
+
+      - name: Build and push image
+        if: steps.exists.outputs.found == 'false'
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.image.outputs.ref }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run database migrations (one-off ECS task)
+        run: infra/scripts/ecs-run-migrate.sh "$ENVIRONMENT" "${{ steps.image.outputs.ref }}"
+
+      - name: Deploy services (rolling, auto-rollback)
+        run: infra/scripts/ecs-deploy.sh "$ENVIRONMENT" "${{ steps.image.outputs.ref }}"
+
+      - name: Smoke test /ready
+        run: infra/scripts/smoke-test.sh "${{ vars.MC_DOMAIN }}"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### deploy-dev"
+            echo "- image: \`${{ steps.image.outputs.ref }}\`"
+            echo "- commit: \`${GITHUB_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
