@@ -65,3 +65,25 @@ def push_targets(account_id: uuid.UUID) -> list[tuple[str, str]]:
         "platform", "push_token"
     )
     return [(platform, token) for platform, token in rows if token]
+
+
+def authenticate_access_token(token: str):  # type: ignore[no-untyped-def]
+    """`(account, session)` for a valid access token with a live session, else raises Unauthenticated/TokenExpired."""
+    from .authentication import authenticate_token
+
+    account, session, _ = authenticate_token(token)
+    return account, session
+
+
+def session_is_live(session_id: uuid.UUID) -> bool:
+    from django.utils import timezone
+
+    from .models import Session
+
+    return (
+        Session.objects.filter(
+            id=session_id, revoked_at__isnull=True, expires_at__gt=timezone.now()
+        )
+        .exclude(account__status__in=["deactivated", "deleted", "suspended"])
+        .exists()
+    )
