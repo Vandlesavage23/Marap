@@ -178,3 +178,18 @@ MC_TRUSTED_PROXY_COUNT = int(env("MC_TRUSTED_PROXY_COUNT", "0"))
 
 INSTALLED_APPS += ["mc.accounts"]
 REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = ["mc.accounts.authentication.JWTAuthentication"]
+
+# Identity verification (Bible §11.1). Fake in local/test; real environments must set explicitly.
+IDENTITY_PROVIDER = env("IDENTITY_PROVIDER", "mc.verification.providers.fake.FakeIdentityProvider")
+FAKE_IDENTITY_SECRET = env("FAKE_IDENTITY_SECRET", "fake-identity-secret")
+SMILE_ID_PARTNER_ID = env("SMILE_ID_PARTNER_ID", "")
+SMILE_ID_API_KEY = env("SMILE_ID_API_KEY", "")
+SMILE_ID_ENV = env("SMILE_ID_ENV", "sandbox")
+INSTALLED_APPS += ["mc.verification"]
+
+CELERY_BEAT_SCHEDULE = {
+    "verification-poll-stale": {
+        "task": "mc.verification.tasks.poll_stale_attempts",
+        "schedule": 300.0,
+    },
+}

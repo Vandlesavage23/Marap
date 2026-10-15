@@ -50,3 +50,8 @@ def has_consent(account: Account, kind: str) -> bool:
 
 def has_required_verification_consents(account: Account) -> bool:
     return all(has_consent(account, k) for k in REQUIRED_VERIFICATION_CONSENTS)
+
+
+def lock_account(account_id: uuid.UUID) -> Account:
+    """SELECT ... FOR UPDATE (call inside a transaction) to serialise per-account operations."""
+    return Account.objects.select_for_update().get(id=account_id)

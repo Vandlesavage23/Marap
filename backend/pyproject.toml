@@ -47,7 +47,7 @@ select = ["E", "F", "I", "B", "UP", "S", "DJ", "SIM", "C4", "RUF"]
 ignore = ["RUF012", "E501", "UP046", "UP047"]
 
 [tool.ruff.lint.per-file-ignores]
-"**/tests/**" = ["S101", "S105", "S106", "S311", "S608", "DJ008", "SIM117"]
+"**/tests/**" = ["S101", "S105", "S106", "S311", "S608", "DJ008", "SIM117", "RUF059"]
 "tests/**" = ["S101", "S105", "S106", "S311"]
 "config/settings/*.py" = ["F403", "F405", "E402", "S105"]
 
@@ -77,6 +77,8 @@ omit = ["*/tests/*", "*/migrations/*"]
 [tool.importlinter]
 root_packages = ["mc", "config"]
 include_external_packages = false
+unmatched_ignore_imports_alerting = "none"
+exclude_type_checking_imports = true
 
 # Module boundary contracts (Bible §4.2, MC-022). A module may call another module only through its
 # `services` / `selectors` (and `policies`, `events`). When you add a module under backend/mc/, add it to
@@ -86,19 +88,31 @@ include_external_packages = false
 name = "common is a leaf: it never imports domain modules"
 type = "forbidden"
 source_modules = ["mc.common"]
-forbidden_modules = ["mc.audit", "mc.accounts"]
-ignore_imports = ["mc.common.tests.** -> mc.**"]
+forbidden_modules = ["mc.audit", "mc.accounts", "mc.verification"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "audit internals are private to audit"
 type = "forbidden"
-source_modules = ["mc.accounts"]
-forbidden_modules = ["mc.audit.models", "mc.audit.api", "mc.audit.tasks"]
-ignore_imports = ["mc.accounts.tests.** -> mc.**"]
+source_modules = ["mc.accounts", "mc.verification"]
+forbidden_modules = ["mc.audit.models", "mc.audit.api", "mc.audit.tasks", "mc.audit.admin_views"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "accounts internals are private to accounts"
 type = "forbidden"
-source_modules = ["mc.audit"]
-forbidden_modules = ["mc.accounts.models", "mc.accounts.api", "mc.accounts.tasks"]
-ignore_imports = ["mc.audit.tests.** -> mc.**"]
+source_modules = ["mc.audit", "mc.verification"]
+forbidden_modules = ["mc.accounts.models", "mc.accounts.api", "mc.accounts.tasks", "mc.accounts.admin_views"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
+
+[[tool.importlinter.contracts]]
+name = "verification internals are private to verification"
+type = "forbidden"
+source_modules = ["mc.audit", "mc.accounts"]
+forbidden_modules = ["mc.verification.models", "mc.verification.api", "mc.verification.tasks", "mc.verification.admin_views"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
+

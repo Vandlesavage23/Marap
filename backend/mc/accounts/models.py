@@ -3,16 +3,18 @@ from django.db.models.functions import Lower
 
 from mc.common.models import BaseModel
 
+from . import constants
+
 
 class Account(BaseModel):
     """A member account (Bible §7.1). Staff are separate (`StaffUser`). `str()` never exposes the phone."""
 
     class Status(models.TextChoices):
-        PENDING_VERIFICATION = "pending_verification"
-        ACTIVE = "active"
-        SUSPENDED = "suspended"
-        DEACTIVATED = "deactivated"
-        DELETED = "deleted"
+        PENDING_VERIFICATION = constants.PENDING_VERIFICATION
+        ACTIVE = constants.ACTIVE
+        SUSPENDED = constants.SUSPENDED
+        DEACTIVATED = constants.DEACTIVATED
+        DELETED = constants.DELETED
 
     class Role(models.TextChoices):
         MEMBER = "member"

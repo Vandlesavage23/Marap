@@ -327,3 +327,16 @@ def register_device(
         if created and had_devices:
             _alert_new_device(account, device)
     return device
+
+
+# ---------------------------------------------------------------- status
+def set_status(*, account: Account, status: str) -> None:
+    """Change account status (callers: verification, safety, privacy). Suspension also signs the
+    user out everywhere."""
+    if status not in Account.Status.values:
+        raise ValidationFailed("Unknown status.")
+    with transaction.atomic():
+        account.status = status
+        account.save(update_fields=["status", "updated_at"])
+        if status in (Account.Status.SUSPENDED, Account.Status.DEACTIVATED, Account.Status.DELETED):
+            revoke_all_sessions(account=account, reason=Session.RevokeReason.ACCOUNT)

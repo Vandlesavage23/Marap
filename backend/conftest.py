@@ -24,3 +24,12 @@ def _fake_sms():
     FakeSms.reset()
     yield FakeSms
     FakeSms.reset()
+
+
+@pytest.fixture(autouse=True)
+def _fake_identity():
+    from mc.verification.providers.fake import FakeIdentityProvider
+
+    FakeIdentityProvider.reset()
+    yield FakeIdentityProvider
+    FakeIdentityProvider.reset()

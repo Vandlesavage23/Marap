@@ -9,6 +9,7 @@ from mc.accounts.models import Account
 from mc.accounts.policies import can_manage_session
 from mc.common.errors import NotFound
 from mc.common.net import client_ip
+from mc.verification import selectors as verification_selectors
 
 from . import serializers as s
 
@@ -21,7 +22,7 @@ def _account_summary(account: Account) -> dict[str, object]:
         "email_verified": account.email_verified_at is not None,
         "status": account.status,
         "locale": account.locale,
-        "verification_status": "not_started",  # wired to the verification module in MC-035/036
+        "verification_status": verification_selectors.latest_status(account)["status"],
         "profile_status": "none",  # wired to the profiles module in MC-045
     }
 
