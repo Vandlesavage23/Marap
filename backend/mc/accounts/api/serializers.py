@@ -19,6 +19,7 @@ class OtpVerifySerializer(serializers.Serializer):
     phone = serializers.CharField(max_length=32)
     code = serializers.RegexField(r"^\d{6}$", max_length=6)
     device = DeviceInfoSerializer(required=False)
+    invite_code = serializers.CharField(max_length=20, required=False, allow_blank=True, default="")
 
 
 class RefreshSerializer(serializers.Serializer):

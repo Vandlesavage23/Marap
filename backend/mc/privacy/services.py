@@ -20,6 +20,7 @@ from mc.accounts import selectors as account_selectors
 from mc.accounts import services as account_services
 from mc.adminportal import services as adminportal_services
 from mc.audit import services as audit
+from mc.beta import services as beta_services
 from mc.common.errors import Conflict, Forbidden
 from mc.entitlements import selectors as entitlement_selectors
 from mc.interests import services as interest_services
@@ -145,6 +146,7 @@ def _erase(account: "Account") -> None:
     messaging_services.scrub_sent_by(account_id=account.id)
     interest_services.purge_for(account_id=account.id)
     adminportal_services.purge_notes_for(account.id)
+    beta_services.purge_for(account.id)
     account_services.hard_delete_account(
         account=account
     )  # cascades profile, answers, devices, sessions, consents…

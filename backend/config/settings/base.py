@@ -302,3 +302,7 @@ ADMIN_IP_ALLOWLIST = [
 STAFF_COOKIE = "mc_admin"
 INSTALLED_APPS += ["mc.adminportal"]
 INSTALLED_APPS += ["mc.webcheckout"]
+
+# Closed beta (MC-127)
+BETA_INVITE_REQUIRED = env("BETA_INVITE_REQUIRED", "false").lower() == "true"
+INSTALLED_APPS += ["mc.beta"]

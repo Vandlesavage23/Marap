@@ -11,6 +11,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
+from mc.beta import services as beta_services
 from mc.common import events, ratelimit
 from mc.common.crypto import hmac_value
 from mc.common.errors import Forbidden, Unauthenticated, ValidationFailed
@@ -131,7 +132,12 @@ def _create_session(
 
 
 def verify_otp(
-    *, phone: str, code: str, ip: str, device: dict[str, Any] | None = None
+    *,
+    phone: str,
+    code: str,
+    ip: str,
+    device: dict[str, Any] | None = None,
+    invite_code: str | None = None,
 ) -> AuthResult:
     """Verify a login code; creates the account for a new phone. Returns tokens."""
     e164 = phone_utils.normalise(phone)
@@ -140,6 +146,8 @@ def verify_otp(
         limit=settings.OTP_VERIFY_PER_IP_PER_HOUR,
         window_seconds=HOUR,
     )
+    if beta_services.invite_required() and selectors.get_account_by_phone(e164) is None:
+        beta_services.assert_invite_valid(invite_code)  # before the SMS code is spent
     _check_otp(e164=e164, code=code, purpose="login")
 
     with transaction.atomic():
@@ -152,6 +160,10 @@ def verify_otp(
             except IntegrityError:  # concurrent first sign-in of the same phone
                 account = Account.objects.get(phone_e164=e164)
                 created = False
+        if created and beta_services.invite_required():
+            beta_services.redeem_invite(
+                code=invite_code, account_id=account.id
+            )  # rolls everything back if unusable
         if account.status in (Account.Status.DEACTIVATED, Account.Status.DELETED):
             raise Forbidden("This account is unavailable.")
         had_devices = Device.objects.filter(account=account).exists()

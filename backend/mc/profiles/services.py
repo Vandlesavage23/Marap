@@ -10,6 +10,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from mc.accounts import selectors as account_selectors
+from mc.beta import services as beta_services
 from mc.common import events
 from mc.common.errors import (
     Conflict,
@@ -292,6 +293,7 @@ def go_live(*, account: "Account") -> Profile:
         missing = readiness.missing_for_go_live(profile)
         if missing:
             raise ProfileIncomplete("Your profile isn't ready yet.", missing=missing)
+        beta_services.claim_go_live(district=profile.district)
         profile.status = Profile.Status.LIVE
         profile.completeness = readiness.completeness(profile)
         profile.save(update_fields=["status", "completeness", "updated_at"])

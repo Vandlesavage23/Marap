@@ -70,6 +70,7 @@ class OtpVerifyView(APIView):
             code=data.validated_data["code"],
             ip=client_ip(request),
             device=dict(device) if device else None,
+            invite_code=data.validated_data.get("invite_code") or None,
         )
         return Response(
             _auth_payload(result),

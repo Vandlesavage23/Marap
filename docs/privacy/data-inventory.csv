@@ -54,3 +54,7 @@ verification.VerificationAppeal.*,verification.VerificationAppeal,appeal of a ve
 adminportal.StaffUser.*,adminportal.StaffUser,staff access control (work email; TOTP secret encrypted),legitimate interest (security),while employed + 1y,company SSO provider,af-south-1 Postgres
 adminportal.StaffSession.*,adminportal.StaffSession,staff portal sessions (token hash; ip as HMAC),legitimate interest (security),purged 30d after expiry,none,af-south-1 Postgres
 adminportal.SupportNote.*,adminportal.SupportNote,support case notes (encrypted; no chat or special data),legitimate interest (support),erased with the account,none,af-south-1 Postgres
+beta.InviteCode.*,beta.InviteCode,closed-beta sign-up gating (no personal data),legitimate interest,until beta ends,none,af-south-1 Postgres
+beta.InviteRedemption.*,beta.InviteRedemption,link an account to the invite it used,legitimate interest,erased with the account,none,af-south-1 Postgres
+beta.BetaFeedback.*,beta.BetaFeedback,product feedback from beta testers (encrypted free text),consent (member submits),erased with the account,none,af-south-1 Postgres
+beta.DistrictCap.*,beta.DistrictCap,throttle go-lives per district (no personal data),legitimate interest,until beta ends,none,af-south-1 Postgres

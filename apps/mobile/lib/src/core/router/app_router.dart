@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
+import 'package:marriage_connect/src/core/router/feature_routes.dart';
 import 'package:marriage_connect/src/features/onboarding/presentation/onboarding_screens.dart';
 
 /// Guard skeleton (Bible §5.4): unauthenticated → onboarding; unverified →
@@ -37,6 +38,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) =>
         appRedirect(ref.read(sessionProvider), state.matchedLocation),
     routes: [
+      ...featureRoutes(),
       GoRoute(
         path: '/splash',
         builder: (_, __) =>
