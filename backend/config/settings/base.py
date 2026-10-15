@@ -1,0 +1,164 @@
+"""Base settings. All values come from the environment; secrets never live in the repo."""
+
+import os
+from pathlib import Path
+from urllib.parse import unquote, urlparse
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+def env(name: str, default: str | None = None) -> str:
+    value = os.environ.get(name, default)
+    if value is None:
+        raise RuntimeError(f"Missing required environment variable {name}")
+    return value
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    return os.environ.get(name, str(default)).lower() in {"1", "true", "yes", "on"}
+
+
+def database_from_url(url: str) -> dict[str, object]:
+    parsed = urlparse(url)
+    return {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": parsed.path.lstrip("/"),
+        "USER": unquote(parsed.username or ""),
+        "PASSWORD": unquote(parsed.password or ""),
+        "HOST": parsed.hostname or "",
+        "PORT": str(parsed.port or ""),
+        "CONN_MAX_AGE": int(env("DB_CONN_MAX_AGE", "60")),
+        "ATOMIC_REQUESTS": False,
+    }
+
+
+SECRET_KEY = env("DJANGO_SECRET_KEY", "insecure-local-only")
+DEBUG = False
+
+# Host routing (Bible §2.2): api.<domain>, admin.<domain>, pay.<domain>.
+MC_DOMAIN = env("MC_DOMAIN", "localtest.me")
+ALLOWED_HOSTS = [f".{MC_DOMAIN}", *filter(None, env("MC_EXTRA_ALLOWED_HOSTS", "").split(","))]
+HOST_URLCONFS = {
+    f"api.{MC_DOMAIN}": "config.urls_api",
+    f"admin.{MC_DOMAIN}": "config.urls_admin",
+    f"pay.{MC_DOMAIN}": "config.urls_pay",
+}
+ROOT_URLCONF = "config.urls_api"
+
+INSTALLED_APPS = [
+    "daphne",
+    "django.contrib.contenttypes",
+    "django.contrib.postgres",
+    "rest_framework",
+    "drf_spectacular",
+    "channels",
+    "mc.common",
+    "mc.audit",
+]
+
+MIDDLEWARE = [
+    "mc.common.hosts.HostRoutingMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "mc.common.middleware.RequestIdMiddleware",
+]
+
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {"context_processors": ["django.template.context_processors.request"]},
+    }
+]
+
+WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
+
+DATABASES = {
+    "default": database_from_url(env("DATABASE_URL", "postgres://mc:mc@localhost:5432/mc"))
+}
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+REDIS_URL = env("REDIS_URL", "redis://localhost:6379/0")
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {"hosts": [REDIS_URL]},
+    }
+}
+
+# Celery (Bible §2.2): queues default, media, billing, notify.
+CELERY_BROKER_URL = REDIS_URL
+CELERY_TASK_DEFAULT_QUEUE = "default"
+CELERY_TASK_ALWAYS_EAGER = False
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "UNAUTHENTICATED_USER": None,
+    "UNAUTHENTICATED_TOKEN": None,
+    "DEFAULT_PERMISSION_CLASSES": ["mc.common.permissions.DenyAll"],  # deny by default
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+    "EXCEPTION_HANDLER": "mc.common.exception_handler.problem_exception_handler",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": [],
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Marriage Connect API",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}
+
+# Docs/OpenAPI are served in dev only (MC-012).
+OPENAPI_ENABLED = False
+
+LANGUAGE_CODE = "en"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_TZ = True
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = "same-origin"
+X_FRAME_OPTIONS = "DENY"
+
+LOG_LEVEL = env("LOG_LEVEL", "INFO")
+
+# Crypto (Bible §12.1). Real environments inject MC_DATA_KEYS (wrapped DEKs), MC_DATA_KEY_CURRENT and
+# peppers from Secrets Manager; local/test settings derive dev-only values (see local.py / test.py).
+import json as _json
+
+MC_DATA_KEYS: dict[str, str] = _json.loads(env("MC_DATA_KEYS_JSON", "{}"))
+MC_DATA_KEY_CURRENT = env("MC_DATA_KEY_CURRENT", "k1")
+MC_PEPPERS: dict[str, str] = _json.loads(env("MC_PEPPERS_JSON", "{}"))
+MC_KMS = None  # production sets an AWS KMS-backed implementation of mc.common.crypto.Kms
+
+# Observability
+SENTRY_DSN = env("SENTRY_DSN", "")
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {"pii": {"()": "mc.common.logging.PiiScrubFilter"}},
+    "formatters": {"json": {"()": "mc.common.logging.JsonFormatter"}},
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "json", "filters": ["pii"]}
+    },
+    "root": {"handlers": ["console"], "level": LOG_LEVEL},
+    "loggers": {"django.server": {"level": "WARNING"}},
+}
+
+if SENTRY_DSN:
+    import sentry_sdk
+
+    from mc.common.logging import sentry_before_send
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        send_default_pii=False,
+        before_send=sentry_before_send,  # type: ignore[arg-type]
+        traces_sample_rate=0.1,
+    )

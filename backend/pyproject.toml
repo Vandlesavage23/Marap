@@ -1,0 +1,97 @@
+[project]
+name = "mc-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "celery>=5.6.3",
+    "channels>=4.3.2",
+    "channels-redis>=4.3.0",
+    "cryptography>=50.0.2",
+    "daphne>=4.2.3",
+    "django>=5.1,<5.3",
+    "djangorestframework>=3.18.3",
+    "drf-spectacular>=0.30.0",
+    "gunicorn>=26.2.0",
+    "phonenumbers>=9.0.41",
+    "psycopg[binary]>=3.3.6",
+    "pyjwt>=2.15.1",
+    "redis>=8.1.0",
+    "sentry-sdk>=2.72.0",
+    "structlog>=26.1.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "django-stubs>=6.1.2",
+    "djangorestframework-stubs>=3.18.1",
+    "factory-boy>=3.3.3",
+    "freezegun>=1.5.5",
+    "hypothesis>=6.169.4",
+    "import-linter>=2.15",
+    "mypy>=2.4.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "pytest-django>=4.14.0",
+    "ruff>=0.17.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S", "DJ", "SIM", "C4", "RUF"]
+ignore = ["RUF012", "E501", "UP046", "UP047"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106", "S311", "S608", "DJ008", "SIM117"]
+"tests/**" = ["S101", "S105", "S106", "S311"]
+"config/settings/*.py" = ["F403", "F405", "E402", "S105"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+strict_optional = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+exclude = ["/tests/", "/migrations/"]
+
+[tool.django-stubs]
+django_settings_module = "config.settings.test"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "-ra --strict-markers"
+asyncio_mode = "auto"
+testpaths = ["mc", "tests"]
+
+[tool.coverage.run]
+source = ["mc"]
+omit = ["*/tests/*", "*/migrations/*"]
+
+[tool.importlinter]
+root_packages = ["mc", "config"]
+include_external_packages = false
+
+# Module boundary contracts (Bible §4.2, MC-022). A module may call another module only through its
+# `services` / `selectors` (and `policies`, `events`). When you add a module under backend/mc/, add it to
+# the `forbidden` contract below — tests/test_architecture.py fails if you forget.
+
+[[tool.importlinter.contracts]]
+name = "common is a leaf: it never imports domain modules"
+type = "forbidden"
+source_modules = ["mc.common"]
+forbidden_modules = ["mc.audit"]
+ignore_imports = ["mc.common.tests.** -> mc.**"]
+
+[[tool.importlinter.contracts]]
+name = "audit is not imported across modules except via services/selectors"
+type = "forbidden"
+source_modules = ["mc.common"]
+forbidden_modules = ["mc.audit.models", "mc.audit.api"]
+ignore_imports = ["mc.common.tests.** -> mc.**"]

@@ -1,0 +1,28 @@
+name: security
+on:
+  pull_request:
+  schedule: [{cron: "0 3 * * *"}]
+permissions: {contents: read}
+jobs:
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: gitleaks/gitleaks-action@v2
+        env: {GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"}
+  pip-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv export --frozen --no-hashes --project backend -o /tmp/req.txt
+      - run: uvx pip-audit -r /tmp/req.txt --disable-pip
+  trivy:
+    runs-on: ubuntu-latest
+    if: hashFiles('backend/Dockerfile') != ''
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t mc-backend backend
+      - uses: aquasecurity/trivy-action@0.28.0
+        with: {image-ref: mc-backend, severity: "CRITICAL,HIGH", exit-code: "1"}

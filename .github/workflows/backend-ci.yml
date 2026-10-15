@@ -1,0 +1,39 @@
+name: backend-ci
+on:
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend-ci.yml"]
+  push:
+    branches: [main]
+permissions: {contents: read}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: {run: {working-directory: backend}}
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env: {POSTGRES_USER: mc, POSTGRES_PASSWORD: mc, POSTGRES_DB: mc}
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mc" --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://mc:mc@localhost:5432/mc
+      TEST_REDIS_URL: redis://localhost:6379/15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with: {enable-cache: true}
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy mc
+      - run: uv run lint-imports
+      - name: Migration check (a model change without a migration fails the build)
+        run: uv run python manage.py makemigrations --check --dry-run
+        env: {DJANGO_SETTINGS_MODULE: config.settings.test}
+      - run: uv run pytest --cov=mc --cov-report=term-missing --cov-fail-under=80
+      # TODO(MC-0xx): per-module 90% gate for entitlements/billing/interests/safety/accounts; schema diff.
