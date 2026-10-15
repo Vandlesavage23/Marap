@@ -340,3 +340,14 @@ def set_status(*, account: Account, status: str) -> None:
         account.save(update_fields=["status", "updated_at"])
         if status in (Account.Status.SUSPENDED, Account.Status.DEACTIVATED, Account.Status.DELETED):
             revoke_all_sessions(account=account, reason=Session.RevokeReason.ACCOUNT)
+
+
+def hard_delete_account(*, account: Account) -> None:
+    """Erase the account row and everything cascading from it (called by the privacy deletion job after
+    the grace period; retained items keep no FK to the account). Consent rows are append-only except here."""
+    from django.db import connection
+
+    with transaction.atomic():
+        with connection.cursor() as cur:
+            cur.execute("SET LOCAL mc.purge_consents = 'on'")
+        account.delete()

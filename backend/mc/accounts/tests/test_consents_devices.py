@@ -155,3 +155,13 @@ def test_register_device_validation(api):
     bad = device(platform="windows")
     assert api.post("/api/v1/me/devices", bad, **bearer(r), **J).status_code == 422
     assert api.post("/api/v1/me/devices", device(), **J).status_code == 401
+
+
+def test_hard_delete_is_the_only_way_to_remove_consents():
+    acct = Account.objects.create(phone_e164=PHONE)
+    services.record_consent(
+        account=acct, items=[{"kind": "terms", "version": V, "granted": True}], source="app"
+    )
+    services.hard_delete_account(account=acct)
+    assert not Account.objects.filter(id=acct.id).exists()
+    assert not ConsentRecord.objects.exists()

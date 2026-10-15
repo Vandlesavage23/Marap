@@ -10,3 +10,5 @@ verification.VerificationAttempt.date_of_birth,verification.VerificationAttempt,
 verification.VerificationAttempt.id_number_hmac,verification.VerificationAttempt,one identity → one account / one trial (keyed hash; ID number never stored),legitimate interest (fraud prevention),retained after deletion,none,af-south-1 Postgres
 verification.VerificationAttempt.vendor_result,verification.VerificationAttempt,minimal audit of vendor outcome (field-encrypted; no images),legitimate interest,deleted with account unless hold,none,af-south-1 Postgres
 verification.VerificationAttempt.(status/reason_code/id_type/issuing_country/timestamps/safety_flag),verification.VerificationAttempt,verification state machine and abuse review,contract/legitimate interest,retained after deletion (decision only),none,af-south-1 Postgres
+entitlements.Trial.*,entitlements.Trial,one free trial per human (identity_hmac),legitimate interest (fraud prevention),retained after deletion (account link cleared),none,af-south-1 Postgres
+entitlements.Entitlement.*,entitlements.Entitlement,membership windows,contract,deleted with account (purchase ledger retained separately),none,af-south-1 Postgres

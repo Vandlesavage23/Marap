@@ -193,3 +193,4 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": 300.0,
     },
 }
+INSTALLED_APPS += ["mc.entitlements"]
