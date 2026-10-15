@@ -304,3 +304,13 @@ def are_mutually_eligible(a: "Account", b: "Account") -> bool:
     return scoring.dealbreaker_ok(mine, theirs, min_similarity=thr) and scoring.dealbreaker_ok(
         theirs, mine, min_similarity=thr
     )
+
+
+def purge_impressions(*, before) -> int:  # type: ignore[no-untyped-def]
+    """Retention: impressions older than `before` (180 days). `not_relevant` feedback older than that is kept
+    as a tombstone so a hidden profile never reappears."""
+    qs = Impression.objects.filter(shown_at__lt=before).exclude(
+        action=Impression.Action.NOT_RELEVANT
+    )
+    deleted, _ = qs.delete()
+    return deleted

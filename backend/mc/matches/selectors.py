@@ -48,3 +48,12 @@ def counterpart_ids(account_id: uuid.UUID, *, ended_since=None) -> set[uuid.UUID
 
 def all_matches(account_id: uuid.UUID) -> QuerySet[Match]:
     return Match.objects.filter(Q(user_a_id=account_id) | Q(user_b_id=account_id)).order_by("id")
+
+
+def ended_matches_before(cutoff):  # type: ignore[no-untyped-def]
+    """`[(match_id, user_a, user_b)]` for matches that ended before `cutoff` (retention of their chat history)."""
+    return list(
+        Match.objects.filter(ended_at__lt=cutoff)
+        .exclude(status=Match.Status.ACTIVE)
+        .values_list("id", "user_a_id", "user_b_id")
+    )

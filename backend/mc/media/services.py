@@ -174,3 +174,11 @@ def selectors_owned(account_id: uuid.UUID):  # type: ignore[no-untyped-def]
 
 def delete_export_object(*, key: str) -> None:
     storage.delete_in(bucket=settings.EXPORTS_BUCKET, key=key)
+
+
+def purge_rejected(*, before) -> int:  # type: ignore[no-untyped-def]
+    """Retention: rejected media rows older than `before` (30 days). Their files were deleted at rejection."""
+    deleted, _ = MediaObject.objects.filter(
+        status=MediaObject.Status.REJECTED, processed_at__lt=before
+    ).delete()
+    return deleted

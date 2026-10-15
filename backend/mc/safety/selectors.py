@@ -105,3 +105,10 @@ def export_for_account(account) -> dict[str, object]:  # type: ignore[no-untyped
         "blocked_count": len(blocked_either_way_ids(account.id))
         and Block.objects.filter(blocker=account).count(),
     }
+
+
+def accounts_under_hold() -> set[uuid.UUID]:
+    """Members with an open safety case: their data is kept for the investigation (retention + deletion hold)."""
+    from .models import Case
+
+    return set(Case.objects.filter(status="open").values_list("subject_id", flat=True))

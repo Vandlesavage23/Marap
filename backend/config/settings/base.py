@@ -276,3 +276,7 @@ CELERY_BEAT_SCHEDULE["privacy-purge-exports"] = {
     "task": "mc.privacy.tasks.purge_expired_exports",
     "schedule": 3600.0,
 }
+CELERY_BEAT_SCHEDULE["privacy-retention"] = {
+    "task": "mc.privacy.tasks.run_retention",
+    "schedule": 86400.0,
+}

@@ -325,3 +325,15 @@ def purge_for(*, account_id: uuid.UUID) -> int:
     InterestSnapshot.objects.filter(id__in=snapshot_ids).delete()
     deleted, _ = qs.delete()
     return deleted
+
+
+def purge_terminal(*, before) -> int:  # type: ignore[no-untyped-def]
+    """Retention: finished interests (passed/expired/cancelled) older than `before` (180 days, longer than the
+    90-day re-send cool-off) together with their snapshots."""
+    qs = Interest.objects.filter(
+        status__in=["passed", "expired", "cancelled"], updated_at__lt=before
+    )
+    snapshot_ids = [s for s in qs.values_list("snapshot_id", flat=True) if s]
+    InterestSnapshot.objects.filter(id__in=snapshot_ids).delete()
+    deleted, _ = qs.delete()
+    return deleted

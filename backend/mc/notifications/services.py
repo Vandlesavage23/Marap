@@ -66,3 +66,9 @@ def push_body(type: str) -> str:
 
 def has_push_target(account_id: uuid.UUID) -> bool:
     return bool(account_selectors.push_targets(account_id))
+
+
+def purge_old(*, before) -> int:  # type: ignore[no-untyped-def]
+    """Retention: inbox entries older than `before` (90 days)."""
+    deleted, _ = Notification.objects.filter(created_at__lt=before).delete()
+    return deleted

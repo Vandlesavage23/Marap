@@ -22,3 +22,10 @@ def purge_expired_exports() -> int:
     from . import export
 
     return export.purge_expired()
+
+
+@shared_task(queue="default")
+def run_retention() -> dict:
+    from . import retention
+
+    return retention.run()

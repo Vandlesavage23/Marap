@@ -1,6 +1,7 @@
 """Messaging writes (Bible §9). Idempotent on `(sender, client_msg_id)`; policy-checked; event-driven."""
 
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from django.conf import settings
@@ -171,3 +172,15 @@ def scrub_sent_by(*, account_id: uuid.UUID) -> int:
         moderation_flag=None,
         updated_at=timezone.now(),
     )
+
+
+def purge_ended_chats(*, before: datetime, hold_accounts: set[uuid.UUID]) -> int:
+    """Retention: messages of matches that ended before `before` (90 days), unless either member is under a
+    safety hold. The Match row stays (cool-off rules and the audit trail need it)."""
+    n = 0
+    for match_id, a, b in match_selectors.ended_matches_before(before):
+        if a in hold_accounts or b in hold_accounts:
+            continue
+        deleted, _ = Message.objects.filter(match_id=match_id).delete()
+        n += deleted
+    return n

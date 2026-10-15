@@ -396,3 +396,13 @@ def consume_reauth_otp(*, account: Account, code: str) -> bool:
     except ValidationFailed:
         return False
     return True
+
+
+def purge_dead_sessions(*, before) -> int:  # type: ignore[no-untyped-def]
+    """Retention: sessions revoked or expired before `before` (90 days)."""
+    from django.db.models import Q
+
+    deleted, _ = Session.objects.filter(
+        Q(revoked_at__lt=before) | Q(expires_at__lt=before)
+    ).delete()
+    return deleted
