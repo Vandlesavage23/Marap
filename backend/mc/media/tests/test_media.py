@@ -59,7 +59,9 @@ def test_presigned_post_enforces_size_range_and_type(s3):
     assert ["content-length-range", 1, 10 * 1024 * 1024] in conds
     assert {"Content-Type": "image/jpeg"} in conds
     key = MediaObject.objects.get().upload_key
-    assert key.startswith("uploads/") and str(MediaObject.objects.get().owner_id) in key
+    assert (
+        key.startswith("uploads/") and str(MediaObject.objects.get().owner_id) not in key
+    )  # no account id in keys
 
 
 def test_upload_rate_limited(settings):

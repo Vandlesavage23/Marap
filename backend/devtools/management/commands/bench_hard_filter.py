@@ -33,7 +33,7 @@ class Command(BaseCommand):
             raise CommandError("Refusing to run outside local/dev settings.")
         if Account.objects.exists():
             raise CommandError("Database is not empty; use a scratch database.")
-        rng = random.Random(7)  # noqa: S311
+        rng = random.Random(7)
         n = opts["profiles"]
         today = timezone.localdate()
         now = timezone.now()
@@ -89,10 +89,10 @@ class Command(BaseCommand):
                 from dataclasses import replace
 
                 ctx = replace(ctx, lat=0.35, lng=32.58)
-            qs = search.candidate_queryset(ctx)
+            base = search.candidate_queryset(ctx)
             from django.db.models import F
 
-            qs = qs.order_by(F("account__last_seen_at").desc(nulls_last=True), "id").values(
+            qs = base.order_by(F("account__last_seen_at").desc(nulls_last=True), "id").values(
                 "id", "account_id", "district", "created_at"
             )[:500]
             sql, params = qs.query.sql_with_params()

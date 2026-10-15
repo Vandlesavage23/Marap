@@ -38,7 +38,7 @@ def ready_media(owner, moderation="approved", face_count=1):
     mid = uuid.uuid4()
     return MediaObject.objects.create(
         id=mid, owner=owner, purpose="profile_photo", declared_mime="image/jpeg", declared_bytes=1000,
-        upload_key=f"uploads/{owner.id}/{mid}", storage_key=f"media/{owner.id}/{mid}.webp",
+        upload_key=f"uploads/{mid}", storage_key=f"media/{mid}.webp",
         mime="image/webp", bytes=900, width=800, height=1000, status="ready",
         moderation=moderation, face_count=face_count,
     )  # fmt: skip

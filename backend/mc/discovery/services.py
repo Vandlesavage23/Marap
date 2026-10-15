@@ -21,7 +21,7 @@ from mc.common.errors import (
     ValidationFailed,
 )
 from mc.common.redis import get_redis
-from mc.common.timeutil import KAMPALA, kampala_date
+from mc.common.timeutil import start_of_kampala_day
 from mc.entitlements import selectors as entitlement_selectors
 from mc.interests import selectors as interest_selectors
 from mc.profiles import search as profile_search
@@ -45,11 +45,6 @@ class RankedEntry:
     score: float
     why: list[str]
     discuss: list[str]
-
-
-def start_of_kampala_day(now: datetime) -> datetime:
-    d = kampala_date(now)
-    return datetime(d.year, d.month, d.day, tzinfo=KAMPALA)
 
 
 def exposure_today(candidate_ids: list[uuid.UUID], now: datetime) -> dict[uuid.UUID, int]:
@@ -287,3 +282,21 @@ def record_interest_action(*, viewer_id: uuid.UUID, candidate_id: uuid.UUID) -> 
     if imp:
         imp.action = Impression.Action.INTEREST
         imp.save(update_fields=["action", "updated_at"])
+
+
+def are_mutually_eligible(a: "Account", b: "Account") -> bool:
+    """Both live profiles pass each other's hard filters (age ranges, married opt-in, diaspora, children,
+    distance) and neither violates the other's deal-breakers. Blocks/pending interests are checked by callers."""
+    ctx_a, ctx_b = profile_selectors.viewer_context_for(a), profile_selectors.viewer_context_for(b)
+    if ctx_a is None or ctx_b is None:
+        return False
+    if not profile_search.candidate_queryset(ctx_a).filter(account_id=b.id).exists():
+        return False
+    if not profile_search.candidate_queryset(ctx_b).filter(account_id=a.id).exists():
+        return False
+    answers = questionnaire_selectors.answers_for_scoring([a.id, b.id])
+    mine, theirs = answers.get(a.id, {}), answers.get(b.id, {})
+    thr = settings.DEALBREAKER_MIN_SIMILARITY
+    return scoring.dealbreaker_ok(mine, theirs, min_similarity=thr) and scoring.dealbreaker_ok(
+        theirs, mine, min_similarity=thr
+    )

@@ -34,3 +34,5 @@ MC_JWT_PRIVATE_KEY_PEM, MC_JWT_PUBLIC_KEY_PEM = dev_ed25519_pems(SECRET_KEY)
 AWS_ACCESS_KEY_ID = "testing"
 AWS_SECRET_ACCESS_KEY = "testing"
 AWS_S3_ENDPOINT_URL = ""
+
+INSTALLED_APPS += ["devtools"]  # dev-only management commands (seed_demo, bench_hard_filter)

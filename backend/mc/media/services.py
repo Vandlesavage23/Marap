@@ -57,7 +57,7 @@ def create_upload(
         declared_mime=mime,
         declared_bytes=size,
         declared_sha256=sha256.lower(),
-        upload_key=f"uploads/{owner.id}/{media_id}",
+        upload_key=f"uploads/{media_id}",
     )
     post = storage.presign_post(
         key=media.upload_key, content_type=mime, max_bytes=_max_bytes(purpose)
@@ -135,7 +135,7 @@ def process_media(*, media_id: uuid.UUID) -> MediaObject | None:
                     media.duration_ms = audio.duration_ms
             except processing.Rejected as exc:
                 return _reject(media, exc.reason)
-        media.storage_key = f"media/{media.owner_id}/{media.id}.{ext}"
+        media.storage_key = f"media/{media.id}.{ext}"
         storage.put_bytes(media.storage_key, data, mime)
         storage.delete(media.upload_key)
         media.mime, media.bytes = mime, len(data)

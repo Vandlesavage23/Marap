@@ -143,7 +143,7 @@ def create_member(
         mid = uuid.uuid4()
         media = MediaObject.objects.create(
             id=mid, owner=account, purpose="profile_photo", declared_mime="image/jpeg", declared_bytes=1000,
-            upload_key=f"uploads/{account.id}/{mid}", storage_key=f"media/{account.id}/{mid}.webp",
+            upload_key=f"uploads/{mid}", storage_key=f"media/{mid}.webp",
             mime="image/webp", bytes=900, width=800, height=1000, status="ready", moderation="approved", face_count=1,
         )  # fmt: skip
         Photo.objects.create(

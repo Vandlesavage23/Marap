@@ -214,3 +214,8 @@ INSTALLED_APPS += ["mc.media"]
 CELERY_TASK_ROUTES = {"mc.media.tasks.*": {"queue": "media"}}
 INSTALLED_APPS += ["mc.safety", "mc.interests"]
 INSTALLED_APPS += ["mc.discovery"]
+INSTALLED_APPS += ["mc.matches"]
+CELERY_BEAT_SCHEDULE["interests-expire"] = {
+    "task": "mc.interests.tasks.expire_interests",
+    "schedule": 900.0,
+}

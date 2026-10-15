@@ -1,5 +1,5 @@
 import uuid
-from datetime import date
+from datetime import date, timedelta
 
 from django.utils import timezone
 
@@ -117,3 +117,49 @@ def live_profile_attributes() -> list[dict[str, object]]:
             "account_id", "gender", "birth_date", "district"
         )
     ]
+
+
+def profile_id_for_account(account_id: uuid.UUID) -> uuid.UUID | None:
+    return Profile.objects.filter(account_id=account_id).values_list("id", flat=True).first()
+
+
+def member_summaries(account_ids, viewer) -> dict[uuid.UUID, dict[str, object]]:  # type: ignore[no-untyped-def]
+    """`{account_id: summary}` for interest lists: public handle = profile id; first approved photo (signed URL
+    only if the media policy lets `viewer` see it)."""
+    from django.conf import settings
+    from django.utils import timezone
+
+    from mc.media import selectors as media_selectors
+
+    from .constants import MARITAL_LABELS
+
+    out: dict[uuid.UUID, dict[str, object]] = {}
+    for p in Profile.objects.filter(account_id__in=list(account_ids)):
+        first = approved_photos(p).first()
+        url = media_selectors.signed_url(first.media, viewer) if first else None
+        out[p.account_id] = {
+            "id": str(p.id),
+            "display_name": p.display_name,
+            "age": age_of(p),
+            "district": p.district,
+            "verified": {"age": True, "identity": True, "photos": first is not None},
+            "marital_status_label": MARITAL_LABELS[p.marital_status]
+            if p.marital_status.startswith("married")
+            else None,
+            "primary_photo": (
+                {
+                    "url": url,
+                    "expires_at": timezone.now()
+                    + timedelta(seconds=settings.MEDIA_SIGNED_URL_SECONDS),
+                }
+                if url
+                else None
+            ),
+        }
+    return out
+
+
+def is_approved_photo_media(media) -> bool:  # type: ignore[no-untyped-def]
+    from .models import Photo
+
+    return Photo.objects.filter(media=media, moderation_status=Photo.Moderation.APPROVED).exists()
