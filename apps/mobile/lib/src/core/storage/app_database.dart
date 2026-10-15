@@ -15,6 +15,8 @@ class OutboxMessages extends Table {
   TextColumn get matchId => text()();
   TextColumn get body => text()();
   IntColumn get attempts => integer().withDefault(const Constant(0))();
+  // Set when the server permanently refused the message (shown as "not sent").
+  TextColumn get failedCode => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();
 
   @override

@@ -34,6 +34,12 @@ class $OutboxMessagesTable extends OutboxMessages
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _failedCodeMeta =
+      const VerificationMeta('failedCode');
+  @override
+  late final GeneratedColumn<String> failedCode = GeneratedColumn<String>(
+      'failed_code', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -42,7 +48,7 @@ class $OutboxMessagesTable extends OutboxMessages
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [clientMsgId, matchId, body, attempts, createdAt];
+      [clientMsgId, matchId, body, attempts, failedCode, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -77,6 +83,12 @@ class $OutboxMessagesTable extends OutboxMessages
       context.handle(_attemptsMeta,
           attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta));
     }
+    if (data.containsKey('failed_code')) {
+      context.handle(
+          _failedCodeMeta,
+          failedCode.isAcceptableOrUnknown(
+              data['failed_code']!, _failedCodeMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -100,6 +112,8 @@ class $OutboxMessagesTable extends OutboxMessages
           .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
       attempts: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}attempts'])!,
+      failedCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}failed_code']),
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -116,12 +130,14 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
   final String matchId;
   final String body;
   final int attempts;
+  final String? failedCode;
   final DateTime createdAt;
   const OutboxMessage(
       {required this.clientMsgId,
       required this.matchId,
       required this.body,
       required this.attempts,
+      this.failedCode,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -130,6 +146,9 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
     map['match_id'] = Variable<String>(matchId);
     map['body'] = Variable<String>(body);
     map['attempts'] = Variable<int>(attempts);
+    if (!nullToAbsent || failedCode != null) {
+      map['failed_code'] = Variable<String>(failedCode);
+    }
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -140,6 +159,9 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       matchId: Value(matchId),
       body: Value(body),
       attempts: Value(attempts),
+      failedCode: failedCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(failedCode),
       createdAt: Value(createdAt),
     );
   }
@@ -152,6 +174,7 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       matchId: serializer.fromJson<String>(json['matchId']),
       body: serializer.fromJson<String>(json['body']),
       attempts: serializer.fromJson<int>(json['attempts']),
+      failedCode: serializer.fromJson<String?>(json['failedCode']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -163,6 +186,7 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       'matchId': serializer.toJson<String>(matchId),
       'body': serializer.toJson<String>(body),
       'attempts': serializer.toJson<int>(attempts),
+      'failedCode': serializer.toJson<String?>(failedCode),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -172,12 +196,14 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
           String? matchId,
           String? body,
           int? attempts,
+          Value<String?> failedCode = const Value.absent(),
           DateTime? createdAt}) =>
       OutboxMessage(
         clientMsgId: clientMsgId ?? this.clientMsgId,
         matchId: matchId ?? this.matchId,
         body: body ?? this.body,
         attempts: attempts ?? this.attempts,
+        failedCode: failedCode.present ? failedCode.value : this.failedCode,
         createdAt: createdAt ?? this.createdAt,
       );
   OutboxMessage copyWithCompanion(OutboxMessagesCompanion data) {
@@ -187,6 +213,8 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       matchId: data.matchId.present ? data.matchId.value : this.matchId,
       body: data.body.present ? data.body.value : this.body,
       attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      failedCode:
+          data.failedCode.present ? data.failedCode.value : this.failedCode,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -198,6 +226,7 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
           ..write('matchId: $matchId, ')
           ..write('body: $body, ')
           ..write('attempts: $attempts, ')
+          ..write('failedCode: $failedCode, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -205,7 +234,7 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
 
   @override
   int get hashCode =>
-      Object.hash(clientMsgId, matchId, body, attempts, createdAt);
+      Object.hash(clientMsgId, matchId, body, attempts, failedCode, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -214,6 +243,7 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
           other.matchId == this.matchId &&
           other.body == this.body &&
           other.attempts == this.attempts &&
+          other.failedCode == this.failedCode &&
           other.createdAt == this.createdAt);
 }
 
@@ -222,6 +252,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
   final Value<String> matchId;
   final Value<String> body;
   final Value<int> attempts;
+  final Value<String?> failedCode;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const OutboxMessagesCompanion({
@@ -229,6 +260,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     this.matchId = const Value.absent(),
     this.body = const Value.absent(),
     this.attempts = const Value.absent(),
+    this.failedCode = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -237,6 +269,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     required String matchId,
     required String body,
     this.attempts = const Value.absent(),
+    this.failedCode = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   })  : clientMsgId = Value(clientMsgId),
@@ -248,6 +281,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     Expression<String>? matchId,
     Expression<String>? body,
     Expression<int>? attempts,
+    Expression<String>? failedCode,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -256,6 +290,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
       if (matchId != null) 'match_id': matchId,
       if (body != null) 'body': body,
       if (attempts != null) 'attempts': attempts,
+      if (failedCode != null) 'failed_code': failedCode,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -266,6 +301,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
       Value<String>? matchId,
       Value<String>? body,
       Value<int>? attempts,
+      Value<String?>? failedCode,
       Value<DateTime>? createdAt,
       Value<int>? rowid}) {
     return OutboxMessagesCompanion(
@@ -273,6 +309,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
       matchId: matchId ?? this.matchId,
       body: body ?? this.body,
       attempts: attempts ?? this.attempts,
+      failedCode: failedCode ?? this.failedCode,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -293,6 +330,9 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     if (attempts.present) {
       map['attempts'] = Variable<int>(attempts.value);
     }
+    if (failedCode.present) {
+      map['failed_code'] = Variable<String>(failedCode.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -309,6 +349,7 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
           ..write('matchId: $matchId, ')
           ..write('body: $body, ')
           ..write('attempts: $attempts, ')
+          ..write('failedCode: $failedCode, ')
           ..write('createdAt: $createdAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -333,6 +374,7 @@ typedef $$OutboxMessagesTableCreateCompanionBuilder = OutboxMessagesCompanion
   required String matchId,
   required String body,
   Value<int> attempts,
+  Value<String?> failedCode,
   required DateTime createdAt,
   Value<int> rowid,
 });
@@ -342,6 +384,7 @@ typedef $$OutboxMessagesTableUpdateCompanionBuilder = OutboxMessagesCompanion
   Value<String> matchId,
   Value<String> body,
   Value<int> attempts,
+  Value<String?> failedCode,
   Value<DateTime> createdAt,
   Value<int> rowid,
 });
@@ -366,6 +409,9 @@ class $$OutboxMessagesTableFilterComposer
 
   ColumnFilters<int> get attempts => $composableBuilder(
       column: $table.attempts, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get failedCode => $composableBuilder(
+      column: $table.failedCode, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -392,6 +438,9 @@ class $$OutboxMessagesTableOrderingComposer
   ColumnOrderings<int> get attempts => $composableBuilder(
       column: $table.attempts, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get failedCode => $composableBuilder(
+      column: $table.failedCode, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
@@ -416,6 +465,9 @@ class $$OutboxMessagesTableAnnotationComposer
 
   GeneratedColumn<int> get attempts =>
       $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<String> get failedCode => $composableBuilder(
+      column: $table.failedCode, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -452,6 +504,7 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             Value<String> matchId = const Value.absent(),
             Value<String> body = const Value.absent(),
             Value<int> attempts = const Value.absent(),
+            Value<String?> failedCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -460,6 +513,7 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             matchId: matchId,
             body: body,
             attempts: attempts,
+            failedCode: failedCode,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -468,6 +522,7 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             required String matchId,
             required String body,
             Value<int> attempts = const Value.absent(),
+            Value<String?> failedCode = const Value.absent(),
             required DateTime createdAt,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -476,6 +531,7 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             matchId: matchId,
             body: body,
             attempts: attempts,
+            failedCode: failedCode,
             createdAt: createdAt,
             rowid: rowid,
           ),
