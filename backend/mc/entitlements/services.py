@@ -138,3 +138,12 @@ def revoke(
                 metadata={"entitlement_id": str(entitlement.id)},
             )
             events.publish(EntitlementChanged(account_id=entitlement.account_id, reason="revoked"))
+
+
+def revoke_for_purchase(*, purchase_id: uuid.UUID, reason: str) -> int:
+    """Refund/revoke: end every window that came from this purchase (audited, never deleted)."""
+    n = 0
+    for ent in Entitlement.objects.filter(purchase_id=purchase_id, revoked_at__isnull=True):
+        revoke(entitlement=ent, reason=reason, actor_type="system", actor_id=None)
+        n += 1
+    return n

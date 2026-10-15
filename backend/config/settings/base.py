@@ -230,3 +230,12 @@ CELERY_BEAT_SCHEDULE["safety-lift-suspensions"] = {
     "task": "mc.safety.tasks.lift_expired_suspensions",
     "schedule": 600.0,
 }
+INSTALLED_APPS += ["mc.billing"]
+CELERY_BEAT_SCHEDULE["billing-expire-purchases"] = {
+    "task": "mc.billing.tasks.expire_purchases",
+    "schedule": 3600.0,
+}
+CELERY_BEAT_SCHEDULE["billing-retry-failed"] = {
+    "task": "mc.billing.tasks.retry_failed",
+    "schedule": 600.0,
+}
