@@ -1,20 +1,21 @@
 # Build status
 
-Backend: complete for M1–M9 + admin portal, support tools, web checkout pages, seed data, scenarios 01–07, 12–14.
-Mobile: scaffold + core layer + onboarding + chat outbox core. Remaining screens listed below.
+Backend: complete for M1–M9, admin portal, support tools, web checkout, beta tooling, store-review account, scenarios 01–07 and 12–14.
+Mobile: all feature screens built (onboarding, verification, profile builder, questionnaire, discovery, interests, matches, chat with
+outbox/photos/voice, membership + IAP, safety, settings, beta feedback) behind fakes for hardware/vendor SDKs.
+Infra and release material: Terraform + deploy workflows written; store package, evaluations, spike, pen-test scope, accessibility
+checklist, game-day plan and runbooks written as documents.
 
-## Verified (automated, run in the authoring sandbox)
-* Backend: `uv run pytest` (≈700 tests incl. scenarios), ruff, mypy, lint-imports, makemigrations --check, data-inventory check.
-* Mobile: `flutter analyze` clean; `flutter test` (interceptors, goldens, onboarding flow, outbox) green.
+## Verified (automated, authoring sandbox)
+* Backend: `uv run pytest` 713 passed / 4 skipped (scenarios 08–11, Phase 5), ruff, mypy, lint-imports, makemigrations --check, data-inventory.
+* Mobile: `flutter analyze` clean; `flutter test` 384 passed (interceptors, goldens, onboarding, profile track, social track, membership track).
+* Terraform: `terraform fmt -check` and an env-parity script only.
 
-## NOT verified / not done
-* Real third-party adapters were written from public docs and never run against vendors: Smile ID, FCM, Apple, Google Play,
-  Flutterwave, OIDC SSO, SES, Rekognition, ClamAV. Fakes are used everywhere in tests.
-* `infra/docker-compose.yml`, `backend/Dockerfile`, GitHub workflows (backend-ci, security, mobile-ci) were never executed.
-* k6 load test (`loadtests/ws_chat.js`) never run; no Android SDK here so `flutter build apk` and iOS builds untested.
-* Not started: Terraform / cloud environments (MC-020, MC-124), Smile ID Flutter spike (MC-030), moderation vendor evaluation
-  (MC-061), accessibility audit (MC-122), pen test (MC-123), store package (MC-125), beta tooling (MC-127), design polish (MC-128),
-  game-day for runbooks.
-* Mobile screens not built: verification (MC-040), profile builder (MC-052), questionnaire (MC-053), discovery (MC-059),
-  interests (MC-069), matches list (MC-070), chat UI (MC-080 UI) and media (MC-081), safety (MC-089), membership/IAP (MC-103/104).
-* Nothing has been pushed: the repo has no remote; all work is local commits on `main`.
+## NOT verified — needs a human, a device, a vendor, or cloud access
+* **Vendor adapters** written from public docs, never run against the real service: Smile ID, FCM, Apple, Google Play, Flutterwave, OIDC SSO, SES, Rekognition, ClamAV.
+* **Terraform / deploy workflows**: never planned or applied (registry blocked here; provider args from memory). No restore drill. See infra/terraform/README.md.
+* **Docker compose, Dockerfile, GitHub workflows, k6 load test**: never executed.
+* **Mobile on a device**: no Android SDK here, so no APK build, no iOS build, no iOS schemes/icons per flavor. Camera, image picker, mic, audio, real WebSocket, store purchases, FLAG_SECURE (MainActivity.kt) are untested.
+* **Smile ID capture** is a stub (`UnavailableIdentityCaptureLauncher`); the real SDK integration is the MC-030 spike (docs/spikes/smile-id-flutter.md, not executed).
+* **Documents that need human execution/sign-off, not code**: moderation vendor benchmark (MC-061), pen test (MC-123), accessibility audit (MC-122), store submission (MC-125), game-day (MC-126), design polish against approved designs (MC-128), copy review of safety-centre text.
+* Placeholders: product prices, support mailbox, safety-centre copy, legal text versions.

@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "sections": [
+    {
+      "id": "meeting",
+      "title": "Meeting someone for the first time",
+      "summary": "Take your time. A good match will understand.",
+      "points": [
+        "Talk in the app for a while before you share your phone number or meet.",
+        "Meet in a public place during the day and tell a family member or friend where you are going.",
+        "Arrange your own transport so you can leave when you want to.",
+        "You never have to meet, share a number or send a photo. You can say no at any time."
+      ]
+    },
+    {
+      "id": "money",
+      "title": "Requests for money",
+      "summary": "Nobody who is serious about marriage needs your money before you meet.",
+      "points": [
+        "Never send money, airtime or mobile money to someone you haven't met, whatever the reason.",
+        "Be careful if someone asks for help with fees, travel, medical bills, a parcel or an investment.",
+        "Report anyone who asks you for money. You don't have to prove anything."
+      ]
+    },
+    {
+      "id": "scams",
+      "title": "Spotting fake profiles and scams",
+      "summary": "Some people are not who they say they are.",
+      "points": [
+        "Be careful if a profile pushes you to leave the app quickly or to share private details.",
+        "Be careful if their story keeps changing or they avoid meeting in person.",
+        "Be careful if they say they love you very fast.",
+        "Report profiles that look fake, pretend to be someone else, or hide that they are married."
+      ]
+    },
+    {
+      "id": "privacy",
+      "title": "Protecting your privacy",
+      "summary": "Share only what you are comfortable with, when you are ready.",
+      "points": [
+        "Don't share your home address, workplace, ID numbers or bank details.",
+        "Never share a one-time code from your phone with anyone.",
+        "You can block anyone at any time. They are not told."
+      ]
+    },
+    {
+      "id": "reporting",
+      "title": "Blocking and reporting",
+      "summary": "Both are in the app, on every profile and conversation.",
+      "points": [
+        "Blocking is immediate and private. You and the other person will no longer see or contact each other.",
+        "Reporting sends the details to our safety team. You can block and report at the same time.",
+        "If your account is restricted, you can appeal the decision from the safety screen."
+      ]
+    },
+    {
+      "id": "urgent",
+      "title": "If you are in danger",
+      "summary": "Your safety comes first.",
+      "points": [
+        "If you are in immediate danger, call the Uganda Police emergency number 999 or 112.",
+        "Move to a safe place and contact someone you trust.",
+        "Once you are safe, report the person in the app."
+      ]
+    }
+  ]
+}

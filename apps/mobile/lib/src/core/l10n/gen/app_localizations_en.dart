@@ -2007,4 +2007,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get questConsentSkip => 'Not now';
+
+  @override
+  String get homeDiscover => 'Discover';
+
+  @override
+  String get homeInterests => 'Interests';
+
+  @override
+  String get homeMatches => 'Matches';
+
+  @override
+  String get homeSettings => 'Settings';
+
+  @override
+  String get homeWelcome => 'Welcome back';
+
+  @override
+  String get homeIntro => 'Pick up where you left off.';
 }

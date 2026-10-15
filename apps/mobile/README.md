@@ -15,3 +15,15 @@ fvm flutter run --flavor dev -t lib/main_dev.dart --dart-define-from-file=env/de
 * `env/*.json` hold PUBLIC values only. No secrets in the app (CLAUDE.md rule 2).
 * Goldens were generated on Linux; regenerate with `flutter test --update-goldens` on the CI image only.
 * Not yet verified here: `flutter build apk` (no Android SDK in the authoring sandbox), iOS builds, app icons per flavor.
+
+## Identity capture (MC-040) integration point
+
+The Smile ID Flutter SDK is not linked yet. `IdentityCaptureLauncher`
+(`lib/src/features/verification/data/identity_capture.dart`) is the single seam:
+the default `UnavailableIdentityCaptureLauncher` shows "not available in this
+version" and never pretends to verify. To integrate, implement the interface
+with the vendor plugin (launch it with `VerificationSession.sdkParams` exactly as
+the server signed them), override `identityCaptureLauncherProvider` in
+`bootstrap`, and set `FLAG_SECURE` on the SDK's own activity too (`ScreenSecurity`
+only covers the Flutter activity). `FakeIdentityCaptureLauncher` is for dev
+flavors/tests only.

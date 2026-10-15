@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/router/feature_routes.dart';
+import 'package:marriage_connect/src/features/home/home_screen.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
 import 'package:marriage_connect/src/features/me/data/me_repository.dart';
 import 'package:marriage_connect/src/features/me/presentation/boot_screen.dart';
@@ -96,7 +97,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/home',
-        builder: (_, __) => const Scaffold(body: Center(child: Text('Home'))),
+        builder: (_, __) => const HomeScreen(),
       ),
     ],
   );

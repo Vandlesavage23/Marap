@@ -957,5 +957,11 @@
   "questConsentGenericTitle": "Share this? (optional)",
   "questConsentGenericBody": "This question is personal and optional. Your answer is stored encrypted, is never used to rank or recommend people, and is deleted if you withdraw consent in Settings.",
   "questConsentAgree": "I agree",
-  "questConsentSkip": "Not now"
+  "questConsentSkip": "Not now",
+  "homeDiscover": "Discover",
+  "homeInterests": "Interests",
+  "homeMatches": "Matches",
+  "homeSettings": "Settings",
+  "homeWelcome": "Welcome back",
+  "homeIntro": "Pick up where you left off."
 }

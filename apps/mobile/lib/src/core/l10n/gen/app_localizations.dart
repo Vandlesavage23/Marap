@@ -3621,6 +3621,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get questConsentSkip;
+
+  /// No description provided for @homeDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get homeDiscover;
+
+  /// No description provided for @homeInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get homeInterests;
+
+  /// No description provided for @homeMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get homeMatches;
+
+  /// No description provided for @homeSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get homeSettings;
+
+  /// No description provided for @homeWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome back'**
+  String get homeWelcome;
+
+  /// No description provided for @homeIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up where you left off.'**
+  String get homeIntro;
 }
 
 class _AppLocalizationsDelegate
