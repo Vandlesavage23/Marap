@@ -1,0 +1,1 @@
+{% extends "webcheckout/base.html" %}{% block body %}<h2>Enter your code</h2><p>If that number has an account, a 6-digit code is on its way.</p><form method="post">{% csrf_token %}<input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required autofocus><button>Continue</button></form>{% endblock %}

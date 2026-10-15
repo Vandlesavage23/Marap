@@ -1,2 +1,2 @@
-# Web checkout routes are added by the webcheckout module (MC-100).
-urlpatterns: list = []
+# Web checkout routes (MC-100).
+from mc.webcheckout.urls import urlpatterns  # noqa: F401

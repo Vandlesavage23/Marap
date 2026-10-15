@@ -1,0 +1,1 @@
+{% extends "webcheckout/base.html" %}{% block body %}<h2>Sign in to buy membership</h2><form method="post">{% csrf_token %}<label>Your phone number<input name="phone" type="tel" autocomplete="tel" placeholder="0772 000 000" required></label><button>Send me a code</button></form><p>Use the number on your Marriage Connect account.</p>{% endblock %}

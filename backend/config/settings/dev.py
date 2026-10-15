@@ -7,3 +7,4 @@ SECURE_SSL_REDIRECT = False  # TLS terminates at the ALB; health probes use plai
 SECURE_HSTS_SECONDS = 31536000
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+INSTALLED_APPS += ["devtools"]  # dev-only management commands (seed_demo, bench_hard_filter)

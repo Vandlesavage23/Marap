@@ -1,0 +1,4 @@
+{% extends "webcheckout/base.html" %}{% block body %}
+{% if state == "pending" %}<meta http-equiv="refresh" content="5"><h2>Waiting for your payment</h2><p>Approve the prompt on your phone. This page updates by itself.</p>
+{% elif state == "paid" %}<h2>Payment received</h2><div class="card">Receipt<br>{{ p.product.duration_days }} days · {{ p.amount_minor }} {{ p.currency }}<br>Reference {{ p.id }}<br>Membership until {{ p.period_end|date:"j M Y" }}</div><p>You can go back to the app.</p>
+{% else %}<h2>Payment didn't go through</h2><p>You have not been charged for a plan that wasn't delivered. <a href="/">Try again</a>.</p>{% endif %}{% endblock %}

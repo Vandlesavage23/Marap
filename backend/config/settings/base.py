@@ -301,3 +301,4 @@ ADMIN_IP_ALLOWLIST = [
 ]  # CIDRs; empty = any
 STAFF_COOKIE = "mc_admin"
 INSTALLED_APPS += ["mc.adminportal"]
+INSTALLED_APPS += ["mc.webcheckout"]

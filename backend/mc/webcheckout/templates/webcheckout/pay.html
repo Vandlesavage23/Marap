@@ -1,0 +1,5 @@
+{% extends "webcheckout/base.html" %}{% block body %}<h2>{{ product.duration_days }} days · {{ product.price_minor }} {{ product.currency }}</h2>
+<form method="post">{% csrf_token %}<input type="hidden" name="nonce" value="{{ nonce }}">
+<label>Pay with<select name="method"><option value="mobile_money">Mobile money</option><option value="card">Card</option></select></label>
+<label>Network<select name="network"><option value="mtn">MTN</option><option value="airtel">Airtel</option></select></label>
+<label>Mobile money number<input name="phone" type="tel" placeholder="0772 000 000"></label><button>Pay {{ product.price_minor }} {{ product.currency }}</button></form><p><a href="/">Back</a></p>{% endblock %}

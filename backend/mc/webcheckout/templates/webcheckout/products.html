@@ -1,0 +1,3 @@
+{% extends "webcheckout/base.html" %}{% block body %}<h2>Choose a plan</h2>{% if ends %}<p>Your membership runs until {{ ends|date:"j M Y" }}. A new plan adds time after that.</p>{% endif %}
+{% for p in items %}<div class="card"><strong>{{ p.duration_days }} days</strong> · {{ p.price_minor }} {{ p.currency }}<br><small>One payment. It does not renew by itself.</small><a href="/pay/{{ p.code }}"><button type="button">Choose</button></a></div>{% empty %}<p>Web payments aren't available right now.</p>{% endfor %}
+<form method="post" action="/logout">{% csrf_token %}<button>Sign out</button></form>{% endblock %}
