@@ -17,3 +17,5 @@ profiles.Profile.birth_date,profiles.Profile,age display and filtering (age show
 profiles.Profile.(religion/religion_practice),profiles.Profile,optional special data (field-encrypted; never used in ranking),explicit consent (special_religion),deleted on consent withdrawal or account deletion,none,af-south-1 Postgres
 profiles.Profile.(married_declaration_at/show_married_profiles),profiles.Profile,married-profile rules (BR-MAR-01),explicit consent (married_visibility),deleted with account,none,af-south-1 Postgres
 profiles.Description.*,profiles.Description,self-description shown to recipients of interest,contract,deleted with account (snapshots deleted per interest rules),none,af-south-1 Postgres
+questionnaire.Answer.(value/importance/is_dealbreaker/question_version),questionnaire.Answer,compatibility scoring and hard filters,contract,deleted with account,none,af-south-1 Postgres
+questionnaire.Answer.value_enc,questionnaire.Answer,optional special answers (field-encrypted; money attitudes never ranked),explicit consent (special_religion/special_finance),deleted on consent withdrawal or account deletion,none,af-south-1 Postgres

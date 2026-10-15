@@ -9,6 +9,7 @@ urlpatterns = [
     path("api/v1/", include("mc.verification.api.urls")),
     path("api/v1/", include("mc.entitlements.api.urls")),
     path("api/v1/", include("mc.profiles.api.urls")),
+    path("api/v1/", include("mc.questionnaire.api.urls")),
     # Unversioned probes for load balancers.
     path("", include((common_urls.probe_urlpatterns, "probes"))),
 ]

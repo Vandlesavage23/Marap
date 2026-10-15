@@ -1,0 +1,1339 @@
+{
+ "ruleset": "questions_v1_placeholder",
+ "questions": [
+  {
+   "key": "marriage_timeline_ready",
+   "dimension": "intent",
+   "type": "single",
+   "prompt": "When would you like to be married?",
+   "options": [
+    {
+     "value": "within_1y",
+     "label": "Within a year"
+    },
+    {
+     "value": "1_2y",
+     "label": "In 1–2 years"
+    },
+    {
+     "value": "2_4y",
+     "label": "In 2–4 years"
+    },
+    {
+     "value": "open",
+     "label": "No fixed timeline"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "within_1y": {
+      "within_1y": 1.0,
+      "1_2y": 0.667,
+      "2_4y": 0.333,
+      "open": 0.0
+     },
+     "1_2y": {
+      "within_1y": 0.667,
+      "1_2y": 1.0,
+      "2_4y": 0.667,
+      "open": 0.333
+     },
+     "2_4y": {
+      "within_1y": 0.333,
+      "1_2y": 0.667,
+      "2_4y": 1.0,
+      "open": 0.667
+     },
+     "open": {
+      "within_1y": 0.0,
+      "1_2y": 0.333,
+      "2_4y": 0.667,
+      "open": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 1,
+   "version": 1
+  },
+  {
+   "key": "marriage_seriousness",
+   "dimension": "intent",
+   "type": "scale",
+   "prompt": "How ready do you feel to commit to marriage?",
+   "options": {
+    "min": 1,
+    "max": 5,
+    "min_label": "Still exploring",
+    "max_label": "Fully ready"
+   },
+   "scoring": {
+    "kind": "scale",
+    "min": 1,
+    "max": 5
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 2,
+   "version": 1
+  },
+  {
+   "key": "children_want",
+   "dimension": "children",
+   "type": "single",
+   "prompt": "Do you want children?",
+   "options": [
+    {
+     "value": "yes",
+     "label": "Yes"
+    },
+    {
+     "value": "no",
+     "label": "No"
+    },
+    {
+     "value": "unsure",
+     "label": "Not sure yet"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "yes": {
+      "yes": 1,
+      "no": 0,
+      "unsure": 0.5
+     },
+     "no": {
+      "yes": 0,
+      "no": 1,
+      "unsure": 0.5
+     },
+     "unsure": {
+      "yes": 0.5,
+      "no": 0.5,
+      "unsure": 1
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 3,
+   "version": 1
+  },
+  {
+   "key": "children_number",
+   "dimension": "children",
+   "type": "single",
+   "prompt": "How many children would you like?",
+   "options": [
+    {
+     "value": "0",
+     "label": "None"
+    },
+    {
+     "value": "1_2",
+     "label": "1–2"
+    },
+    {
+     "value": "3_4",
+     "label": "3–4"
+    },
+    {
+     "value": "5_plus",
+     "label": "5 or more"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "0": {
+      "0": 1.0,
+      "1_2": 0.667,
+      "3_4": 0.333,
+      "5_plus": 0.0
+     },
+     "1_2": {
+      "0": 0.667,
+      "1_2": 1.0,
+      "3_4": 0.667,
+      "5_plus": 0.333
+     },
+     "3_4": {
+      "0": 0.333,
+      "1_2": 0.667,
+      "3_4": 1.0,
+      "5_plus": 0.667
+     },
+     "5_plus": {
+      "0": 0.0,
+      "1_2": 0.333,
+      "3_4": 0.667,
+      "5_plus": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 4,
+   "version": 1
+  },
+  {
+   "key": "children_existing_ok",
+   "dimension": "children",
+   "type": "single",
+   "prompt": "Are you comfortable with a partner who already has children?",
+   "options": [
+    {
+     "value": "yes",
+     "label": "Yes"
+    },
+    {
+     "value": "depends",
+     "label": "It depends"
+    },
+    {
+     "value": "no",
+     "label": "No"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "yes": {
+      "yes": 1,
+      "depends": 0.7,
+      "no": 0.2
+     },
+     "depends": {
+      "yes": 0.7,
+      "depends": 1,
+      "no": 0.4
+     },
+     "no": {
+      "yes": 0.2,
+      "depends": 0.4,
+      "no": 1
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 5,
+   "version": 1
+  },
+  {
+   "key": "marriage_form",
+   "dimension": "marriage_form",
+   "type": "single",
+   "prompt": "Which kind of marriage are you looking for?",
+   "options": [
+    {
+     "value": "monogamous",
+     "label": "One spouse only"
+    },
+    {
+     "value": "open_customary",
+     "label": "Open to customary or Islamic polygamy"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "monogamous": {
+      "monogamous": 1,
+      "open_customary": 0
+     },
+     "open_customary": {
+      "monogamous": 0,
+      "open_customary": 1
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 6,
+   "version": 1
+  },
+  {
+   "key": "marriage_ceremony",
+   "dimension": "marriage_form",
+   "type": "single",
+   "prompt": "Which ceremonies matter most to you?",
+   "options": [
+    {
+     "value": "customary",
+     "label": "Customary (introduction & traditions)"
+    },
+    {
+     "value": "religious",
+     "label": "Religious"
+    },
+    {
+     "value": "civil",
+     "label": "Civil"
+    },
+    {
+     "value": "all",
+     "label": "All of these"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "customary": {
+      "customary": 1,
+      "religious": 0.4,
+      "civil": 0.3,
+      "all": 0.7
+     },
+     "religious": {
+      "customary": 0.4,
+      "religious": 1,
+      "civil": 0.3,
+      "all": 0.7
+     },
+     "civil": {
+      "customary": 0.3,
+      "religious": 0.3,
+      "civil": 1,
+      "all": 0.7
+     },
+     "all": {
+      "customary": 0.7,
+      "religious": 0.7,
+      "civil": 0.7,
+      "all": 1
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 7,
+   "version": 1
+  },
+  {
+   "key": "family_involvement",
+   "dimension": "family",
+   "type": "single",
+   "prompt": "How involved should extended family be in your marriage decisions?",
+   "options": [
+    {
+     "value": "very",
+     "label": "Very involved"
+    },
+    {
+     "value": "some",
+     "label": "Somewhat"
+    },
+    {
+     "value": "little",
+     "label": "Mostly our own decision"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "very": {
+      "very": 1.0,
+      "some": 0.5,
+      "little": 0.0
+     },
+     "some": {
+      "very": 0.5,
+      "some": 1.0,
+      "little": 0.5
+     },
+     "little": {
+      "very": 0.0,
+      "some": 0.5,
+      "little": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 8,
+   "version": 1
+  },
+  {
+   "key": "live_with_family",
+   "dimension": "family",
+   "type": "single",
+   "prompt": "Would you be open to living near or with relatives after marriage?",
+   "options": [
+    {
+     "value": "yes",
+     "label": "Yes"
+    },
+    {
+     "value": "near",
+     "label": "Near, but separately"
+    },
+    {
+     "value": "no",
+     "label": "No"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "yes": {
+      "yes": 1.0,
+      "near": 0.5,
+      "no": 0.0
+     },
+     "near": {
+      "yes": 0.5,
+      "near": 1.0,
+      "no": 0.5
+     },
+     "no": {
+      "yes": 0.0,
+      "near": 0.5,
+      "no": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 9,
+   "version": 1
+  },
+  {
+   "key": "support_parents",
+   "dimension": "family",
+   "type": "single",
+   "prompt": "How do you see supporting parents and relatives?",
+   "options": [
+    {
+     "value": "major",
+     "label": "A major commitment"
+    },
+    {
+     "value": "some",
+     "label": "Some support"
+    },
+    {
+     "value": "minimal",
+     "label": "Minimal"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "major": {
+      "major": 1.0,
+      "some": 0.5,
+      "minimal": 0.0
+     },
+     "some": {
+      "major": 0.5,
+      "some": 1.0,
+      "minimal": 0.5
+     },
+     "minimal": {
+      "major": 0.0,
+      "some": 0.5,
+      "minimal": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 10,
+   "version": 1
+  },
+  {
+   "key": "household_roles",
+   "dimension": "roles",
+   "type": "single",
+   "prompt": "How do you see household responsibilities?",
+   "options": [
+    {
+     "value": "traditional",
+     "label": "Traditional roles"
+    },
+    {
+     "value": "shared",
+     "label": "Shared equally"
+    },
+    {
+     "value": "flexible",
+     "label": "Flexible, whatever works"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "traditional": {
+      "traditional": 1,
+      "shared": 0.2,
+      "flexible": 0.6
+     },
+     "shared": {
+      "traditional": 0.2,
+      "shared": 1,
+      "flexible": 0.7
+     },
+     "flexible": {
+      "traditional": 0.6,
+      "shared": 0.7,
+      "flexible": 1
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 11,
+   "version": 1
+  },
+  {
+   "key": "career_after_marriage",
+   "dimension": "roles",
+   "type": "single",
+   "prompt": "Should both partners keep working after marriage?",
+   "options": [
+    {
+     "value": "both",
+     "label": "Yes, both"
+    },
+    {
+     "value": "one",
+     "label": "One partner may stay home"
+    },
+    {
+     "value": "open",
+     "label": "Open to discuss"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "both": {
+      "both": 1,
+      "one": 0.2,
+      "open": 0.7
+     },
+     "one": {
+      "both": 0.2,
+      "one": 1,
+      "open": 0.7
+     },
+     "open": {
+      "both": 0.7,
+      "one": 0.7,
+      "open": 1
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 12,
+   "version": 1
+  },
+  {
+   "key": "conflict_style",
+   "dimension": "communication",
+   "type": "single",
+   "prompt": "When you disagree, you usually…",
+   "options": [
+    {
+     "value": "talk_now",
+     "label": "Talk it through right away"
+    },
+    {
+     "value": "cool_off",
+     "label": "Take time, then talk"
+    },
+    {
+     "value": "avoid",
+     "label": "Prefer to avoid conflict"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "talk_now": {
+      "talk_now": 1,
+      "cool_off": 0.7,
+      "avoid": 0.2
+     },
+     "cool_off": {
+      "talk_now": 0.7,
+      "cool_off": 1,
+      "avoid": 0.5
+     },
+     "avoid": {
+      "talk_now": 0.2,
+      "cool_off": 0.5,
+      "avoid": 1
+     }
+    }
+   },
+   "allow_dealbreaker": false,
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "scoring_allowed": true,
+   "position": 13,
+   "version": 1
+  },
+  {
+   "key": "communication_frequency",
+   "dimension": "communication",
+   "type": "scale",
+   "prompt": "How much daily contact feels right?",
+   "options": {
+    "min": 1,
+    "max": 5,
+    "min_label": "A little",
+    "max_label": "A lot"
+   },
+   "scoring": {
+    "kind": "scale",
+    "min": 1,
+    "max": 5
+   },
+   "allow_dealbreaker": false,
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "scoring_allowed": true,
+   "position": 14,
+   "version": 1
+  },
+  {
+   "key": "social_energy",
+   "dimension": "lifestyle",
+   "type": "scale",
+   "prompt": "How would you describe your social life?",
+   "options": {
+    "min": 1,
+    "max": 5,
+    "min_label": "Quiet and homely",
+    "max_label": "Very social"
+   },
+   "scoring": {
+    "kind": "scale",
+    "min": 1,
+    "max": 5
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 15,
+   "version": 1
+  },
+  {
+   "key": "alcohol",
+   "dimension": "lifestyle",
+   "type": "single",
+   "prompt": "Alcohol",
+   "options": [
+    {
+     "value": "never",
+     "label": "Never"
+    },
+    {
+     "value": "sometimes",
+     "label": "Sometimes"
+    },
+    {
+     "value": "regularly",
+     "label": "Regularly"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "never": {
+      "never": 1.0,
+      "sometimes": 0.5,
+      "regularly": 0.0
+     },
+     "sometimes": {
+      "never": 0.5,
+      "sometimes": 1.0,
+      "regularly": 0.5
+     },
+     "regularly": {
+      "never": 0.0,
+      "sometimes": 0.5,
+      "regularly": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 16,
+   "version": 1
+  },
+  {
+   "key": "smoking",
+   "dimension": "lifestyle",
+   "type": "single",
+   "prompt": "Smoking",
+   "options": [
+    {
+     "value": "never",
+     "label": "Never"
+    },
+    {
+     "value": "sometimes",
+     "label": "Sometimes"
+    },
+    {
+     "value": "regularly",
+     "label": "Regularly"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "never": {
+      "never": 1.0,
+      "sometimes": 0.5,
+      "regularly": 0.0
+     },
+     "sometimes": {
+      "never": 0.5,
+      "sometimes": 1.0,
+      "regularly": 0.5
+     },
+     "regularly": {
+      "never": 0.0,
+      "sometimes": 0.5,
+      "regularly": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 17,
+   "version": 1
+  },
+  {
+   "key": "free_time",
+   "dimension": "lifestyle",
+   "type": "multi",
+   "prompt": "How do you like to spend free time?",
+   "options": [
+    {
+     "value": "church_mosque",
+     "label": "Worship & community"
+    },
+    {
+     "value": "family",
+     "label": "Family time"
+    },
+    {
+     "value": "sports",
+     "label": "Sports & fitness"
+    },
+    {
+     "value": "reading",
+     "label": "Reading & learning"
+    },
+    {
+     "value": "music_arts",
+     "label": "Music & arts"
+    },
+    {
+     "value": "business",
+     "label": "Side business"
+    },
+    {
+     "value": "travel",
+     "label": "Travel"
+    },
+    {
+     "value": "outdoors",
+     "label": "Farming & outdoors"
+    }
+   ],
+   "scoring": {
+    "kind": "jaccard"
+   },
+   "allow_dealbreaker": false,
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "scoring_allowed": true,
+   "position": 18,
+   "version": 1
+  },
+  {
+   "key": "spending_style",
+   "dimension": "lifestyle",
+   "type": "single",
+   "prompt": "In daily life you are…",
+   "options": [
+    {
+     "value": "saver",
+     "label": "A careful saver"
+    },
+    {
+     "value": "balanced",
+     "label": "Balanced"
+    },
+    {
+     "value": "spender",
+     "label": "Enjoy spending"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "saver": {
+      "saver": 1.0,
+      "balanced": 0.5,
+      "spender": 0.0
+     },
+     "balanced": {
+      "saver": 0.5,
+      "balanced": 1.0,
+      "spender": 0.5
+     },
+     "spender": {
+      "saver": 0.0,
+      "balanced": 0.5,
+      "spender": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 19,
+   "version": 1
+  },
+  {
+   "key": "live_where",
+   "dimension": "location",
+   "type": "single",
+   "prompt": "Where would you like to build your home?",
+   "options": [
+    {
+     "value": "kampala",
+     "label": "Kampala / Wakiso"
+    },
+    {
+     "value": "other_city",
+     "label": "Another town"
+    },
+    {
+     "value": "rural",
+     "label": "Rural area"
+    },
+    {
+     "value": "abroad",
+     "label": "Abroad"
+    },
+    {
+     "value": "flexible",
+     "label": "Flexible"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "kampala": {
+      "kampala": 1.0,
+      "other_city": 0.2,
+      "rural": 0.2,
+      "abroad": 0.2,
+      "flexible": 0.6
+     },
+     "other_city": {
+      "kampala": 0.2,
+      "other_city": 1.0,
+      "rural": 0.2,
+      "abroad": 0.2,
+      "flexible": 0.6
+     },
+     "rural": {
+      "kampala": 0.2,
+      "other_city": 0.2,
+      "rural": 1.0,
+      "abroad": 0.2,
+      "flexible": 0.6
+     },
+     "abroad": {
+      "kampala": 0.2,
+      "other_city": 0.2,
+      "rural": 0.2,
+      "abroad": 1.0,
+      "flexible": 0.6
+     },
+     "flexible": {
+      "kampala": 0.6,
+      "other_city": 0.6,
+      "rural": 0.6,
+      "abroad": 0.6,
+      "flexible": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 20,
+   "version": 1
+  },
+  {
+   "key": "relocate",
+   "dimension": "location",
+   "type": "single",
+   "prompt": "Would you relocate for your marriage?",
+   "options": [
+    {
+     "value": "yes",
+     "label": "Yes"
+    },
+    {
+     "value": "maybe",
+     "label": "Maybe"
+    },
+    {
+     "value": "no",
+     "label": "No"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "yes": {
+      "yes": 1,
+      "maybe": 0.7,
+      "no": 0.3
+     },
+     "maybe": {
+      "yes": 0.7,
+      "maybe": 1,
+      "no": 0.5
+     },
+     "no": {
+      "yes": 0.3,
+      "maybe": 0.5,
+      "no": 1
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 21,
+   "version": 1
+  },
+  {
+   "key": "home_ownership_goal",
+   "dimension": "lifestyle",
+   "type": "single",
+   "prompt": "Before marriage, how important is having your own home or land?",
+   "options": [
+    {
+     "value": "essential",
+     "label": "Essential"
+    },
+    {
+     "value": "preferred",
+     "label": "Preferred"
+    },
+    {
+     "value": "flexible",
+     "label": "Not required"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "essential": {
+      "essential": 1.0,
+      "preferred": 0.5,
+      "flexible": 0.0
+     },
+     "preferred": {
+      "essential": 0.5,
+      "preferred": 1.0,
+      "flexible": 0.5
+     },
+     "flexible": {
+      "essential": 0.0,
+      "preferred": 0.5,
+      "flexible": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 22,
+   "version": 1
+  },
+  {
+   "key": "education_importance",
+   "dimension": "lifestyle",
+   "type": "single",
+   "prompt": "How important is a partner's level of education?",
+   "options": [
+    {
+     "value": "very",
+     "label": "Very"
+    },
+    {
+     "value": "somewhat",
+     "label": "Somewhat"
+    },
+    {
+     "value": "not",
+     "label": "Not important"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "very": {
+      "very": 1.0,
+      "somewhat": 0.5,
+      "not": 0.0
+     },
+     "somewhat": {
+      "very": 0.5,
+      "somewhat": 1.0,
+      "not": 0.5
+     },
+     "not": {
+      "very": 0.0,
+      "somewhat": 0.5,
+      "not": 1.0
+     }
+    }
+   },
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "allow_dealbreaker": true,
+   "scoring_allowed": true,
+   "position": 23,
+   "version": 1
+  },
+  {
+   "key": "pets_animals",
+   "dimension": "lifestyle",
+   "type": "single",
+   "prompt": "Pets and animals at home",
+   "options": [
+    {
+     "value": "love",
+     "label": "Love them"
+    },
+    {
+     "value": "fine",
+     "label": "Fine with them"
+    },
+    {
+     "value": "prefer_not",
+     "label": "Prefer not"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "love": {
+      "love": 1.0,
+      "fine": 0.5,
+      "prefer_not": 0.0
+     },
+     "fine": {
+      "love": 0.5,
+      "fine": 1.0,
+      "prefer_not": 0.5
+     },
+     "prefer_not": {
+      "love": 0.0,
+      "fine": 0.5,
+      "prefer_not": 1.0
+     }
+    }
+   },
+   "allow_dealbreaker": false,
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "scoring_allowed": true,
+   "position": 24,
+   "version": 1
+  },
+  {
+   "key": "health_lifestyle",
+   "dimension": "lifestyle",
+   "type": "single",
+   "prompt": "How much do you prioritise health and exercise?",
+   "options": [
+    {
+     "value": "high",
+     "label": "A lot"
+    },
+    {
+     "value": "medium",
+     "label": "Some"
+    },
+    {
+     "value": "low",
+     "label": "Not much"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "high": {
+      "high": 1.0,
+      "medium": 0.5,
+      "low": 0.0
+     },
+     "medium": {
+      "high": 0.5,
+      "medium": 1.0,
+      "low": 0.5
+     },
+     "low": {
+      "high": 0.0,
+      "medium": 0.5,
+      "low": 1.0
+     }
+    }
+   },
+   "allow_dealbreaker": false,
+   "is_core": true,
+   "is_special": false,
+   "consent_kind": "",
+   "scoring_allowed": true,
+   "position": 25,
+   "version": 1
+  },
+  {
+   "key": "faith_practice",
+   "dimension": "faith",
+   "type": "single",
+   "prompt": "How actively do you practise your faith?",
+   "options": [
+    {
+     "value": "daily",
+     "label": "Daily"
+    },
+    {
+     "value": "weekly",
+     "label": "Weekly"
+    },
+    {
+     "value": "occasionally",
+     "label": "Occasionally"
+    },
+    {
+     "value": "rarely",
+     "label": "Rarely"
+    },
+    {
+     "value": "not_religious",
+     "label": "Not religious"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "daily": {
+      "daily": 1.0,
+      "weekly": 0.75,
+      "occasionally": 0.5,
+      "rarely": 0.25,
+      "not_religious": 0.0
+     },
+     "weekly": {
+      "daily": 0.75,
+      "weekly": 1.0,
+      "occasionally": 0.75,
+      "rarely": 0.5,
+      "not_religious": 0.25
+     },
+     "occasionally": {
+      "daily": 0.5,
+      "weekly": 0.75,
+      "occasionally": 1.0,
+      "rarely": 0.75,
+      "not_religious": 0.5
+     },
+     "rarely": {
+      "daily": 0.25,
+      "weekly": 0.5,
+      "occasionally": 0.75,
+      "rarely": 1.0,
+      "not_religious": 0.75
+     },
+     "not_religious": {
+      "daily": 0.0,
+      "weekly": 0.25,
+      "occasionally": 0.5,
+      "rarely": 0.75,
+      "not_religious": 1.0
+     }
+    }
+   },
+   "is_core": false,
+   "is_special": true,
+   "consent_kind": "special_religion",
+   "scoring_allowed": true,
+   "allow_dealbreaker": true,
+   "position": 100,
+   "version": 1
+  },
+  {
+   "key": "faith_importance_in_partner",
+   "dimension": "faith",
+   "type": "single",
+   "prompt": "How important is it that your partner shares your faith practice?",
+   "options": [
+    {
+     "value": "essential",
+     "label": "Essential"
+    },
+    {
+     "value": "important",
+     "label": "Important"
+    },
+    {
+     "value": "flexible",
+     "label": "Flexible"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "essential": {
+      "essential": 1.0,
+      "important": 0.5,
+      "flexible": 0.0
+     },
+     "important": {
+      "essential": 0.5,
+      "important": 1.0,
+      "flexible": 0.5
+     },
+     "flexible": {
+      "essential": 0.0,
+      "important": 0.5,
+      "flexible": 1.0
+     }
+    }
+   },
+   "is_core": false,
+   "is_special": true,
+   "consent_kind": "special_religion",
+   "scoring_allowed": true,
+   "allow_dealbreaker": true,
+   "position": 101,
+   "version": 1
+  },
+  {
+   "key": "money_attitude",
+   "dimension": "money",
+   "type": "single",
+   "prompt": "How do you think about money in a marriage?",
+   "options": [
+    {
+     "value": "joint",
+     "label": "Fully joint finances"
+    },
+    {
+     "value": "partly",
+     "label": "Partly joint"
+    },
+    {
+     "value": "separate",
+     "label": "Mostly separate"
+    }
+   ],
+   "scoring": {
+    "kind": "matrix",
+    "matrix": {
+     "joint": {
+      "joint": 1,
+      "partly": 0.6,
+      "separate": 0.1
+     },
+     "partly": {
+      "joint": 0.6,
+      "partly": 1,
+      "separate": 0.6
+     },
+     "separate": {
+      "joint": 0.1,
+      "partly": 0.6,
+      "separate": 1
+     }
+    }
+   },
+   "is_core": false,
+   "is_special": true,
+   "consent_kind": "special_finance",
+   "scoring_allowed": false,
+   "allow_dealbreaker": false,
+   "position": 102,
+   "version": 1
+  }
+ ]
+}
