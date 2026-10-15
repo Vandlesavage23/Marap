@@ -100,8 +100,13 @@ def handle_apple_notification(*, signed_payload: str) -> PaymentEvent:
         provider="apple", provider_event_id=notification_id, event_type=f"{ntype}:{subtype or ''}"[:60],
         raw=raw, normalized=normalized, signature_valid=True,
     )  # fmt: skip
-    if normalized is None and event.process_status == PaymentEvent.Status.PENDING:
-        services._finish(event, PaymentEvent.Status.IGNORED, "informational")
+    if normalized is None:
+        if event.process_status == PaymentEvent.Status.PENDING:
+            services._finish(event, PaymentEvent.Status.IGNORED, "informational")
+    else:
+        services.process_event(
+            event_id=event.id
+        )  # inline for fast grants; the worker retries failures
     return event
 
 
