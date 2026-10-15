@@ -34,3 +34,8 @@ def scam_flag(text: str) -> str | None:
     from . import text_rules
 
     return text_rules.scam_reason(text)
+
+
+def blocked_members(account_id: uuid.UUID):  # type: ignore[no-untyped-def]
+    """Blocks made BY `account_id` (what the blocker sees in their 'Blocked members' list)."""
+    return Block.objects.filter(blocker_id=account_id).order_by("-id")

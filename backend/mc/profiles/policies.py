@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 
 from mc.entitlements import selectors as entitlement_selectors
+from mc.safety import selectors as safety_selectors
 
 from .models import Profile
 
@@ -19,6 +20,8 @@ def can_view_profile(viewer: "Account", target: Profile) -> bool:
     if target.account_id == viewer.id:
         return True
     if not is_visible_profile(target):
+        return False
+    if safety_selectors.is_blocked_either_way(viewer.id, target.account_id):
         return False
     viewer_profile = Profile.objects.filter(account=viewer).only("gender").first()
     if (
