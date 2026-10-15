@@ -18,3 +18,18 @@ def retry_failed() -> int:
 @shared_task(queue="billing")
 def expire_purchases() -> int:
     return services.expire_purchases()
+
+
+@shared_task(queue="billing")
+def sweep_pending_web() -> dict[str, int]:
+    from . import reconcile
+
+    return reconcile.sweep_pending_web()
+
+
+@shared_task(queue="billing")
+def nightly_reconciliation() -> dict:
+    from . import reconcile
+
+    reconcile.reconcile_google()
+    return reconcile.nightly_report()

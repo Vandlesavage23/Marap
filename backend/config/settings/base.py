@@ -258,3 +258,11 @@ PAYMENT_GATEWAY = env("PAYMENT_GATEWAY", "mc.billing.providers.flutterwave.FakeG
 FLUTTERWAVE_SECRET_KEY = env("FLUTTERWAVE_SECRET_KEY", "")
 FLUTTERWAVE_WEBHOOK_HASH = env("FLUTTERWAVE_WEBHOOK_HASH", "fake-webhook-hash")
 CHECKOUT_REDIRECT_URL = env("CHECKOUT_REDIRECT_URL", "https://pay.localtest.me/checkout/return")
+CELERY_BEAT_SCHEDULE["billing-sweep-pending-web"] = {
+    "task": "mc.billing.tasks.sweep_pending_web",
+    "schedule": 600.0,
+}
+CELERY_BEAT_SCHEDULE["billing-nightly-reconciliation"] = {
+    "task": "mc.billing.tasks.nightly_reconciliation",
+    "schedule": 86400.0,
+}
