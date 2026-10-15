@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "appName": "Marriage Connect",
+  "welcomeTitle": "Find a partner for marriage",
+  "welcomeBody": "Verified adults. Respectful introductions. Your privacy comes first.",
+  "continueLabel": "Continue",
+  "retry": "Try again",
+  "stateEmptyTitle": "Nothing here yet",
+  "stateErrorTitle": "Something went wrong",
+  "stateErrorBody": "We couldn't load this. Please try again.",
+  "stateOfflineTitle": "You're offline",
+  "stateOfflineBody": "Check your connection and try again.",
+  "stateRestrictedTitle": "Not available right now",
+  "restrictedMembership": "Your membership has ended. You can still read your conversations.",
+  "restrictedSuspended": "Your account is restricted. Please check your notifications.",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "errorRateLimited": "Too many attempts. Please wait a moment.",
+  "errorOffline": "You're offline.",
+  "errorEntitlementRequired": "This needs an active trial or membership.",
+  "errorNotVerified": "Please verify your identity first.",
+  "errorUnauthenticated": "Please sign in again.",
+  "offlineBanner": "No connection. Some things may be out of date."
+}

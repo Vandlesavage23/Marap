@@ -1,0 +1,32 @@
+name: mobile-ci
+on:
+  pull_request:
+    paths: ["apps/mobile/**", ".github/workflows/mobile-ci.yml"]
+  push:
+    branches: [main]
+    paths: ["apps/mobile/**"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.7"
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter gen-l10n
+      - run: flutter analyze
+      - run: flutter test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Build dev APK
+        run: flutter build apk --debug --flavor dev -t lib/main_dev.dart --dart-define-from-file=env/dev.json
