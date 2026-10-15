@@ -143,6 +143,12 @@ def apply_result(result: VendorResult) -> VerificationAttempt | None:
             attempt.status, attempt.reason_code = "error", reasons.VENDOR_ERROR
         elif result.outcome == "needs_review":
             attempt.status, attempt.decided_at = "needs_review", None
+            # keep what a human needs to decide (a keyed hash and the birth date; never the ID number)
+            attempt.date_of_birth = result.date_of_birth
+            if result.id_number and normalise_id_number(result.id_number):
+                attempt.id_number_hmac = hmac_value(
+                    normalise_id_number(result.id_number), purpose="id_number"
+                )
         elif result.outcome == "failed":
             attempt.status = "failed"
             attempt.reason_code = result.vendor_reason or reasons.UNKNOWN

@@ -6,3 +6,8 @@ class CreateSessionSerializer(serializers.Serializer):
     issuing_country = serializers.RegexField(
         r"^[A-Za-z]{2}$", required=False, allow_blank=True, default=""
     )
+
+
+class AppealSerializer(serializers.Serializer):
+    attempt_id = serializers.UUIDField(required=False, allow_null=True)
+    message = serializers.CharField(max_length=1200)

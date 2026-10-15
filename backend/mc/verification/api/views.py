@@ -6,7 +6,8 @@ from rest_framework.views import APIView
 
 from mc.accounts.permissions import IsActiveMember
 from mc.common.idempotency import IdempotentMixin
-from mc.verification import selectors, services
+from mc.common.serializers import reject_unknown_fields
+from mc.verification import review, selectors, services
 
 from . import serializers as s
 
@@ -52,3 +53,19 @@ class SmileIdWebhookView(APIView):
         body = request._request.body  # raw bytes: the signature covers them exactly
         services.handle_vendor_callback(body=body, headers=request.headers)
         return Response({"status": "ok"})
+
+
+class AppealView(IdempotentMixin):
+    permission_classes = [IsActiveMember]
+
+    @extend_schema(request=s.AppealSerializer, responses={201: dict})
+    def perform_idempotent(self, request):  # type: ignore[no-untyped-def]
+        data = s.AppealSerializer(data=request.data)
+        reject_unknown_fields(data, request.data)
+        data.is_valid(raise_exception=True)
+        appeal = review.open_appeal(
+            account=request.user,
+            attempt_id=data.validated_data.get("attempt_id"),
+            message=data.validated_data["message"],
+        )
+        return status.HTTP_201_CREATED, {"id": str(appeal.id), "status": appeal.status}

@@ -55,3 +55,33 @@ class VerificationAttempt(BaseModel):
             ),
         ]
         indexes = [models.Index(fields=["account", "-created_at"])]
+
+
+class VerificationAppeal(BaseModel):
+    """A member's appeal of a final verification failure (Bible §7.2). One open appeal per attempt."""
+
+    class Status(models.TextChoices):
+        OPEN = "open"
+        UPHELD = "upheld"  # the appeal succeeded: the attempt is re-decided as passed
+        REJECTED = "rejected"
+
+    attempt = models.ForeignKey(
+        VerificationAttempt, on_delete=models.CASCADE, related_name="appeals"
+    )
+    account = models.ForeignKey(
+        "accounts.Account", null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    message = EncryptedTextField()
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.OPEN)
+    decided_by = models.UUIDField(null=True, blank=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decision_reason = models.CharField(max_length=500, blank=True, default="")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["attempt"],
+                condition=models.Q(status="open"),
+                name="uniq_open_verification_appeal",
+            )
+        ]

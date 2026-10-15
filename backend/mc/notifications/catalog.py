@@ -9,5 +9,6 @@ CATALOG: dict[str, dict[str, object]] = {
     "warning": {"inbox": True, "body": "Please review our community guidelines"},
     "appeal_decided": {"inbox": True, "body": "Your appeal has been reviewed"},
     "export_ready": {"inbox": True, "body": "Your data export is ready"},
+    "verification_decided": {"inbox": True, "body": "Your verification has been reviewed"},
     "new_device": {"inbox": True, "body": "New sign-in on your account"},
 }
