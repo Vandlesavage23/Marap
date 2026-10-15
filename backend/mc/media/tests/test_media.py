@@ -8,7 +8,7 @@ from django.test import Client
 from mc.accounts.tests.helpers import bearer
 from mc.media import selectors, services
 from mc.media.models import MediaObject
-from mc.media.policies import register_viewer_policy
+from mc.media.policies import register_viewer_policy, unregister_viewer_policy
 from mc.media.providers.moderation import FakeModeration, ModerationResult
 from mc.media.providers.scanner import EICAR, FakeScanner
 from mc.profiles.tests.helpers import verified_client
@@ -243,11 +243,16 @@ def test_signed_url_owner_only_unless_policy_registered(s3):
     assert body["url"].startswith("https://") or body["url"].startswith("http")
     assert c2.get(f"/api/v1/media/{m.id}", **bearer(r2)).status_code == 404  # denied, no oracle
     assert selectors.signed_url(m, other) is None
-    register_viewer_policy("profile_photo", lambda viewer, media: viewer.id == other.id)
+
+    def grant(viewer, media):
+        return viewer.id == other.id
+
+    register_viewer_policy("profile_photo", grant)
     try:
         assert c2.get(f"/api/v1/media/{m.id}", **bearer(r2)).json()["url"]
     finally:
-        register_viewer_policy("profile_photo", lambda viewer, media: False)
+        unregister_viewer_policy("profile_photo", grant)
+    assert c2.get(f"/api/v1/media/{m.id}", **bearer(r2)).status_code == 404
     assert Client(headers={"host": "api.mc.test"}).get(f"/api/v1/media/{m.id}").status_code == 401
 
 

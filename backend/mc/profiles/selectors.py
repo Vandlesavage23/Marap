@@ -37,3 +37,18 @@ def current_description(profile: Profile):  # type: ignore[no-untyped-def]
 
 def has_approved_description(account_id: uuid.UUID) -> bool:
     return Profile.objects.filter(account_id=account_id, current_description__isnull=False).exists()
+
+
+def approved_photos(profile: Profile):  # type: ignore[no-untyped-def]
+    return (
+        profile.photos.filter(moderation_status="approved")
+        .select_related("media")
+        .order_by("position")
+    )
+
+
+def readiness(profile: Profile) -> dict[str, object]:
+    from . import readiness as r
+
+    missing = r.missing_for_go_live(profile)
+    return {"ready": not missing, "missing": missing}

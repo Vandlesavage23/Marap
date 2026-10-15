@@ -10,11 +10,19 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from mc.accounts import selectors as account_selectors
-from mc.common.errors import Conflict, MarriedNotEligible, NotVerified, ValidationFailed
+from mc.common import events
+from mc.common.errors import (
+    Conflict,
+    MarriedNotEligible,
+    NotVerified,
+    ProfileIncomplete,
+    ValidationFailed,
+)
 from mc.verification import selectors as verification_selectors
 
-from . import selectors
+from . import readiness, selectors
 from .districts import VALID_DISTRICTS
+from .events import ProfileWentLive, ProfileWentOffline
 from .models import Profile
 from .names import normalise_display_name
 
@@ -131,7 +139,7 @@ def update_profile(*, account: "Account", data: dict[str, Any]) -> Profile:
             raise ValidationFailed("Use a 2-letter country code.")
         profile.diaspora_country = profile.diaspora_country.upper()
 
-        profile.completeness = completeness_of(profile)
+        profile.completeness = readiness.completeness(profile)
         try:
             profile.save()
         except IntegrityError as exc:  # pragma: no cover - defensive
@@ -161,27 +169,6 @@ def _validate_married_rules(profile: Profile, account: "Account", data: dict[str
         or not has_consent
     ):
         raise MarriedNotEligible("This marital status can't be used on your profile.")
-
-
-# ---- completeness (fields part; photos/description/questionnaire join in MC-051) -------------
-REQUIRED_FIELDS = (
-    "display_name",
-    "gender",
-    "district",
-    "intention",
-    "marriage_timeline",
-    "marital_status",
-)
-OPTIONAL_FIELDS = (
-    "marriage_form_preference", "has_children", "wants_children", "languages", "occupation", "education",
-)  # fmt: skip
-
-
-def completeness_of(profile: Profile) -> int:
-    """0–100 from profile fields only: required fields carry 60 points, optional fields 40."""
-    req = sum(1 for f in REQUIRED_FIELDS if getattr(profile, f))
-    opt = sum(1 for f in OPTIONAL_FIELDS if getattr(profile, f))
-    return round(60 * req / len(REQUIRED_FIELDS) + 40 * opt / len(OPTIONAL_FIELDS))
 
 
 def clear_special_data(*, account_id: uuid.UUID, kind: str) -> None:
@@ -248,6 +235,7 @@ def submit_description(*, account: "Account", text: str) -> "Description":
 def _make_current(profile: Profile, desc: "Description") -> None:
     profile.current_description = desc
     profile.save(update_fields=["current_description", "updated_at"])
+    refresh(profile)
 
 
 def review_description(
@@ -269,3 +257,66 @@ def review_description(
         if approve:
             _make_current(desc.profile, desc)
     return desc
+
+
+# ---- readiness, go-live, visibility (MC-051) -----------------------------------------------------
+def refresh(profile: Profile) -> Profile:
+    """Recompute completeness; take a live profile offline if it no longer meets the go-live rules
+    (e.g. its photo count dropped below the minimum)."""
+    profile.completeness = readiness.completeness(profile)
+    fields = ["completeness", "updated_at"]
+    went_offline = False
+    if profile.status == Profile.Status.LIVE and readiness.missing_for_go_live(profile):
+        profile.status = Profile.Status.DRAFT
+        fields.append("status")
+        went_offline = True
+    profile.save(update_fields=fields)
+    if went_offline:
+        events.publish(
+            ProfileWentOffline(
+                account_id=profile.account_id, profile_id=profile.id, reason="requirements"
+            )
+        )
+    return profile
+
+
+def go_live(*, account: "Account") -> Profile:
+    """Draft → live only when every §10.3 rule holds; otherwise `profile_incomplete` lists what's missing."""
+    profile = get_or_create_profile(account=account)
+    with transaction.atomic():
+        profile = Profile.objects.select_for_update().get(pk=profile.pk)
+        if profile.status == Profile.Status.SUSPENDED:
+            raise Conflict("This profile is suspended.")
+        if profile.status == Profile.Status.LIVE:
+            return profile  # idempotent
+        missing = readiness.missing_for_go_live(profile)
+        if missing:
+            raise ProfileIncomplete("Your profile isn't ready yet.", missing=missing)
+        profile.status = Profile.Status.LIVE
+        profile.completeness = readiness.completeness(profile)
+        profile.save(update_fields=["status", "completeness", "updated_at"])
+        events.publish(ProfileWentLive(account_id=account.id, profile_id=profile.id))
+    return profile
+
+
+def set_hidden(*, account: "Account", hidden: bool) -> Profile:
+    profile = get_or_create_profile(account=account)
+    with transaction.atomic():
+        profile = Profile.objects.select_for_update().get(pk=profile.pk)
+        if profile.status == Profile.Status.SUSPENDED:
+            raise Conflict("This profile is suspended.")
+        if hidden and profile.status == Profile.Status.LIVE:
+            profile.status = Profile.Status.HIDDEN_BY_USER
+            events.publish(
+                ProfileWentOffline(
+                    account_id=account.id, profile_id=profile.id, reason="hidden_by_user"
+                )
+            )
+        elif not hidden and profile.status == Profile.Status.HIDDEN_BY_USER:
+            if readiness.missing_for_go_live(profile):
+                profile.status = Profile.Status.DRAFT
+            else:
+                profile.status = Profile.Status.LIVE
+                events.publish(ProfileWentLive(account_id=account.id, profile_id=profile.id))
+        profile.save(update_fields=["status", "updated_at"])
+    return profile

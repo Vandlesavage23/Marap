@@ -14,3 +14,5 @@ behaviour until answered. Update this file (and the Bible) when a decision lands
 | Q7 | Questionnaire content | ~25 core questions "from product team". | Draft placeholder set in `mc/questionnaire/fixtures/questions_v1.json` — needs product/UX review, Luganda/Swahili copy, and scoring-matrix review. |
 | Q8 | Consent erasure | Consent rows are append-only, but account hard-delete must remove them (or retain as evidence?). | Deleted with the account via an explicit DB escape hatch; counsel to confirm retention (MC-004). |
 | Q9 | Smile ID adapter | Written from public docs, unverified against the sandbox. | Fake provider used everywhere; real adapter flagged until MC-030. |
+| Q10 | Deal-breakers | §7.3 `Preference.dealbreakers` duplicates `Answer.is_dealbreaker`. | Single source of truth is `Answer.is_dealbreaker`; `Preference` omits the column. |
+| Q11 | Profile visibility endpoints | §8.2 has no go-live / hide endpoints. | Added `POST /me/profile/go-live`, `/hide`, `/unhide`; a live profile auto-drops to draft if go-live rules stop holding. |

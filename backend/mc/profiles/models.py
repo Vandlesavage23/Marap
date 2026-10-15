@@ -136,3 +136,59 @@ class Description(BaseModel):
             ):
                 raise ValueError("Description text is immutable; create a new version.")
         super().save(*args, **kwargs)
+
+
+class Photo(BaseModel):
+    """Profile photo (Bible §7.3): 2–6 per profile, ordered, with a moderation state derived from the
+    media pipeline / human review. Only `approved` photos are ever shown to other members."""
+
+    class Moderation(models.TextChoices):
+        PENDING = "pending"
+        APPROVED = "approved"
+        REJECTED = "rejected"
+
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="photos")
+    media = models.OneToOneField(
+        "media.MediaObject", on_delete=models.CASCADE, related_name="photo"
+    )
+    position = models.PositiveSmallIntegerField()  # 0..5
+    moderation_status = models.CharField(
+        max_length=10, choices=Moderation.choices, default=Moderation.PENDING
+    )
+    face_match = models.BooleanField(
+        null=True, blank=True
+    )  # a face was detected (not an identity match yet)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["profile", "position"],
+                name="uniq_photo_position",
+                deferrable=models.Deferrable.DEFERRED,
+            ),
+            models.CheckConstraint(
+                condition=models.Q(position__gte=0, position__lte=5), name="photo_position_0_5"
+            ),
+        ]
+        ordering = ["position"]
+
+
+class Preference(BaseModel):
+    """Who the member wants to meet (Bible §7.3). Deal-breakers live on questionnaire answers."""
+
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE, related_name="preference")
+    age_min = models.PositiveSmallIntegerField()
+    age_max = models.PositiveSmallIntegerField()
+    max_distance_km = models.PositiveSmallIntegerField(null=True, blank=True)
+    include_diaspora = models.BooleanField(default=True)
+    accept_has_children = models.BooleanField(default=True)
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    age_min__gte=18, age_max__lte=80, age_min__lte=models.F("age_max")
+                ),
+                name="pref_age_range_valid",
+            ),
+        ]

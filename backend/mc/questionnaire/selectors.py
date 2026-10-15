@@ -61,3 +61,7 @@ def answers_for_scoring(
             "is_dealbreaker": a.is_dealbreaker,
         }
     return out
+
+
+def has_optional_answers(account_id: uuid.UUID) -> bool:
+    return Answer.objects.filter(account_id=account_id, question__is_core=False).exists()

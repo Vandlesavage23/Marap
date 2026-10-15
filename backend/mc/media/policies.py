@@ -10,11 +10,18 @@ if TYPE_CHECKING:
     from .models import MediaObject
 
 ViewerPolicy = Callable[["Account", "MediaObject"], bool]
-_policies: dict[str, ViewerPolicy] = {}
+_policies: dict[str, list[ViewerPolicy]] = {}
 
 
 def register_viewer_policy(purpose: str, policy: ViewerPolicy) -> None:
-    _policies[purpose] = policy
+    """Add a grant for `purpose`; a viewer may see the media if ANY registered policy allows it."""
+    if policy not in _policies.setdefault(purpose, []):
+        _policies[purpose].append(policy)
+
+
+def unregister_viewer_policy(purpose: str, policy: ViewerPolicy) -> None:  # tests
+    if policy in _policies.get(purpose, []):
+        _policies[purpose].remove(policy)
 
 
 def can_view_media(viewer: "Account", media: "MediaObject") -> bool:
@@ -24,5 +31,4 @@ def can_view_media(viewer: "Account", media: "MediaObject") -> bool:
         )  # owner may see their own status/preview while it's pending
     if media.owner_id == viewer.id:
         return True
-    policy = _policies.get(media.purpose)
-    return bool(policy and policy(viewer, media))
+    return any(policy(viewer, media) for policy in _policies.get(media.purpose, []))

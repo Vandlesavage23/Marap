@@ -20,3 +20,5 @@ profiles.Description.*,profiles.Description,self-description shown to recipients
 questionnaire.Answer.(value/importance/is_dealbreaker/question_version),questionnaire.Answer,compatibility scoring and hard filters,contract,deleted with account,none,af-south-1 Postgres
 questionnaire.Answer.value_enc,questionnaire.Answer,optional special answers (field-encrypted; money attitudes never ranked),explicit consent (special_religion/special_finance),deleted on consent withdrawal or account deletion,none,af-south-1 Postgres
 media.MediaObject.(purpose/mime/bytes/width/height/duration_ms/sha256/status/reject_reason/moderation/face_count),media.MediaObject,photo and voice processing pipeline (EXIF stripped; originals deleted after processing),contract,ready media deleted with account; rejected media 30 days,AWS S3 / Rekognition (moderation),af-south-1 S3 + Postgres
+profiles.Photo.(position/moderation_status/face_match),profiles.Photo,profile photo ordering and approval,contract,deleted with account,none,af-south-1 Postgres
+profiles.Preference.*,profiles.Preference,discovery filters chosen by the member,contract,deleted with account,none,af-south-1 Postgres

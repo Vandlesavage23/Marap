@@ -28,3 +28,15 @@ def can_view_profile(viewer: "Account", target: Profile) -> bool:
     ):
         return False
     return entitlement_selectors.has_capability(viewer, "browse")
+
+
+def photo_media_viewer_policy(viewer: "Account", media) -> bool:  # type: ignore[no-untyped-def]
+    """Media policy for `profile_photo`: approved photos of profiles the viewer may see."""
+    from .models import Photo
+
+    photo = Photo.objects.select_related("profile__account").filter(media=media).first()
+    return bool(
+        photo
+        and photo.moderation_status == Photo.Moderation.APPROVED
+        and can_view_profile(viewer, photo.profile)
+    )

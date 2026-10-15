@@ -6,9 +6,11 @@ from typing import TYPE_CHECKING, Any
 from django.db import transaction
 
 from mc.accounts import selectors as account_selectors
+from mc.common import events
 from mc.common.errors import ValidationFailed
 from mc.verification import selectors as verification_selectors
 
+from .events import AnswersSaved
 from .models import Answer, Question
 
 if TYPE_CHECKING:
@@ -79,6 +81,7 @@ def save_answers(*, account: "Account", answers: list[dict[str, Any]]) -> list[A
                 fields |= {"value": value, "value_enc": None}
             ans, _ = Answer.objects.update_or_create(account=account, question=q, defaults=fields)
             saved.append(ans)
+        events.publish(AnswersSaved(account_id=account.id))
     return saved
 
 

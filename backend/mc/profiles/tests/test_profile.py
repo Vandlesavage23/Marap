@@ -36,7 +36,7 @@ def test_patch_valid_and_completeness():
     resp = patch(c, r, **BASIC)
     assert resp.status_code == 200
     body = resp.json()
-    assert body["display_name"] == "Amani" and body["completeness"] == 60
+    assert body["display_name"] == "Amani" and body["completeness"] == 30
     body = patch(
         c,
         r,
@@ -47,7 +47,7 @@ def test_patch_valid_and_completeness():
         wants_children="yes",
         marriage_form_preference="monogamous_only",
     ).json()
-    assert body["languages"] == ["en", "lg"] and body["completeness"] == 100
+    assert body["languages"] == ["en", "lg"] and body["completeness"] == 40
 
 
 def test_birth_date_and_unknown_fields_are_not_editable():

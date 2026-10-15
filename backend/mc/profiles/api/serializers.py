@@ -51,6 +51,7 @@ class ProfileUpdateSerializer(serializers.Serializer):
 
 def own_profile(profile: Profile) -> dict[str, object]:
     return {
+        "readiness": selectors.readiness(profile),
         "id": str(profile.id),
         "status": profile.status,
         "completeness": profile.completeness,
@@ -80,9 +81,14 @@ def own_profile(profile: Profile) -> dict[str, object]:
     }
 
 
-def public_profile(profile: Profile) -> dict[str, object]:
+def public_profile(profile: Profile, viewer=None) -> dict[str, object]:  # type: ignore[no-untyped-def]
     """What other members may see. No religion text, no birth date (age only), no location point."""
+    photos = list(selectors.approved_photos(profile))
+    has_photos = bool(photos)
+    desc = profile.current_description
     return {
+        "photos": [photo_payload(p, viewer) for p in photos] if viewer is not None else [],
+        "description": desc.text if desc else None,
         "profile_id": str(profile.id),
         "display_name": profile.display_name,
         "age": selectors.age_of(profile),
@@ -100,7 +106,11 @@ def public_profile(profile: Profile) -> dict[str, object]:
         "languages": profile.languages,
         "occupation": profile.occupation,
         "education": profile.education,
-        "badges": ["age_verified", "identity_verified"],
+        "badges": [
+            "age_verified",
+            "identity_verified",
+            *(["photo_verified"] if has_photos else []),
+        ],
     }
 
 
@@ -115,4 +125,45 @@ def description_payload(desc) -> dict[str, object]:  # type: ignore[no-untyped-d
         "status": desc.status,
         "reject_reason": desc.reject_reason or None,
         "created_at": desc.created_at,
+    }
+
+
+class PreferenceSerializer(serializers.Serializer):
+    age_min = serializers.IntegerField(min_value=18, max_value=80, required=False)
+    age_max = serializers.IntegerField(min_value=18, max_value=80, required=False)
+    max_distance_km = serializers.IntegerField(
+        min_value=1, max_value=2000, required=False, allow_null=True
+    )
+    include_diaspora = serializers.BooleanField(required=False)
+    accept_has_children = serializers.BooleanField(required=False)
+
+
+class PhotoCreateSerializer(serializers.Serializer):
+    media_id = serializers.UUIDField()
+
+
+class PhotoOrderSerializer(serializers.Serializer):
+    ids = serializers.ListField(child=serializers.UUIDField(), allow_empty=False, max_length=6)
+
+
+def preference_payload(pref) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    return {
+        "age_min": pref.age_min,
+        "age_max": pref.age_max,
+        "max_distance_km": pref.max_distance_km,
+        "include_diaspora": pref.include_diaspora,
+        "accept_has_children": pref.accept_has_children,
+    }
+
+
+def photo_payload(photo, viewer) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    from mc.media import selectors as media_selectors
+
+    return {
+        "id": str(photo.id),
+        "position": photo.position,
+        "moderation_status": photo.moderation_status,
+        "w": photo.media.width,
+        "h": photo.media.height,
+        "url": media_selectors.signed_url(photo.media, viewer),
     }
