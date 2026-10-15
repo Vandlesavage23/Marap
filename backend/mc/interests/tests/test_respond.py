@@ -131,7 +131,7 @@ def test_received_list_shape_and_photo_grant():
     from mc.profiles.models import Photo
 
     photo = Photo.objects.filter(profile__account=m[2]).first()
-    stranger = member("female")
+    stranger = member("male")  # same gender as the sender: no profile access either
     assert media_selectors.signed_url(photo.media, stranger[2]) is None
     assert media_selectors.signed_url(photo.media, f[2]) is not None
 
@@ -173,15 +173,9 @@ def test_lists_hide_blocked_users_and_paginate():
         .get(f"/api/v1/interests/received?limit=2&cursor={page1['next_cursor']}", **bearer(f[1]))
         .json()
     )
-    page3 = (
-        f[0]
-        .get(f"/api/v1/interests/received?limit=2&cursor={page2['next_cursor']}", **bearer(f[1]))
-        .json()
-    )
-    ids = [i["sender"]["id"] for p in (page1, page2, page3) for i in p["items"]]
-    assert (
-        len(ids) == len(set(ids)) == 4 and senders[0][3] not in ids and page3["next_cursor"] is None
-    )
+    ids = [i["sender"]["id"] for p in (page1, page2) for i in p["items"]]
+    assert len(ids) == len(set(ids)) == 4 and senders[0][3] not in ids
+    assert page2["next_cursor"] is None
     assert f[0].get("/api/v1/interests/received?limit=0", **bearer(f[1])).status_code == 422
 
 

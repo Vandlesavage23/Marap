@@ -13,6 +13,7 @@ urlpatterns = [
     path("api/v1/", include("mc.media.api.urls")),
     path("api/v1/", include("mc.discovery.api.urls")),
     path("api/v1/", include("mc.interests.api.urls")),
+    path("api/v1/", include("mc.matches.api.urls")),
     # Unversioned probes for load balancers.
     path("", include((common_urls.probe_urlpatterns, "probes"))),
 ]

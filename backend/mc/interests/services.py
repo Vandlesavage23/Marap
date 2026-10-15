@@ -96,6 +96,10 @@ def send_interest(
             recipient is None
             or recipient.status != "active"
             or safety_selectors.is_blocked_either_way(sender.id, recipient.id)
+            or recipient.id
+            in match_selectors.counterpart_ids(
+                sender.id, ended_since=now - timedelta(days=settings.INTEREST_RESEND_COOLDOWN_DAYS)
+            )  # already matched, or unmatched recently
             or not discovery_services.are_mutually_eligible(sender, recipient)
         ):
             raise NotEligible("You can't send an interest to this profile.")

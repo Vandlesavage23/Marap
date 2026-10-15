@@ -34,3 +34,95 @@ def test_scenario_02_verification_failure_then_retry_passes():
     assert c.get("/api/v1/verification/status", **bearer(r)).json()["reason"] == "doc_unreadable"
     callback(c, result(job_id_of(start(c, r))))
     assert c.get("/api/v1/me", **bearer(r)).json()["status"] == "active"
+
+
+# ---- scenario 03: concurrent duplicate interests → one row ------------------------------------
+import threading  # noqa: E402
+import uuid  # noqa: E402
+from concurrent.futures import ThreadPoolExecutor  # noqa: E402
+
+from django.db import connection  # noqa: E402
+from django.test import Client  # noqa: E402
+
+from mc.accounts.tests.helpers import login  # noqa: E402
+from mc.interests.models import Interest  # noqa: E402
+from mc.interests.tests.helpers import member, send  # noqa: E402
+from mc.matches.models import Match  # noqa: E402
+
+
+def _hammer(fn, n):
+    barrier = threading.Barrier(n)
+
+    def run(i):
+        try:
+            barrier.wait()
+            return fn(i)
+        finally:
+            connection.close()
+
+    with ThreadPoolExecutor(max_workers=n) as pool:
+        return list(pool.map(run, range(n)))
+
+
+@pytest.mark.django_db(transaction=True)
+def test_scenario_03_concurrent_duplicate_interests_create_one_row():
+    m, f = member("male"), member("female")
+    token = m[1].json()["access"]
+
+    def same_key(_):
+        c = Client(headers={"host": "api.mc.test"})
+        return c.post(
+            "/api/v1/interests",
+            {"recipient_id": f[3]},
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+            HTTP_IDEMPOTENCY_KEY="one-key-for-all-12345",
+        ).status_code
+
+    results = _hammer(same_key, 8)
+    assert Interest.objects.count() == 1
+    assert set(results) <= {200, 201, 409}  # winner 201, replays 200/201, in-flight duplicates 409
+    assert 201 in results
+
+
+@pytest.mark.django_db(transaction=True)
+def test_scenario_03_concurrent_different_keys_still_one_pending_row():
+    m, f = member("male"), member("female")
+    token = m[1].json()["access"]
+
+    def distinct_key(i):
+        c = Client(headers={"host": "api.mc.test"})
+        return c.post(
+            "/api/v1/interests",
+            {"recipient_id": f[3]},
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+            HTTP_IDEMPOTENCY_KEY=f"key-{uuid.uuid4().hex}",
+        ).status_code
+
+    results = _hammer(distinct_key, 8)
+    assert Interest.objects.filter(status="pending").count() == 1 and Interest.objects.count() == 1
+    assert results.count(201) == 1 and set(results) <= {201, 409}
+
+
+@pytest.mark.django_db(transaction=True)
+def test_scenario_03_crossing_interests_end_in_exactly_one_match():
+    m, f = member("male"), member("female")
+    tokens = {"m": m[1].json()["access"], "f": f[1].json()["access"]}
+    targets = {"m": f[3], "f": m[3]}
+
+    def cross(i):
+        who = "m" if i % 2 == 0 else "f"
+        c = Client(headers={"host": "api.mc.test"})
+        return c.post(
+            "/api/v1/interests",
+            {"recipient_id": targets[who]},
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {tokens[who]}",
+            HTTP_IDEMPOTENCY_KEY=f"cross-{uuid.uuid4().hex}",
+        ).status_code
+
+    _hammer(cross, 2)  # one from each side at the same instant
+    assert Match.objects.filter(status="active").count() == 1
+    assert Interest.objects.count() == 1 and Interest.objects.get().status == "accepted"
+    _ = (login, send)

@@ -21,6 +21,8 @@ class Match(BaseModel):
     )
     # Set once both participants have sent a message (Phase 5 disclosure clock). Never reset.
     first_two_way_message_at = models.DateTimeField(null=True, blank=True)
+    user_a_first_message_at = models.DateTimeField(null=True, blank=True)
+    user_b_first_message_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [

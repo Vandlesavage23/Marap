@@ -30,3 +30,17 @@ def other_member(match: Match, account_id: uuid.UUID) -> uuid.UUID:
 
 def get_match(match_id: uuid.UUID) -> Match | None:
     return Match.objects.filter(id=match_id).first()
+
+
+def counterpart_ids(account_id: uuid.UUID, *, ended_since=None) -> set[uuid.UUID]:  # type: ignore[no-untyped-def]
+    """Accounts matched with `account_id` now, plus (optionally) those whose match ended after `ended_since`.
+    Used to keep matched / recently-unmatched people out of discovery and out of re-sent interests."""
+    q = Q(status=Match.Status.ACTIVE)
+    if ended_since is not None:
+        q |= Q(ended_at__gte=ended_since)
+    rows = (
+        Match.objects.filter(Q(user_a_id=account_id) | Q(user_b_id=account_id))
+        .filter(q)
+        .values_list("user_a_id", "user_b_id")
+    )
+    return {b if a == account_id else a for a, b in rows}

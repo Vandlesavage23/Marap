@@ -16,3 +16,5 @@ behaviour until answered. Update this file (and the Bible) when a decision lands
 | Q9 | Smile ID adapter | Written from public docs, unverified against the sandbox. | Fake provider used everywhere; real adapter flagged until MC-030. |
 | Q10 | Deal-breakers | §7.3 `Preference.dealbreakers` duplicates `Answer.is_dealbreaker`. | Single source of truth is `Answer.is_dealbreaker`; `Preference` omits the column. |
 | Q11 | Profile visibility endpoints | §8.2 has no go-live / hide endpoints. | Added `POST /me/profile/go-live`, `/hide`, `/unhide`; a live profile auto-drops to draft if go-live rules stop holding. |
+| Q12 | Public identifiers | Interest/discovery examples use `recipient_id` / `sender.id` without saying whether account or profile ids. | The public handle everywhere between members is the **profile id**; account ids and phone numbers never reach other members. Media object keys contain no account id either. |
+| Q13 | After unmatch | §10.5 says a match never re-activates but not whether the pair can re-match. | Unmatched pairs are hidden from each other and blocked from re-sending interests for `INTEREST_RESEND_COOLDOWN_DAYS` (90). |

@@ -24,6 +24,7 @@ from mc.common.redis import get_redis
 from mc.common.timeutil import start_of_kampala_day
 from mc.entitlements import selectors as entitlement_selectors
 from mc.interests import selectors as interest_selectors
+from mc.matches import selectors as match_selectors
 from mc.profiles import search as profile_search
 from mc.profiles import selectors as profile_selectors
 from mc.questionnaire import selectors as questionnaire_selectors
@@ -64,6 +65,9 @@ def _exclusions(viewer_id: uuid.UUID, now: datetime, *, include_recent: bool) ->
     excluded = safety_selectors.blocked_either_way_ids(
         viewer_id
     ) | interest_selectors.pending_counterpart_ids(viewer_id)
+    excluded |= match_selectors.counterpart_ids(
+        viewer_id, ended_since=now - timedelta(days=settings.INTEREST_RESEND_COOLDOWN_DAYS)
+    )  # matched now, or unmatched recently
     excluded |= set(
         Impression.objects.filter(
             viewer_id=viewer_id, action=Impression.Action.NOT_RELEVANT
