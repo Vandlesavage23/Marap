@@ -30,3 +30,9 @@ interests.InterestSnapshot.*,interests.InterestSnapshot,description + display na
 matches.Match.*,matches.Match,mutual match and chat membership (first-message timestamps drive the Phase 5 clock),contract,history deleted 90 days after unmatch unless report hold; closed on account deletion,none,af-south-1 Postgres
 messaging.Message.*,messaging.Message,chat between matched members (media signed per viewer),contract,deleted 90 days after unmatch unless report hold; sender deletion → placeholder,none,af-south-1 Postgres/S3
 notifications.Notification.*,notifications.Notification,in-app inbox (ids only),contract,deleted with account / on block,none,af-south-1 Postgres
+safety.Report.*,safety.Report,member reports (free text field-encrypted),legitimate interest (safety),retained while case open + 12 months (A); pseudonymised after account deletion,none,af-south-1 Postgres
+safety.ReportEvidence.*,safety.ReportEvidence,copied evidence for moderators (field-encrypted; moderators never browse chats),legitimate interest (safety),with the report,none,af-south-1 Postgres
+safety.Case.*,safety.Case,moderation work queue and SLA,legitimate interest (safety),12 months after closure (A),none,af-south-1 Postgres
+safety.Action.*,safety.Action,enforcement history,legitimate interest (safety),retained (audit),none,af-south-1 Postgres
+safety.Ban.*,safety.Ban,prevent a banned person from re-registering (keyed hash only),legitimate interest (safety),retained,none,af-south-1 Postgres
+safety.EnforcementAppeal.*,safety.EnforcementAppeal,appeal of an enforcement action (message field-encrypted),legal obligation/fairness,retained with the action,none,af-south-1 Postgres
