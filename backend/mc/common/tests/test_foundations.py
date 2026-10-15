@@ -67,6 +67,7 @@ def test_admin_and_pay_hosts_route_separately():
 def test_openapi_served_in_dev_only(api, monkeypatch):
     assert api.get("/api/v1/schema/").status_code == 200
     monkeypatch.setenv("DJANGO_SECRET_KEY", "x")
+    monkeypatch.setenv("SMS_PROVIDER", "mc.accounts.providers.sms.AfricasTalkingSms")
     import importlib
 
     prod = importlib.import_module("config.settings.prod")
