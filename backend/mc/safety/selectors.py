@@ -20,3 +20,17 @@ def is_blocked_either_way(a: uuid.UUID, b: uuid.UUID) -> bool:
     return Block.objects.filter(
         Q(blocker_id=a, blocked_id=b) | Q(blocker_id=b, blocked_id=a)
     ).exists()
+
+
+def contact_details_reason(text: str) -> str | None:
+    """Reason a chat message must be blocked while the early-match contact window is open, else None."""
+    from . import text_rules
+
+    return text_rules.contact_reason(text)
+
+
+def scam_flag(text: str) -> str | None:
+    """Heuristic scam signal for a chat message (flag + safety tip for the recipient; never blocks)."""
+    from . import text_rules
+
+    return text_rules.scam_reason(text)

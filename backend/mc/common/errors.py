@@ -103,4 +103,12 @@ class Conflict(DomainError):
     code, status, title = "conflict", 409, "Conflict"
 
 
+class ContactDetailsBlocked(DomainError):
+    code, status, title = "contact_details_blocked", 422, "Contact details can't be shared yet"
+
+
+class PhotoLocked(DomainError):
+    code, status, title = "photo_locked", 403, "Photos aren't unlocked yet"
+
+
 STABLE_CODES = frozenset(cls.code for cls in DomainError.__subclasses__())

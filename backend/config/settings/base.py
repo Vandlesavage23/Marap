@@ -219,3 +219,4 @@ CELERY_BEAT_SCHEDULE["interests-expire"] = {
     "task": "mc.interests.tasks.expire_interests",
     "schedule": 900.0,
 }
+INSTALLED_APPS += ["mc.messaging"]
