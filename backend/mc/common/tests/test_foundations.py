@@ -70,6 +70,7 @@ def test_openapi_served_in_dev_only(api, monkeypatch):
     monkeypatch.setenv("SMS_PROVIDER", "mc.accounts.providers.sms.AfricasTalkingSms")
     monkeypatch.setenv("IDENTITY_PROVIDER", "mc.verification.providers.smile_id.SmileIdProvider")
     monkeypatch.setenv("MALWARE_SCANNER", "mc.media.providers.scanner.ClamdScanner")
+    monkeypatch.setenv("PUSH_PROVIDER", "mc.notifications.providers.push.FcmPush")
     monkeypatch.setenv(
         "IMAGE_MODERATION_PROVIDER", "mc.media.providers.moderation.RekognitionModeration"
     )
