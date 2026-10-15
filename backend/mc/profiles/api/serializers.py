@@ -4,15 +4,8 @@ ID hashes, phone, email or birth date; `test_serializers_never_expose_identity_f
 from rest_framework import serializers
 
 from mc.profiles import selectors
+from mc.profiles.constants import MARITAL_LABELS
 from mc.profiles.models import Profile
-
-MARITAL_LABELS = {
-    "never_married": "Never married",
-    "divorced": "Divorced",
-    "widowed": "Widowed",
-    "married_customary": "Married (customary)",
-    "married_islamic": "Married (Islamic)",
-}
 
 
 class LocationSerializer(serializers.Serializer):

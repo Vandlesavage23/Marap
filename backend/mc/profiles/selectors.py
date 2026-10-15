@@ -52,3 +52,68 @@ def readiness(profile: Profile) -> dict[str, object]:
 
     missing = r.missing_for_go_live(profile)
     return {"ready": not missing, "missing": missing}
+
+
+def viewer_context_for(account):  # type: ignore[no-untyped-def]
+    """Search context for a live viewer, or None when the viewer has no live profile."""
+    from . import preferences
+    from .search import viewer_context
+
+    profile = Profile.objects.filter(account=account, status=Profile.Status.LIVE).first()
+    if profile is None:
+        return None
+    return viewer_context(profile, preferences.get_or_create_preference(profile=profile))
+
+
+def card_data(profile_ids, viewer) -> dict[uuid.UUID, dict[str, object]]:  # type: ignore[no-untyped-def]
+    """CandidateCard basics (no numeric score) for profiles that are still live+active, keyed by profile id.
+    Includes signed photo URLs for approved photos only."""
+    from mc.media import selectors as media_selectors
+
+    from .constants import MARITAL_LABELS
+
+    out: dict[uuid.UUID, dict[str, object]] = {}
+    qs = Profile.objects.filter(
+        id__in=list(profile_ids), status=Profile.Status.LIVE, account__status="active"
+    )
+    for p in qs:
+        photos = [
+            {
+                "url": media_selectors.signed_url(ph.media, viewer),
+                "w": ph.media.width,
+                "h": ph.media.height,
+            }
+            for ph in approved_photos(p)
+        ]
+        out[p.id] = {
+            "profile_id": str(p.id),
+            "display_name": p.display_name,
+            "age": age_of(p),
+            "district": p.district,
+            "photos": photos,
+            "intention": p.intention,
+            "marriage_timeline": p.marriage_timeline,
+            "marital_status_label": MARITAL_LABELS[p.marital_status]
+            if p.marital_status.startswith("married")
+            else None,
+            "badges": [
+                "age_verified",
+                "identity_verified",
+                *(["photo_verified"] if photos else []),
+            ],
+        }
+    return out
+
+
+def account_id_for_profile(profile_id: uuid.UUID) -> uuid.UUID | None:
+    return Profile.objects.filter(id=profile_id).values_list("account_id", flat=True).first()
+
+
+def live_profile_attributes() -> list[dict[str, object]]:
+    """`[{account_id, gender, age, district}]` for every live profile (evaluation reports only)."""
+    return [
+        {"account_id": p.account_id, "gender": p.gender, "age": age_of(p), "district": p.district}
+        for p in Profile.objects.filter(status=Profile.Status.LIVE, account__status="active").only(
+            "account_id", "gender", "birth_date", "district"
+        )
+    ]

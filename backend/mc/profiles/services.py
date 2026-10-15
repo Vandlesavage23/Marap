@@ -20,7 +20,7 @@ from mc.common.errors import (
 )
 from mc.verification import selectors as verification_selectors
 
-from . import readiness, selectors
+from . import preferences, readiness, selectors
 from .districts import VALID_DISTRICTS
 from .events import ProfileWentLive, ProfileWentOffline
 from .models import Profile
@@ -295,6 +295,7 @@ def go_live(*, account: "Account") -> Profile:
         profile.status = Profile.Status.LIVE
         profile.completeness = readiness.completeness(profile)
         profile.save(update_fields=["status", "completeness", "updated_at"])
+        preferences.get_or_create_preference(profile=profile)  # discovery needs a preference row
         events.publish(ProfileWentLive(account_id=account.id, profile_id=profile.id))
     return profile
 

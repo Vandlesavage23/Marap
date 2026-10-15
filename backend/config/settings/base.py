@@ -212,3 +212,5 @@ IMAGE_MODERATION_PROVIDER = env(
 )
 INSTALLED_APPS += ["mc.media"]
 CELERY_TASK_ROUTES = {"mc.media.tasks.*": {"queue": "media"}}
+INSTALLED_APPS += ["mc.safety", "mc.interests"]
+INSTALLED_APPS += ["mc.discovery"]

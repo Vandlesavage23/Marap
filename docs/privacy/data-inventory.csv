@@ -22,3 +22,8 @@ questionnaire.Answer.value_enc,questionnaire.Answer,optional special answers (fi
 media.MediaObject.(purpose/mime/bytes/width/height/duration_ms/sha256/status/reject_reason/moderation/face_count),media.MediaObject,photo and voice processing pipeline (EXIF stripped; originals deleted after processing),contract,ready media deleted with account; rejected media 30 days,AWS S3 / Rekognition (moderation),af-south-1 S3 + Postgres
 profiles.Photo.(position/moderation_status/face_match),profiles.Photo,profile photo ordering and approval,contract,deleted with account,none,af-south-1 Postgres
 profiles.Preference.*,profiles.Preference,discovery filters chosen by the member,contract,deleted with account,none,af-south-1 Postgres
+discovery.Impression.*,discovery.Impression,exposure caps / repeat-hiding / ranking evaluation (score never returned to clients),legitimate interest,180 days,none,af-south-1 Postgres
+discovery.ModelVersion.*,discovery.ModelVersion,ranking configuration (no personal data),n/a,n/a,none,af-south-1 Postgres
+safety.Block.*,safety.Block,absolute two-way blocking,legitimate interest/safety,deleted with account,none,af-south-1 Postgres
+interests.Interest.*,interests.Interest,expression of interest lifecycle,contract,deleted with account (paid-service records retained separately),none,af-south-1 Postgres
+interests.InterestSnapshot.*,interests.InterestSnapshot,description + display name as sent,contract,deleted on block / account deletion,none,af-south-1 Postgres

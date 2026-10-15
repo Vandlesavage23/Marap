@@ -54,6 +54,7 @@ ignore = ["S607", "RUF001", "RUF002", "RUF003", "RUF012", "E501", "UP046", "UP04
 "**/tests/**" = ["S101", "S105", "S106", "S311", "S603", "S608", "DJ008", "SIM117", "RUF059"]
 "tests/**" = ["S101", "S105", "S106", "S311"]
 "conftest.py" = ["S106"]
+"devtools/**" = ["S311"]
 "config/settings/*.py" = ["F403", "F405", "E402", "S105"]
 
 [tool.mypy]
@@ -95,14 +96,14 @@ exclude_type_checking_imports = true
 name = "common is a leaf: it never imports domain modules"
 type = "forbidden"
 source_modules = ["mc.common"]
-forbidden_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.media", "mc.profiles", "mc.questionnaire", "mc.verification"]
+forbidden_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.entitlements", "mc.interests", "mc.media", "mc.profiles", "mc.questionnaire", "mc.safety", "mc.verification"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "accounts internals are private to accounts"
 type = "forbidden"
-source_modules = ["mc.audit", "mc.entitlements", "mc.media", "mc.profiles", "mc.questionnaire", "mc.verification"]
+source_modules = ["mc.audit", "mc.discovery", "mc.entitlements", "mc.interests", "mc.media", "mc.profiles", "mc.questionnaire", "mc.safety", "mc.verification"]
 forbidden_modules = ["mc.accounts.models", "mc.accounts.api", "mc.accounts.tasks", "mc.accounts.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
@@ -110,23 +111,39 @@ ignore_imports = ["mc.**.tests.** -> mc.**"]
 [[tool.importlinter.contracts]]
 name = "audit internals are private to audit"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.entitlements", "mc.media", "mc.profiles", "mc.questionnaire", "mc.verification"]
+source_modules = ["mc.accounts", "mc.discovery", "mc.entitlements", "mc.interests", "mc.media", "mc.profiles", "mc.questionnaire", "mc.safety", "mc.verification"]
 forbidden_modules = ["mc.audit.models", "mc.audit.api", "mc.audit.tasks", "mc.audit.admin_views"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
+
+[[tool.importlinter.contracts]]
+name = "discovery internals are private to discovery"
+type = "forbidden"
+source_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.interests", "mc.media", "mc.profiles", "mc.questionnaire", "mc.safety", "mc.verification"]
+forbidden_modules = ["mc.discovery.models", "mc.discovery.api", "mc.discovery.tasks", "mc.discovery.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "entitlements internals are private to entitlements"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.audit", "mc.media", "mc.profiles", "mc.questionnaire", "mc.verification"]
+source_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.interests", "mc.media", "mc.profiles", "mc.questionnaire", "mc.safety", "mc.verification"]
 forbidden_modules = ["mc.entitlements.models", "mc.entitlements.api", "mc.entitlements.tasks", "mc.entitlements.admin_views"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
+
+[[tool.importlinter.contracts]]
+name = "interests internals are private to interests"
+type = "forbidden"
+source_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.entitlements", "mc.media", "mc.profiles", "mc.questionnaire", "mc.safety", "mc.verification"]
+forbidden_modules = ["mc.interests.models", "mc.interests.api", "mc.interests.tasks", "mc.interests.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "media internals are private to media"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.profiles", "mc.questionnaire", "mc.verification"]
+source_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.entitlements", "mc.interests", "mc.profiles", "mc.questionnaire", "mc.safety", "mc.verification"]
 forbidden_modules = ["mc.media.models", "mc.media.api", "mc.media.tasks", "mc.media.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
@@ -134,7 +151,7 @@ ignore_imports = ["mc.**.tests.** -> mc.**"]
 [[tool.importlinter.contracts]]
 name = "profiles internals are private to profiles"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.media", "mc.questionnaire", "mc.verification"]
+source_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.entitlements", "mc.interests", "mc.media", "mc.questionnaire", "mc.safety", "mc.verification"]
 forbidden_modules = ["mc.profiles.models", "mc.profiles.api", "mc.profiles.tasks", "mc.profiles.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
@@ -142,15 +159,23 @@ ignore_imports = ["mc.**.tests.** -> mc.**"]
 [[tool.importlinter.contracts]]
 name = "questionnaire internals are private to questionnaire"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.media", "mc.profiles", "mc.verification"]
+source_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.entitlements", "mc.interests", "mc.media", "mc.profiles", "mc.safety", "mc.verification"]
 forbidden_modules = ["mc.questionnaire.models", "mc.questionnaire.api", "mc.questionnaire.tasks", "mc.questionnaire.admin_views"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
+
+[[tool.importlinter.contracts]]
+name = "safety internals are private to safety"
+type = "forbidden"
+source_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.entitlements", "mc.interests", "mc.media", "mc.profiles", "mc.questionnaire", "mc.verification"]
+forbidden_modules = ["mc.safety.models", "mc.safety.api", "mc.safety.tasks", "mc.safety.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "verification internals are private to verification"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.media", "mc.profiles", "mc.questionnaire"]
+source_modules = ["mc.accounts", "mc.audit", "mc.discovery", "mc.entitlements", "mc.interests", "mc.media", "mc.profiles", "mc.questionnaire", "mc.safety"]
 forbidden_modules = ["mc.verification.models", "mc.verification.api", "mc.verification.tasks", "mc.verification.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
