@@ -18,7 +18,7 @@ from mc.common.redis import get_redis
 
 from . import phone as phone_utils
 from . import selectors, tokens
-from .events import NewDeviceSignIn
+from .events import ConsentChanged, NewDeviceSignIn
 from .models import Account, ConsentRecord, Device, Session
 from .providers.sms import get_sms_provider
 from .tasks import send_new_device_alert
@@ -246,7 +246,12 @@ def record_consent(
             )
         )
     with transaction.atomic():
-        return ConsentRecord.objects.bulk_create(rows)
+        created = ConsentRecord.objects.bulk_create(rows)
+        for row in created:
+            events.publish(
+                ConsentChanged(account_id=account.id, kind=row.kind, granted=row.granted)
+            )
+        return created
 
 
 def require_verification_consents(account: Account) -> None:

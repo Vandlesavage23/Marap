@@ -7,6 +7,7 @@ from freezegun import freeze_time
 from mc.accounts.models import Account, Session
 from mc.accounts.tests.helpers import bearer
 from mc.common import events
+from mc.common.timeutil import age_on, kampala_date
 from mc.verification import reasons, services
 from mc.verification.events import AccountVerified, SafetyFlagRaised
 from mc.verification.models import VerificationAttempt
@@ -184,9 +185,9 @@ def test_age_computed_in_kampala_date(now, dob, adult):
 
 
 def test_age_helpers():
-    assert services.age_on(date(2000, 2, 29), date(2018, 2, 28)) == 17
-    assert services.age_on(date(2000, 2, 29), date(2018, 3, 1)) == 18
-    assert services.kampala_date(datetime(2026, 5, 31, 21, 0, tzinfo=UTC)) == date(2026, 6, 1)
+    assert age_on(date(2000, 2, 29), date(2018, 2, 28)) == 17
+    assert age_on(date(2000, 2, 29), date(2018, 3, 1)) == 18
+    assert kampala_date(datetime(2026, 5, 31, 21, 0, tzinfo=UTC)) == date(2026, 6, 1)
 
 
 def test_duplicate_identity_fails_and_flags_second_account_only(django_capture_on_commit_callbacks):

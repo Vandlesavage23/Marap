@@ -9,9 +9,8 @@ another passed account.
 import json
 import uuid
 from collections.abc import Mapping
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
-from zoneinfo import ZoneInfo
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
@@ -30,6 +29,7 @@ from mc.common.errors import (
     ValidationFailed,
     VerificationPending,
 )
+from mc.common.timeutil import age_on, kampala_date
 
 from . import reasons, selectors
 from .events import AccountVerified, SafetyFlagRaised
@@ -40,16 +40,7 @@ from .providers.base import VendorResult
 if TYPE_CHECKING:
     from mc.accounts.models import Account
 
-KAMPALA = ZoneInfo("Africa/Kampala")
 TERMINAL = {"passed", "failed", "error", "expired"}
-
-
-def kampala_date(moment: datetime) -> date:
-    return moment.astimezone(KAMPALA).date()
-
-
-def age_on(dob: date, on: date) -> int:
-    return on.year - dob.year - ((on.month, on.day) < (dob.month, dob.day))
 
 
 def normalise_id_number(raw: str) -> str:

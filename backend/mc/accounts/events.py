@@ -10,3 +10,10 @@ class NewDeviceSignIn(DomainEvent):
 
     account_id: uuid.UUID
     device_id: uuid.UUID
+
+
+@dataclass(frozen=True)
+class ConsentChanged(DomainEvent):
+    account_id: uuid.UUID
+    kind: str
+    granted: bool

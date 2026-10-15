@@ -194,3 +194,4 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 INSTALLED_APPS += ["mc.entitlements"]
+INSTALLED_APPS += ["mc.profiles"]

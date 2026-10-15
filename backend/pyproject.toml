@@ -44,7 +44,7 @@ extend-exclude = ["migrations"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "S", "DJ", "SIM", "C4", "RUF"]
-ignore = ["RUF012", "E501", "UP046", "UP047"]
+ignore = ["RUF001", "RUF002", "RUF003", "RUF012", "E501", "UP046", "UP047"]
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S101", "S105", "S106", "S311", "S608", "DJ008", "SIM117", "RUF059"]
@@ -90,14 +90,14 @@ exclude_type_checking_imports = true
 name = "common is a leaf: it never imports domain modules"
 type = "forbidden"
 source_modules = ["mc.common"]
-forbidden_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.verification"]
+forbidden_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.profiles", "mc.verification"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "accounts internals are private to accounts"
 type = "forbidden"
-source_modules = ["mc.audit", "mc.entitlements", "mc.verification"]
+source_modules = ["mc.audit", "mc.entitlements", "mc.profiles", "mc.verification"]
 forbidden_modules = ["mc.accounts.models", "mc.accounts.api", "mc.accounts.tasks", "mc.accounts.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
@@ -105,7 +105,7 @@ ignore_imports = ["mc.**.tests.** -> mc.**"]
 [[tool.importlinter.contracts]]
 name = "audit internals are private to audit"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.entitlements", "mc.verification"]
+source_modules = ["mc.accounts", "mc.entitlements", "mc.profiles", "mc.verification"]
 forbidden_modules = ["mc.audit.models", "mc.audit.api", "mc.audit.tasks", "mc.audit.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
@@ -113,15 +113,23 @@ ignore_imports = ["mc.**.tests.** -> mc.**"]
 [[tool.importlinter.contracts]]
 name = "entitlements internals are private to entitlements"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.audit", "mc.verification"]
+source_modules = ["mc.accounts", "mc.audit", "mc.profiles", "mc.verification"]
 forbidden_modules = ["mc.entitlements.models", "mc.entitlements.api", "mc.entitlements.tasks", "mc.entitlements.admin_views"]
+allow_indirect_imports = true
+ignore_imports = ["mc.**.tests.** -> mc.**"]
+
+[[tool.importlinter.contracts]]
+name = "profiles internals are private to profiles"
+type = "forbidden"
+source_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.verification"]
+forbidden_modules = ["mc.profiles.models", "mc.profiles.api", "mc.profiles.tasks", "mc.profiles.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
 name = "verification internals are private to verification"
 type = "forbidden"
-source_modules = ["mc.accounts", "mc.audit", "mc.entitlements"]
+source_modules = ["mc.accounts", "mc.audit", "mc.entitlements", "mc.profiles"]
 forbidden_modules = ["mc.verification.models", "mc.verification.api", "mc.verification.tasks", "mc.verification.admin_views"]
 allow_indirect_imports = true
 ignore_imports = ["mc.**.tests.** -> mc.**"]
