@@ -75,8 +75,8 @@ class FcmPush:
         body = urllib.parse.urlencode(
             {"grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer", "assertion": assertion}
         ).encode()
-        with urllib.request.urlopen(  # noqa: S310
-            urllib.request.Request(sa["token_uri"], data=body),  # noqa: S310
+        with urllib.request.urlopen(
+            urllib.request.Request(sa["token_uri"], data=body),
             timeout=10,
         ) as resp:
             data = json.loads(resp.read())
@@ -104,7 +104,7 @@ class FcmPush:
             },
         )
         try:
-            urllib.request.urlopen(req, timeout=10)  # noqa: S310
+            urllib.request.urlopen(req, timeout=10)
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode(errors="ignore")
             if exc.code in (400, 404) and (

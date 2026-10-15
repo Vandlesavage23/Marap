@@ -36,3 +36,8 @@ AWS_SECRET_ACCESS_KEY = "testing"
 AWS_S3_ENDPOINT_URL = ""
 
 INSTALLED_APPS += ["devtools"]  # dev-only management commands (seed_demo, bench_hard_filter)
+
+STORE_PROVIDER_GOOGLE = "mc.billing.providers.google.FakePlayApi"
+APPLE_ENVIRONMENT = "Sandbox"
+GOOGLE_RTDN_AUDIENCE = "https://api.mc.test/webhooks/google"
+GOOGLE_RTDN_SERVICE_ACCOUNT = "pubsub-push@mc-test.iam.gserviceaccount.com"

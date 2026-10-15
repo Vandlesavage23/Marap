@@ -1,5 +1,6 @@
 from django.db import models
 
+from mc.common.crypto import EncryptedTextField
 from mc.common.models import BaseModel
 
 
@@ -89,6 +90,8 @@ class Purchase(BaseModel):
     last_event = models.ForeignKey(
         PaymentEvent, null=True, on_delete=models.SET_NULL, related_name="+"
     )
+    # Google Play purchase token (needed to re-query Google in reconciliation). Field-encrypted; never logged.
+    provider_token = EncryptedTextField(null=True, blank=True)
 
     class Meta:
         constraints = [

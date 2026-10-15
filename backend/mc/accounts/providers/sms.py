@@ -47,13 +47,13 @@ class AfricasTalkingSms:
                 **({"from": settings.AT_SENDER_ID} if settings.AT_SENDER_ID else {}),
             }
         ).encode()
-        req = urllib.request.Request(  # noqa: S310 - fixed https URL
+        req = urllib.request.Request(
             self.url,
             data=data,
             headers={"apiKey": settings.AT_API_KEY, "Accept": "application/json"},
         )
         try:
-            with urllib.request.urlopen(req, timeout=10) as resp:  # noqa: S310
+            with urllib.request.urlopen(req, timeout=10) as resp:
                 payload = json.loads(resp.read())
         except Exception as exc:
             raise ProviderError("sms provider error") from exc

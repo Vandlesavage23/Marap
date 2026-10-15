@@ -239,3 +239,16 @@ CELERY_BEAT_SCHEDULE["billing-retry-failed"] = {
     "task": "mc.billing.tasks.retry_failed",
     "schedule": 600.0,
 }
+
+# Store billing (Bible §11.2). Root certificates and credentials are injected per environment.
+APPLE_BUNDLE_ID = env("APPLE_BUNDLE_ID", "ug.marriageconnect.app")
+APPLE_ENVIRONMENT = env("APPLE_ENVIRONMENT", "Sandbox")  # Production | Sandbox
+APPLE_ROOT_CERTS_PEM: list[str] = _json.loads(
+    env("APPLE_ROOT_CERTS_PEM_JSON", "[]")
+)  # Apple Root CA - G3
+GOOGLE_PACKAGE_NAME = env("GOOGLE_PACKAGE_NAME", "ug.marriageconnect.app")
+GOOGLE_RTDN_AUDIENCE = env("GOOGLE_RTDN_AUDIENCE", "")
+GOOGLE_RTDN_SERVICE_ACCOUNT = env("GOOGLE_RTDN_SERVICE_ACCOUNT", "")
+GOOGLE_SERVICE_ACCOUNT_JSON = env("GOOGLE_SERVICE_ACCOUNT_JSON", "{}")
+STORE_PROVIDER_APPLE = env("STORE_PROVIDER_APPLE", "mc.billing.providers.apple.AppleStore")
+STORE_PROVIDER_GOOGLE = env("STORE_PROVIDER_GOOGLE", "mc.billing.providers.google.GooglePlayStore")

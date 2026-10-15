@@ -75,3 +75,12 @@ def _fake_push():
     FakePush.reset()
     yield FakePush
     FakePush.reset()
+
+
+@pytest.fixture(autouse=True)
+def _fake_play():
+    from mc.billing.providers.google import FakePlayApi
+
+    FakePlayApi.reset()
+    yield FakePlayApi
+    FakePlayApi.reset()
