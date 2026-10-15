@@ -2,7 +2,9 @@
 
 from typing import Any
 
+import redis.exceptions
 from django.core.exceptions import PermissionDenied
+from django.db import InterfaceError, OperationalError
 from django.http import Http404
 from rest_framework import exceptions as drf
 from rest_framework.response import Response
@@ -48,6 +50,18 @@ def problem_exception_handler(exc: Exception, context: dict[str, Any]) -> Respon
             {"Retry-After": str(exc.retry_after)} if isinstance(exc, errors.RateLimited) else None
         )
         return _response(body, headers)
+    if isinstance(exc, redis.exceptions.RedisError | OperationalError | InterfaceError):
+        # Dependency outage (Redis / Postgres): a clean, retryable 503 — never a stack trace. The transaction that
+        # raised it has already rolled back, so nothing is half-written.
+        return _response(
+            problem_body(
+                code="service_unavailable",
+                title="Service temporarily unavailable",
+                status=503,
+                detail="Please try again in a moment.",
+            ),
+            {"Retry-After": "5"},
+        )
     if isinstance(exc, Http404):
         exc = drf.NotFound()
     elif isinstance(exc, PermissionDenied):
