@@ -16,3 +16,4 @@ IDENTITY_PROVIDER = env("IDENTITY_PROVIDER")  # required: never the fake in prod
 MALWARE_SCANNER = env("MALWARE_SCANNER")  # required: never the fake in prod
 IMAGE_MODERATION_PROVIDER = env("IMAGE_MODERATION_PROVIDER")
 PUSH_PROVIDER = env("PUSH_PROVIDER")  # required: never the fake in prod
+PAYMENT_GATEWAY = env("PAYMENT_GATEWAY")  # required: never the fake in prod

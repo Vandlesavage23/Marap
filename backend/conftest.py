@@ -84,3 +84,12 @@ def _fake_play():
     FakePlayApi.reset()
     yield FakePlayApi
     FakePlayApi.reset()
+
+
+@pytest.fixture(autouse=True)
+def _fake_gateway():
+    from mc.billing.providers.flutterwave import FakeGateway
+
+    FakeGateway.reset()
+    yield FakeGateway
+    FakeGateway.reset()

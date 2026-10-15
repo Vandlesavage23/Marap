@@ -231,7 +231,9 @@ def test_rtdn_cancel_renew_revoke_and_void(oidc):
     assert push(oidc(), void).status_code == 200
     p.refresh_from_db()
     assert p.status == "refunded"
-    assert services.ledger_balance(p) == 20000  # two charges (purchase + renewal); one voided order refunded
+    assert (
+        services.ledger_balance(p) == 20000
+    )  # two charges (purchase + renewal); one voided order refunded
     assert ent.entitlement_summary(who[2]).state != "member"
 
 

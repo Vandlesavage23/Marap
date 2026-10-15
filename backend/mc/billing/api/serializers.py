@@ -19,3 +19,10 @@ class StoreVerifySerializer(serializers.Serializer):
                 "product_id and purchase_token are required for Android."
             )
         return attrs
+
+
+class CheckoutSerializer(serializers.Serializer):
+    product_code = serializers.CharField(max_length=30)
+    method = serializers.ChoiceField(choices=["mobile_money", "card"])
+    phone = serializers.CharField(max_length=32, required=False, allow_blank=True, default="")
+    network = serializers.CharField(max_length=10, required=False, allow_blank=True, default="")

@@ -75,7 +75,7 @@ def state_for(
         verified=verified,
         trial_used=trial is not None,
         trial_ends_at=trial.ends_at if trial else None,
-        membership_ends_at=member.ends_at if member else None,
+        membership_ends_at=membership_ends_at(account_id, now) if member else None,
         membership_source=member.source if member else None,
         capabilities=_capabilities(state, verified),
     )
@@ -97,10 +97,11 @@ def has_capability(account, capability: str, now: datetime | None = None) -> boo
 
 
 def membership_ends_at(account_id: uuid.UUID, now: datetime | None = None) -> datetime | None:
-    """Latest end of any active non-trial window (billing uses it to extend overlapping purchases)."""
+    """Latest end of any non-revoked, non-trial window that hasn't ended, including windows that start later
+    (queued back-to-back purchases). Billing uses it to start the next prepaid period where access ends."""
     now = now or timezone.now()
     ent = (
-        _active(account_id, now)
+        Entitlement.objects.filter(account_id=account_id, revoked_at__isnull=True, ends_at__gt=now)
         .exclude(source=Entitlement.Source.TRIAL)
         .order_by("-ends_at")
         .first()
