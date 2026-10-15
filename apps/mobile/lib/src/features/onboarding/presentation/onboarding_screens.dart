@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
+import 'package:marriage_connect/src/features/me/application/me_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
 
@@ -248,7 +249,11 @@ class _ConsentsScreenState extends ConsumerState<ConsentsScreen> {
   Future<void> _submit() async {
     final ok =
         await ref.read(onboardingProvider.notifier).submitConsents(_granted);
-    if (ok && mounted) context.go('/home');
+    if (!ok || !mounted) return;
+    // The guard routes on server state: re-read /me, then let it pick the
+    // next step (verification, builder or home).
+    ref.invalidate(meProvider);
+    context.go('/home');
   }
 
   @override

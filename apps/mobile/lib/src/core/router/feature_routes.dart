@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:marriage_connect/src/features/membership/membership_routes.dart';
 
 /// Each feature exposes its routes from its own file; this is the only place
 /// they are combined (keeps parallel feature work from conflicting in the router).
@@ -15,4 +16,4 @@ final List<RouteBase> profileTrackRoutes = [];
 final List<RouteBase> socialTrackRoutes = [];
 
 /// membership, safety, settings, beta feedback — owned by the membership track.
-final List<RouteBase> membershipTrackRoutes = [];
+final List<RouteBase> membershipTrackRoutes = buildMembershipTrackRoutes();

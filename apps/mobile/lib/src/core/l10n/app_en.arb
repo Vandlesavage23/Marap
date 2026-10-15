@@ -55,5 +55,639 @@
   "consentTransfer": "I understand my data is processed on servers outside Uganda as described in the Privacy Notice",
   "consentsNote": "You can withdraw consent later in Settings.",
   "consentsAgree": "Agree and continue",
-  "errorValidation": "Please check what you entered."
+  "errorValidation": "Please check what you entered.",
+  "memberTrialTitle": "Try Marriage Connect free for 24 hours",
+  "memberTrialBody1": "Your free trial lasts 24 hours from the moment you tap the button below. No payment details are needed.",
+  "memberTrialBody2": "When it ends, browsing, sending interests and sending messages stop until you take a membership. You can still read your conversations and use your account controls.",
+  "memberTrialBody3": "Nothing renews or charges automatically after the trial. Membership is optional.",
+  "memberTrialPlansHeading": "Membership after the trial",
+  "memberTrialPlanLine": "{period}: {price}",
+  "@memberTrialPlanLine": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "memberTrialStart": "Start my 24-hour trial",
+  "memberTrialNotNow": "Not now",
+  "memberTrialAlreadyUsed": "You've already used your free trial.",
+  "memberTrialStarted": "Your free trial has started.",
+  "memberErrTrialUsed": "You've already used your free trial. You can take a membership instead.",
+  "memberErrConflict": "That's already being processed. Please try again in a moment.",
+  "memberErrProvider": "We couldn't reach the store to confirm this. Please try again.",
+  "memberErrForbidden": "You don't have access to this right now.",
+  "memberStatusTitle": "Your membership",
+  "memberStateNone": "No active membership",
+  "memberStateTrial": "Free trial",
+  "memberStateMember": "Member",
+  "memberStateExpired": "Membership ended",
+  "memberTrialEnds": "Your free trial ends on {when}.",
+  "@memberTrialEnds": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "memberMembershipEnds": "Your membership is active until {when}.",
+  "@memberMembershipEnds": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "memberMembershipStoreRenews": "It renews automatically until you cancel it in the store.",
+  "memberExpiredBody": "Your membership has ended. You can still read your conversations, and your account controls work as usual.",
+  "memberNoneBody": "You don't have a trial or membership yet.",
+  "memberViewPlans": "See membership options",
+  "memberManage": "Manage membership in the store",
+  "memberManageIos": "Opens your App Store subscriptions, where you can change or cancel.",
+  "memberManageAndroid": "Opens your Google Play subscriptions, where you can change or cancel.",
+  "memberManageFailed": "We couldn't open the store. Open your store's subscription settings to change or cancel.",
+  "memberGateBrowse": "Browsing needs an active free trial or membership.",
+  "memberGateSendInterest": "Sending an interest needs an active free trial or membership.",
+  "memberGateAcceptInterest": "Accepting an interest needs an active free trial or membership.",
+  "memberGateSendMessage": "Sending messages needs an active free trial or membership. You can still read your conversations.",
+  "memberGateReceiveInterest": "You can't receive interests right now.",
+  "memberGateReadConversations": "You can't open conversations right now.",
+  "memberGateNotVerified": "Finish identity verification first. It unlocks the free trial and everything else.",
+  "memberGateTrialUnused": "You haven't used your free trial yet. It's free for 24 hours and needs no payment details.",
+  "memberGateStartTrial": "Start free trial",
+  "memberGateSeePlans": "See membership options",
+  "memberGateNotNow": "Not now",
+  "memberReadOnlyChat": "This conversation is read-only because you don't have an active membership. You can still read everything here.",
+  "paywallTitle": "Membership",
+  "paywallIntro": "Membership lets you browse, send interests and send messages. Choose a plan if you'd like one. You can also say no, and nothing changes.",
+  "paywallPeriodMonths": "{count, plural, =1{1 month} other{{count} months}}",
+  "@paywallPeriodMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallPeriodDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@paywallPeriodDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "paywallProductTitle": "Membership, {period}",
+  "@paywallProductTitle": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallPrice": "{price} for {period}",
+  "@paywallPrice": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      },
+      "period": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallSubscribe": "Subscribe for {price}",
+  "@paywallSubscribe": {
+    "placeholders": {
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallRenewalIos": "Renews automatically every {period} at {price} until you cancel. Payment is charged to your Apple ID.",
+  "@paywallRenewalIos": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallRenewalAndroid": "Renews automatically every {period} at {price} until you cancel. Payment is charged to your Google Play account.",
+  "@paywallRenewalAndroid": {
+    "placeholders": {
+      "period": {
+        "type": "String"
+      },
+      "price": {
+        "type": "String"
+      }
+    }
+  },
+  "paywallCancelIos": "To cancel, open Settings, tap your name, then Subscriptions, at least 24 hours before the renewal date. You keep access until the end of the period you've paid for.",
+  "paywallCancelAndroid": "To cancel, open Google Play, then Payments and subscriptions, then Subscriptions, before the renewal date. You keep access until the end of the period you've paid for.",
+  "paywallNotNow": "Not now",
+  "paywallRestore": "Restore purchases",
+  "paywallRestoreNone": "We found no purchases to restore on this store account.",
+  "paywallRestored": "Your membership has been restored.",
+  "paywallPurchasePending": "Your purchase is waiting for approval. We'll update your membership when the store confirms it.",
+  "paywallPurchaseSuccess": "Thank you. Your membership is active.",
+  "paywallPurchaseCancelled": "Purchase cancelled. You haven't been charged.",
+  "paywallPurchaseFailed": "The store couldn't complete the purchase. You haven't been charged.",
+  "paywallVerifyFailed": "The store took your payment but we couldn't confirm it yet. Please don't pay again. Tap Restore purchases or try again shortly.",
+  "paywallStoreUnavailable": "The store isn't available on this device right now.",
+  "paywallNoProducts": "No membership plans are available right now.",
+  "paywallProcessing": "Confirming with the store...",
+  "safetyCentreTitle": "Safety centre",
+  "safetyCentreEmpty": "Safety information isn't available right now.",
+  "safetyReportAction": "Report",
+  "safetyBlockAction": "Block",
+  "safetyReportTitle": "Report",
+  "safetyReportWhy": "What's the problem?",
+  "safetyCatScam": "Scam or asking for money",
+  "safetyCatFinancial": "Asking me for money or payments",
+  "safetyCatHarassment": "Harassment or abuse",
+  "safetyCatSexual": "Sexual or inappropriate content",
+  "safetyCatThreat": "Threats or danger",
+  "safetyCatUnderage": "Seems under 18",
+  "safetyCatImpersonation": "Pretending to be someone else",
+  "safetyCatMarried": "Hiding that they are married",
+  "safetyCatFake": "Fake profile",
+  "safetyCatSpam": "Spam",
+  "safetyCatOther": "Something else",
+  "safetyReportDetails": "Add details (optional)",
+  "safetyReportDetailsNote": "Please don't include phone numbers or other private details.",
+  "safetyReportAlsoBlock": "Also block this person",
+  "safetyReportSubmit": "Send report",
+  "safetyReportSent": "Thank you. We've received your report.",
+  "safetyReportSentBlocked": "Thank you. We've received your report and blocked this person.",
+  "safetyReportAbout": "Reports go to our safety team.",
+  "safetyBlockTitle": "Block this person?",
+  "safetyBlockBody": "You won't see each other or be able to contact each other. Any interest or match between you ends. They aren't told.",
+  "safetyBlockConfirm": "Block",
+  "safetyBlockCancel": "Cancel",
+  "safetyBlocked": "Blocked.",
+  "safetyBlockedListTitle": "Blocked people",
+  "safetyBlockedEmpty": "You haven't blocked anyone.",
+  "safetyUnblock": "Unblock",
+  "safetyUnblocked": "Unblocked. A past match isn't restored.",
+  "safetyAppealTitle": "Appeal a decision",
+  "safetyAppealSuspended": "Your account is suspended until {when}.",
+  "@safetyAppealSuspended": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "safetyAppealSuspendedOpen": "Your account is suspended.",
+  "safetyAppealBanned": "Your account has been closed for breaking our rules.",
+  "safetyAppealNone": "There's no decision to appeal.",
+  "safetyAppealBody": "If you think this was a mistake, tell us why. A different reviewer will look at it.",
+  "safetyAppealHint": "Explain in 10 to 1,000 characters. Please don't include phone numbers.",
+  "safetyAppealSubmit": "Send appeal",
+  "safetyAppealSent": "Your appeal has been sent.",
+  "safetyAppealAlready": "You've already appealed this decision.",
+  "safetyAppealTooShort": "Please write between 10 and 1,000 characters.",
+  "settingsTitle": "Settings",
+  "settingsMembership": "Membership",
+  "settingsPrivacy": "Privacy and consents",
+  "settingsSessions": "Signed-in devices",
+  "settingsSafety": "Safety centre",
+  "settingsBlocked": "Blocked people",
+  "settingsExport": "Download my data",
+  "settingsDelete": "Delete my account",
+  "settingsFeedback": "Send beta feedback",
+  "settingsConsentsIntro": "These are the permissions you've given us. You can change your mind at any time.",
+  "settingsConsentTerms": "Terms of Use",
+  "settingsConsentPrivacy": "Privacy Notice",
+  "settingsConsentTransfer": "Processing on servers outside Uganda",
+  "settingsConsentReligion": "Use my religion answers (optional)",
+  "settingsConsentFinance": "Use my money-attitude answers (optional)",
+  "settingsConsentMarried": "Show my married status to others (optional)",
+  "settingsConsentMarketing": "Send me news and offers (optional)",
+  "settingsConsentRequiredNote": "Terms, privacy and data-transfer are needed to use the app. Withdrawing them may stop parts of the app working. To have your data erased, delete your account.",
+  "settingsConsentGranted": "Allowed",
+  "settingsConsentWithdrawn": "Withdrawn",
+  "settingsConsentUnknown": "Not set",
+  "settingsConsentWithdraw": "Withdraw",
+  "settingsConsentAllow": "Allow",
+  "settingsConsentSaved": "Saved.",
+  "settingsSessionsEmpty": "No other devices are signed in.",
+  "settingsSessionThisDevice": "This device",
+  "settingsSessionAndroid": "Android device",
+  "settingsSessionIos": "iPhone or iPad",
+  "settingsSessionOther": "Other device",
+  "settingsSessionSince": "Signed in {when}",
+  "@settingsSessionSince": {
+    "placeholders": {
+      "when": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSessionRevoke": "Sign out",
+  "settingsSessionRevoked": "That device has been signed out.",
+  "settingsDeleteTitle": "Delete my account",
+  "settingsDeleteBody": "Your profile is hidden straight away and you're signed out everywhere. Matches and interests end. After a grace period your data is permanently erased, apart from the records we're legally required to keep. We'll show you the date.",
+  "settingsDeleteSubscription": "Deleting your account doesn't cancel an App Store or Google Play subscription. Cancel it in your store's subscription settings to stop renewals.",
+  "settingsDeleteSendCode": "Text me a confirmation code",
+  "settingsDeleteCodeSent": "We sent a 6-digit code to your phone. It's valid for a few minutes.",
+  "settingsDeleteCodeLabel": "6-digit code",
+  "settingsDeleteConfirm": "Delete my account",
+  "settingsDeleteCodeInvalid": "That code is invalid or has expired. Ask for a new one.",
+  "settingsDeleteDoneTitle": "Your account is deactivated",
+  "settingsDeleteDoneBody": "Your data will be permanently erased on {date}.",
+  "@settingsDeleteDoneBody": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsDeleteDoneBodyNoDate": "Your data will be permanently erased after the grace period.",
+  "settingsDeleteDone": "Done",
+  "settingsExportTitle": "Download my data",
+  "settingsExportBody": "We'll prepare a copy of your data. This can take up to 72 hours. The link also arrives by email and works for 7 days.",
+  "settingsExportRequest": "Request my data",
+  "settingsExportRequested": "Request received. Expected by {date}.",
+  "@settingsExportRequested": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsExportRequestedNoDate": "Request received. It can take up to 72 hours.",
+  "settingsExportReady": "Your data is ready.",
+  "settingsExportDownload": "Download",
+  "settingsExportCheck": "Check status",
+  "settingsExportOpenFailed": "We couldn't open the link. Please try again.",
+  "betaFeedbackTitle": "Beta feedback",
+  "betaFeedbackBody": "Tell us what's working and what isn't. Please don't include phone numbers, messages or other private details.",
+  "betaFeedbackHint": "Your feedback",
+  "betaFeedbackRating": "How is it going? (optional)",
+  "betaFeedbackSend": "Send feedback",
+  "betaFeedbackThanks": "Thank you. Your feedback has been sent.",
+  "betaFeedbackTooLong": "Please keep it under 2,000 characters.",
+  "discTitle": "Discover",
+  "discFilters": "Filters",
+  "discPass": "Pass",
+  "discNotRelevant": "Not for me",
+  "discInterested": "Send interest",
+  "discWhyButton": "Why this match?",
+  "discWhyTitle": "Why we suggest this person",
+  "discWhyNone": "We don't have enough shared answers to explain this one yet.",
+  "discDiscussTitle": "Worth talking about",
+  "discEmptyTitle": "No new profiles right now",
+  "discEmptyBody": "Check back soon, or widen your filters.",
+  "discDoneTitle": "You've seen everyone for now",
+  "discDoneBody": "New people join every day. Check back later.",
+  "discLimitTitle": "That's plenty for today",
+  "discLimitBody": "Come back tomorrow for more people.",
+  "discRestrictedReason": "Browsing needs an active trial or membership.",
+  "discProfileIncomplete": "Finish your profile to start discovering people.",
+  "discBandStrong": "Strong match",
+  "discBandGood": "Good match",
+  "discBandPossible": "Possible match",
+  "discNameAge": "{name}, {age}",
+  "@discNameAge": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "discCardSemantics": "{name}, {age}, {district}",
+  "@discCardSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      },
+      "district": {
+        "type": "String"
+      }
+    }
+  },
+  "discTapToLoad": "Tap to load photo",
+  "discNoPhoto": "No photo yet",
+  "discBadgeAge": "Age verified",
+  "discBadgeIdentity": "Identity verified",
+  "discBadgePhoto": "Photo verified",
+  "discViewProfile": "View full profile",
+  "discProfileTitle": "Profile",
+  "discAbout": "About",
+  "discLanguages": "Languages",
+  "discWork": "Work",
+  "discEducation": "Education",
+  "discIntention": "Looking for",
+  "discTimeline": "Timeline",
+  "discChildren": "Children",
+  "discIntentionMarriageSoon": "Marriage soon",
+  "discIntentionOpenTimeline": "Marriage, no fixed timeline",
+  "discTimelineWithin1y": "Within a year",
+  "discTimeline1to2y": "In 1 to 2 years",
+  "discTimeline2to4y": "In 2 to 4 years",
+  "discTimelineOpen": "Open",
+  "discHasChildrenNo": "No children",
+  "discHasChildrenWithMe": "Has children living with them",
+  "discHasChildrenNotWithMe": "Has children not living with them",
+  "discWantsYes": "Wants children",
+  "discWantsNo": "Doesn't want children",
+  "discWantsUnsure": "Unsure about children",
+  "discEduPrimary": "Primary school",
+  "discEduSecondary": "Secondary school",
+  "discEduCertificate": "Certificate or diploma",
+  "discEduBachelors": "Bachelor's degree",
+  "discEduPostgraduate": "Postgraduate",
+  "discFiltersTitle": "Who you see",
+  "discAgeRange": "Age {min} to {max}",
+  "@discAgeRange": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "discDistanceLabel": "Maximum distance",
+  "discDistanceKm": "{km} km",
+  "@discDistanceKm": {
+    "placeholders": {
+      "km": {
+        "type": "int"
+      }
+    }
+  },
+  "discDistanceAny": "Any distance",
+  "discDiaspora": "Include people living abroad",
+  "discChildrenOk": "Open to people who have children",
+  "discApply": "Apply filters",
+  "discFiltersFailed": "We couldn't save your filters.",
+  "discHiddenNote": "We won't show this profile again.",
+  "discPhotoCount": "Photo {n} of {total}",
+  "@discPhotoCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "interestSendTitle": "Send an interest",
+  "interestSendBody": "{name} will see this description right away. Make sure it sounds like you.",
+  "@interestSendBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "interestPreviewLabel": "Your description",
+  "interestNoDescription": "You need an approved description before you can send interests.",
+  "interestSendButton": "Send interest",
+  "interestSentTitle": "Interest sent",
+  "interestSentBody": "{name} can now see your description. You can send {n} more today.",
+  "@interestSentBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "interestMatchedTitle": "It's a match",
+  "interestMatchedBody": "{name} was already interested in you. You can start talking now.",
+  "@interestMatchedBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "interestOpenChat": "Open chat",
+  "interestDone": "Done",
+  "interestErrDuplicate": "You already have a pending interest with this person.",
+  "interestErrNotEligible": "You can't send an interest to this profile.",
+  "interestErrLimit": "You've reached today's limit. Try again tomorrow.",
+  "interestErrDescription": "Your description isn't approved yet.",
+  "interestErrProfile": "Finish your profile before sending interests.",
+  "interestTitle": "Interests",
+  "interestTabReceived": "Received",
+  "interestTabSent": "Sent",
+  "interestReceivedEmptyTitle": "No interests yet",
+  "interestReceivedEmptyBody": "When someone is interested in you, they'll appear here.",
+  "interestSentEmptyTitle": "You haven't sent any interests",
+  "interestSentEmptyBody": "Find people you like in Discover.",
+  "interestRestricted": "Verify your identity to see who's interested.",
+  "interestAccept": "Accept",
+  "interestPass": "Pass",
+  "interestAccepted": "You matched with {name}.",
+  "@interestAccepted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "interestPassedDone": "Passed.",
+  "interestStatusPending": "Waiting for a reply",
+  "interestStatusAccepted": "Accepted",
+  "interestStatusExpired": "Expired",
+  "interestExpires": "Expires {date}",
+  "@interestExpires": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "interestDetailTitle": "Interest",
+  "interestMessageLabel": "What {name} wrote",
+  "@interestMessageLabel": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "interestLoadMore": "Load more",
+  "interestNotFound": "We couldn't find that interest. It may have expired.",
+  "matchesTitle": "Matches",
+  "matchesEmptyTitle": "No matches yet",
+  "matchesEmptyBody": "When an interest is mutual, you'll see the person here.",
+  "matchesRestricted": "Verify your identity to see your matches.",
+  "matchesSince": "Matched {date}",
+  "@matchesSince": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yMMMd"
+      }
+    }
+  },
+  "matchesStaleBanner": "Showing your saved matches. We'll update them when you're back online.",
+  "matchesUnmatch": "Unmatch",
+  "matchesUnmatchTitle": "Unmatch {name}?",
+  "@matchesUnmatchTitle": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "matchesUnmatchBody": "You won't be able to message each other. This can't be undone.",
+  "matchesCancel": "Cancel",
+  "chatTitleFallback": "Chat",
+  "chatEmptyTitle": "Say hello",
+  "chatEmptyBody": "Start the conversation, politely and respectfully.",
+  "chatComposerHint": "Write a message",
+  "chatSend": "Send",
+  "chatReadOnlyBanner": "Your membership has ended. You can read this conversation but not reply.",
+  "chatContactNote": "For safety, phone numbers and links can't be shared in the first 3 days of a match.",
+  "chatContactBlocked": "That message looks like it has a phone number or link. For safety these can't be shared in the first 3 days of a match.",
+  "chatNotSent": "Not sent",
+  "chatDiscard": "Delete",
+  "chatWaiting": "Waiting for connection",
+  "chatDelivered": "Delivered",
+  "chatRead": "Read",
+  "chatConnecting": "Connecting…",
+  "chatReconnecting": "Reconnecting…",
+  "chatMatchEnded": "This conversation has ended.",
+  "chatSystemMatchCreated": "You matched. Say hello!",
+  "chatSystemOther": "Update",
+  "chatMessageDeleted": "This message was removed.",
+  "chatSafetyTip": "Be careful with requests for money or personal details. Never send money to someone you haven't met.",
+  "chatLoadOlder": "Load earlier messages",
+  "chatAttach": "Add photo",
+  "chatPhotoLocked": "Photos unlock once you've each sent {n} messages.",
+  "@chatPhotoLocked": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatPhotoProgress": "You: {you} of {n}. Them: {they} of {n}.",
+  "@chatPhotoProgress": {
+    "placeholders": {
+      "you": {
+        "type": "int"
+      },
+      "they": {
+        "type": "int"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "chatPhotoGallery": "Choose from gallery",
+  "chatPhotoCamera": "Take a photo",
+  "chatPhotoTapToLoad": "Tap to load photo",
+  "chatPhotoLabel": "Photo",
+  "chatVoiceStart": "Record a voice note",
+  "chatVoiceRecording": "Recording {seconds} s of {max} s",
+  "@chatVoiceRecording": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "chatVoiceCancel": "Cancel",
+  "chatVoiceSend": "Send voice note",
+  "chatVoicePlay": "Play voice note",
+  "chatVoicePause": "Pause voice note",
+  "chatVoiceTapToDownload": "Tap to download voice note",
+  "chatVoiceDuration": "{seconds} s",
+  "@chatVoiceDuration": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "chatVoicePermission": "Microphone access is needed to record a voice note.",
+  "chatUploading": "Sending…",
+  "chatUploadFailed": "We couldn't send that. Please try again.",
+  "chatMore": "More",
+  "meLoading": "Loading your account",
+  "verifTitle": "Verify your identity",
+  "verifLoading": "Loading verification status",
+  "verifIntroTitle": "Let's confirm it's really you",
+  "verifIntroBody": "Everyone on Marriage Connect is a verified adult. It takes about two minutes: you'll scan your ID and take a short selfie video.",
+  "verifIntroPrivacy": "We check your ID with our verification partner. We never show your name or ID number to anyone.",
+  "verifIdTypeHeading": "Which ID will you use?",
+  "verifIdNationalId": "National ID",
+  "verifIdPassport": "Passport",
+  "verifIdDriversLicense": "Driving permit",
+  "verifStartCapture": "Start verification",
+  "verifExpiredNote": "Your last attempt timed out. You can start again.",
+  "verifErrorNote": "We couldn't finish your last attempt. You can start again.",
+  "verifConsentsTitle": "One more step first",
+  "verifConsentsBody": "Please accept our Terms and Privacy Notice before verifying.",
+  "verifConsentsAction": "Review and accept",
+  "verifCaptureTitle": "Scan your ID",
+  "verifCaptureBody": "Find good light, hold your ID flat, and look straight at the camera for the selfie. Screenshots are turned off on this screen to protect your ID.",
+  "verifCaptureOpen": "Open camera",
+  "verifCaptureStarting": "Getting ready...",
+  "verifCaptureCapturing": "Follow the steps on screen...",
+  "verifCaptureSubmitting": "Sending your details...",
+  "verifCaptureUnavailable": "ID capture isn't available in this version of the app yet. Please update the app and try again.",
+  "verifCaptureFailed": "The capture didn't finish. Check your camera permission and try again.",
+  "verifErrorPending": "We're still checking your previous submission.",
+  "verifErrorLimit": "You've reached today's verification limit. Please try again tomorrow or contact support.",
+  "verifErrorForbidden": "Verification isn't available for this account.",
+  "verifErrorDuplicate": "This account is already verified.",
+  "verifPendingTitle": "We're checking your ID",
+  "verifPendingBody": "This usually takes a few minutes. You can close the app and come back; we'll tell you when it's done.",
+  "verifReviewTitle": "A person is reviewing your ID",
+  "verifReviewBody": "This can take longer than usual. We'll tell you as soon as there's a result.",
+  "verifCheckAgain": "Check again",
+  "verifFailedTitle": "We couldn't verify you",
+  "verifReasonFaceMismatch": "Your selfie didn't match the photo on your ID.",
+  "verifReasonDocUnreadable": "We couldn't read your ID. Try again in better light.",
+  "verifReasonDocExpired": "That ID has expired. Please use one that is still valid.",
+  "verifReasonLiveness": "The selfie check didn't pass. Try again in good light, facing the camera.",
+  "verifReasonUnderage": "You must be 18 or older to use Marriage Connect.",
+  "verifReasonDuplicate": "This ID is already linked to another account.",
+  "verifReasonBanned": "This ID can't be used on Marriage Connect.",
+  "verifReasonMissingData": "We couldn't read all the details on your ID. Try again or use a different ID.",
+  "verifReasonGeneric": "We couldn't confirm your details this time.",
+  "verifTryAgain": "Try again",
+  "verifAppealHeading": "Think we got it wrong?",
+  "verifAppealBody": "You can ask a person to take another look.",
+  "verifAppealAction": "Appeal this decision",
+  "verifAppealSupportOnly": "This decision can only be reviewed by our support team.",
+  "verifAppealSent": "Your appeal has been sent. A person will review it.",
+  "verifAppealTitle": "Appeal",
+  "verifAppealPrompt": "Tell us what happened and why you think the result is wrong.",
+  "verifAppealHint": "Your message (10 to 1,000 characters)",
+  "verifAppealTooShort": "Please write at least 10 characters.",
+  "verifAppealSubmit": "Send appeal",
+  "verifAppealBack": "Back to verification",
+  "verifPassedTitle": "You're verified",
+  "verifPassedBody": "Thank you. Next, let's build your profile.",
+  "verifPassedContinue": "Build my profile"
 }

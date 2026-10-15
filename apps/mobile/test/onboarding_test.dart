@@ -8,6 +8,7 @@ import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/router/app_router.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/features/me/data/me_repository.dart';
 import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
 import 'package:marriage_connect/src/features/onboarding/presentation/onboarding_screens.dart';
@@ -71,7 +72,14 @@ Widget app(FakeAuth fake, {String start = '/onboarding'}) {
 void main() {
   test('router: signed-in users stay on consents, then are sent home', () {
     expect(appRedirect(SessionState.signedIn, '/onboarding/consents'), isNull);
-    expect(appRedirect(SessionState.signedIn, '/onboarding/otp'), '/home');
+    expect(
+      appRedirect(
+        SessionState.signedIn,
+        '/onboarding/otp',
+        me: MeSnapshot.complete,
+      ),
+      '/home',
+    );
   });
 
   testWidgets('full happy path: welcome → how → phone → otp → consents → home',

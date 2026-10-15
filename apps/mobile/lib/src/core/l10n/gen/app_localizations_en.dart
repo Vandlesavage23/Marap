@@ -146,4 +146,1307 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorValidation => 'Please check what you entered.';
+
+  @override
+  String get memberTrialTitle => 'Try Marriage Connect free for 24 hours';
+
+  @override
+  String get memberTrialBody1 =>
+      'Your free trial lasts 24 hours from the moment you tap the button below. No payment details are needed.';
+
+  @override
+  String get memberTrialBody2 =>
+      'When it ends, browsing, sending interests and sending messages stop until you take a membership. You can still read your conversations and use your account controls.';
+
+  @override
+  String get memberTrialBody3 =>
+      'Nothing renews or charges automatically after the trial. Membership is optional.';
+
+  @override
+  String get memberTrialPlansHeading => 'Membership after the trial';
+
+  @override
+  String memberTrialPlanLine(String period, String price) {
+    return '$period: $price';
+  }
+
+  @override
+  String get memberTrialStart => 'Start my 24-hour trial';
+
+  @override
+  String get memberTrialNotNow => 'Not now';
+
+  @override
+  String get memberTrialAlreadyUsed => 'You\'ve already used your free trial.';
+
+  @override
+  String get memberTrialStarted => 'Your free trial has started.';
+
+  @override
+  String get memberErrTrialUsed =>
+      'You\'ve already used your free trial. You can take a membership instead.';
+
+  @override
+  String get memberErrConflict =>
+      'That\'s already being processed. Please try again in a moment.';
+
+  @override
+  String get memberErrProvider =>
+      'We couldn\'t reach the store to confirm this. Please try again.';
+
+  @override
+  String get memberErrForbidden => 'You don\'t have access to this right now.';
+
+  @override
+  String get memberStatusTitle => 'Your membership';
+
+  @override
+  String get memberStateNone => 'No active membership';
+
+  @override
+  String get memberStateTrial => 'Free trial';
+
+  @override
+  String get memberStateMember => 'Member';
+
+  @override
+  String get memberStateExpired => 'Membership ended';
+
+  @override
+  String memberTrialEnds(String when) {
+    return 'Your free trial ends on $when.';
+  }
+
+  @override
+  String memberMembershipEnds(String when) {
+    return 'Your membership is active until $when.';
+  }
+
+  @override
+  String get memberMembershipStoreRenews =>
+      'It renews automatically until you cancel it in the store.';
+
+  @override
+  String get memberExpiredBody =>
+      'Your membership has ended. You can still read your conversations, and your account controls work as usual.';
+
+  @override
+  String get memberNoneBody => 'You don\'t have a trial or membership yet.';
+
+  @override
+  String get memberViewPlans => 'See membership options';
+
+  @override
+  String get memberManage => 'Manage membership in the store';
+
+  @override
+  String get memberManageIos =>
+      'Opens your App Store subscriptions, where you can change or cancel.';
+
+  @override
+  String get memberManageAndroid =>
+      'Opens your Google Play subscriptions, where you can change or cancel.';
+
+  @override
+  String get memberManageFailed =>
+      'We couldn\'t open the store. Open your store\'s subscription settings to change or cancel.';
+
+  @override
+  String get memberGateBrowse =>
+      'Browsing needs an active free trial or membership.';
+
+  @override
+  String get memberGateSendInterest =>
+      'Sending an interest needs an active free trial or membership.';
+
+  @override
+  String get memberGateAcceptInterest =>
+      'Accepting an interest needs an active free trial or membership.';
+
+  @override
+  String get memberGateSendMessage =>
+      'Sending messages needs an active free trial or membership. You can still read your conversations.';
+
+  @override
+  String get memberGateReceiveInterest =>
+      'You can\'t receive interests right now.';
+
+  @override
+  String get memberGateReadConversations =>
+      'You can\'t open conversations right now.';
+
+  @override
+  String get memberGateNotVerified =>
+      'Finish identity verification first. It unlocks the free trial and everything else.';
+
+  @override
+  String get memberGateTrialUnused =>
+      'You haven\'t used your free trial yet. It\'s free for 24 hours and needs no payment details.';
+
+  @override
+  String get memberGateStartTrial => 'Start free trial';
+
+  @override
+  String get memberGateSeePlans => 'See membership options';
+
+  @override
+  String get memberGateNotNow => 'Not now';
+
+  @override
+  String get memberReadOnlyChat =>
+      'This conversation is read-only because you don\'t have an active membership. You can still read everything here.';
+
+  @override
+  String get paywallTitle => 'Membership';
+
+  @override
+  String get paywallIntro =>
+      'Membership lets you browse, send interests and send messages. Choose a plan if you\'d like one. You can also say no, and nothing changes.';
+
+  @override
+  String paywallPeriodMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count months',
+      one: '1 month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paywallPeriodDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String paywallProductTitle(String period) {
+    return 'Membership, $period';
+  }
+
+  @override
+  String paywallPrice(String price, String period) {
+    return '$price for $period';
+  }
+
+  @override
+  String paywallSubscribe(String price) {
+    return 'Subscribe for $price';
+  }
+
+  @override
+  String paywallRenewalIos(String period, String price) {
+    return 'Renews automatically every $period at $price until you cancel. Payment is charged to your Apple ID.';
+  }
+
+  @override
+  String paywallRenewalAndroid(String period, String price) {
+    return 'Renews automatically every $period at $price until you cancel. Payment is charged to your Google Play account.';
+  }
+
+  @override
+  String get paywallCancelIos =>
+      'To cancel, open Settings, tap your name, then Subscriptions, at least 24 hours before the renewal date. You keep access until the end of the period you\'ve paid for.';
+
+  @override
+  String get paywallCancelAndroid =>
+      'To cancel, open Google Play, then Payments and subscriptions, then Subscriptions, before the renewal date. You keep access until the end of the period you\'ve paid for.';
+
+  @override
+  String get paywallNotNow => 'Not now';
+
+  @override
+  String get paywallRestore => 'Restore purchases';
+
+  @override
+  String get paywallRestoreNone =>
+      'We found no purchases to restore on this store account.';
+
+  @override
+  String get paywallRestored => 'Your membership has been restored.';
+
+  @override
+  String get paywallPurchasePending =>
+      'Your purchase is waiting for approval. We\'ll update your membership when the store confirms it.';
+
+  @override
+  String get paywallPurchaseSuccess => 'Thank you. Your membership is active.';
+
+  @override
+  String get paywallPurchaseCancelled =>
+      'Purchase cancelled. You haven\'t been charged.';
+
+  @override
+  String get paywallPurchaseFailed =>
+      'The store couldn\'t complete the purchase. You haven\'t been charged.';
+
+  @override
+  String get paywallVerifyFailed =>
+      'The store took your payment but we couldn\'t confirm it yet. Please don\'t pay again. Tap Restore purchases or try again shortly.';
+
+  @override
+  String get paywallStoreUnavailable =>
+      'The store isn\'t available on this device right now.';
+
+  @override
+  String get paywallNoProducts =>
+      'No membership plans are available right now.';
+
+  @override
+  String get paywallProcessing => 'Confirming with the store...';
+
+  @override
+  String get safetyCentreTitle => 'Safety centre';
+
+  @override
+  String get safetyCentreEmpty =>
+      'Safety information isn\'t available right now.';
+
+  @override
+  String get safetyReportAction => 'Report';
+
+  @override
+  String get safetyBlockAction => 'Block';
+
+  @override
+  String get safetyReportTitle => 'Report';
+
+  @override
+  String get safetyReportWhy => 'What\'s the problem?';
+
+  @override
+  String get safetyCatScam => 'Scam or asking for money';
+
+  @override
+  String get safetyCatFinancial => 'Asking me for money or payments';
+
+  @override
+  String get safetyCatHarassment => 'Harassment or abuse';
+
+  @override
+  String get safetyCatSexual => 'Sexual or inappropriate content';
+
+  @override
+  String get safetyCatThreat => 'Threats or danger';
+
+  @override
+  String get safetyCatUnderage => 'Seems under 18';
+
+  @override
+  String get safetyCatImpersonation => 'Pretending to be someone else';
+
+  @override
+  String get safetyCatMarried => 'Hiding that they are married';
+
+  @override
+  String get safetyCatFake => 'Fake profile';
+
+  @override
+  String get safetyCatSpam => 'Spam';
+
+  @override
+  String get safetyCatOther => 'Something else';
+
+  @override
+  String get safetyReportDetails => 'Add details (optional)';
+
+  @override
+  String get safetyReportDetailsNote =>
+      'Please don\'t include phone numbers or other private details.';
+
+  @override
+  String get safetyReportAlsoBlock => 'Also block this person';
+
+  @override
+  String get safetyReportSubmit => 'Send report';
+
+  @override
+  String get safetyReportSent => 'Thank you. We\'ve received your report.';
+
+  @override
+  String get safetyReportSentBlocked =>
+      'Thank you. We\'ve received your report and blocked this person.';
+
+  @override
+  String get safetyReportAbout => 'Reports go to our safety team.';
+
+  @override
+  String get safetyBlockTitle => 'Block this person?';
+
+  @override
+  String get safetyBlockBody =>
+      'You won\'t see each other or be able to contact each other. Any interest or match between you ends. They aren\'t told.';
+
+  @override
+  String get safetyBlockConfirm => 'Block';
+
+  @override
+  String get safetyBlockCancel => 'Cancel';
+
+  @override
+  String get safetyBlocked => 'Blocked.';
+
+  @override
+  String get safetyBlockedListTitle => 'Blocked people';
+
+  @override
+  String get safetyBlockedEmpty => 'You haven\'t blocked anyone.';
+
+  @override
+  String get safetyUnblock => 'Unblock';
+
+  @override
+  String get safetyUnblocked => 'Unblocked. A past match isn\'t restored.';
+
+  @override
+  String get safetyAppealTitle => 'Appeal a decision';
+
+  @override
+  String safetyAppealSuspended(String when) {
+    return 'Your account is suspended until $when.';
+  }
+
+  @override
+  String get safetyAppealSuspendedOpen => 'Your account is suspended.';
+
+  @override
+  String get safetyAppealBanned =>
+      'Your account has been closed for breaking our rules.';
+
+  @override
+  String get safetyAppealNone => 'There\'s no decision to appeal.';
+
+  @override
+  String get safetyAppealBody =>
+      'If you think this was a mistake, tell us why. A different reviewer will look at it.';
+
+  @override
+  String get safetyAppealHint =>
+      'Explain in 10 to 1,000 characters. Please don\'t include phone numbers.';
+
+  @override
+  String get safetyAppealSubmit => 'Send appeal';
+
+  @override
+  String get safetyAppealSent => 'Your appeal has been sent.';
+
+  @override
+  String get safetyAppealAlready => 'You\'ve already appealed this decision.';
+
+  @override
+  String get safetyAppealTooShort =>
+      'Please write between 10 and 1,000 characters.';
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsMembership => 'Membership';
+
+  @override
+  String get settingsPrivacy => 'Privacy and consents';
+
+  @override
+  String get settingsSessions => 'Signed-in devices';
+
+  @override
+  String get settingsSafety => 'Safety centre';
+
+  @override
+  String get settingsBlocked => 'Blocked people';
+
+  @override
+  String get settingsExport => 'Download my data';
+
+  @override
+  String get settingsDelete => 'Delete my account';
+
+  @override
+  String get settingsFeedback => 'Send beta feedback';
+
+  @override
+  String get settingsConsentsIntro =>
+      'These are the permissions you\'ve given us. You can change your mind at any time.';
+
+  @override
+  String get settingsConsentTerms => 'Terms of Use';
+
+  @override
+  String get settingsConsentPrivacy => 'Privacy Notice';
+
+  @override
+  String get settingsConsentTransfer => 'Processing on servers outside Uganda';
+
+  @override
+  String get settingsConsentReligion => 'Use my religion answers (optional)';
+
+  @override
+  String get settingsConsentFinance =>
+      'Use my money-attitude answers (optional)';
+
+  @override
+  String get settingsConsentMarried =>
+      'Show my married status to others (optional)';
+
+  @override
+  String get settingsConsentMarketing => 'Send me news and offers (optional)';
+
+  @override
+  String get settingsConsentRequiredNote =>
+      'Terms, privacy and data-transfer are needed to use the app. Withdrawing them may stop parts of the app working. To have your data erased, delete your account.';
+
+  @override
+  String get settingsConsentGranted => 'Allowed';
+
+  @override
+  String get settingsConsentWithdrawn => 'Withdrawn';
+
+  @override
+  String get settingsConsentUnknown => 'Not set';
+
+  @override
+  String get settingsConsentWithdraw => 'Withdraw';
+
+  @override
+  String get settingsConsentAllow => 'Allow';
+
+  @override
+  String get settingsConsentSaved => 'Saved.';
+
+  @override
+  String get settingsSessionsEmpty => 'No other devices are signed in.';
+
+  @override
+  String get settingsSessionThisDevice => 'This device';
+
+  @override
+  String get settingsSessionAndroid => 'Android device';
+
+  @override
+  String get settingsSessionIos => 'iPhone or iPad';
+
+  @override
+  String get settingsSessionOther => 'Other device';
+
+  @override
+  String settingsSessionSince(String when) {
+    return 'Signed in $when';
+  }
+
+  @override
+  String get settingsSessionRevoke => 'Sign out';
+
+  @override
+  String get settingsSessionRevoked => 'That device has been signed out.';
+
+  @override
+  String get settingsDeleteTitle => 'Delete my account';
+
+  @override
+  String get settingsDeleteBody =>
+      'Your profile is hidden straight away and you\'re signed out everywhere. Matches and interests end. After a grace period your data is permanently erased, apart from the records we\'re legally required to keep. We\'ll show you the date.';
+
+  @override
+  String get settingsDeleteSubscription =>
+      'Deleting your account doesn\'t cancel an App Store or Google Play subscription. Cancel it in your store\'s subscription settings to stop renewals.';
+
+  @override
+  String get settingsDeleteSendCode => 'Text me a confirmation code';
+
+  @override
+  String get settingsDeleteCodeSent =>
+      'We sent a 6-digit code to your phone. It\'s valid for a few minutes.';
+
+  @override
+  String get settingsDeleteCodeLabel => '6-digit code';
+
+  @override
+  String get settingsDeleteConfirm => 'Delete my account';
+
+  @override
+  String get settingsDeleteCodeInvalid =>
+      'That code is invalid or has expired. Ask for a new one.';
+
+  @override
+  String get settingsDeleteDoneTitle => 'Your account is deactivated';
+
+  @override
+  String settingsDeleteDoneBody(String date) {
+    return 'Your data will be permanently erased on $date.';
+  }
+
+  @override
+  String get settingsDeleteDoneBodyNoDate =>
+      'Your data will be permanently erased after the grace period.';
+
+  @override
+  String get settingsDeleteDone => 'Done';
+
+  @override
+  String get settingsExportTitle => 'Download my data';
+
+  @override
+  String get settingsExportBody =>
+      'We\'ll prepare a copy of your data. This can take up to 72 hours. The link also arrives by email and works for 7 days.';
+
+  @override
+  String get settingsExportRequest => 'Request my data';
+
+  @override
+  String settingsExportRequested(String date) {
+    return 'Request received. Expected by $date.';
+  }
+
+  @override
+  String get settingsExportRequestedNoDate =>
+      'Request received. It can take up to 72 hours.';
+
+  @override
+  String get settingsExportReady => 'Your data is ready.';
+
+  @override
+  String get settingsExportDownload => 'Download';
+
+  @override
+  String get settingsExportCheck => 'Check status';
+
+  @override
+  String get settingsExportOpenFailed =>
+      'We couldn\'t open the link. Please try again.';
+
+  @override
+  String get betaFeedbackTitle => 'Beta feedback';
+
+  @override
+  String get betaFeedbackBody =>
+      'Tell us what\'s working and what isn\'t. Please don\'t include phone numbers, messages or other private details.';
+
+  @override
+  String get betaFeedbackHint => 'Your feedback';
+
+  @override
+  String get betaFeedbackRating => 'How is it going? (optional)';
+
+  @override
+  String get betaFeedbackSend => 'Send feedback';
+
+  @override
+  String get betaFeedbackThanks => 'Thank you. Your feedback has been sent.';
+
+  @override
+  String get betaFeedbackTooLong => 'Please keep it under 2,000 characters.';
+
+  @override
+  String get discTitle => 'Discover';
+
+  @override
+  String get discFilters => 'Filters';
+
+  @override
+  String get discPass => 'Pass';
+
+  @override
+  String get discNotRelevant => 'Not for me';
+
+  @override
+  String get discInterested => 'Send interest';
+
+  @override
+  String get discWhyButton => 'Why this match?';
+
+  @override
+  String get discWhyTitle => 'Why we suggest this person';
+
+  @override
+  String get discWhyNone =>
+      'We don\'t have enough shared answers to explain this one yet.';
+
+  @override
+  String get discDiscussTitle => 'Worth talking about';
+
+  @override
+  String get discEmptyTitle => 'No new profiles right now';
+
+  @override
+  String get discEmptyBody => 'Check back soon, or widen your filters.';
+
+  @override
+  String get discDoneTitle => 'You\'ve seen everyone for now';
+
+  @override
+  String get discDoneBody => 'New people join every day. Check back later.';
+
+  @override
+  String get discLimitTitle => 'That\'s plenty for today';
+
+  @override
+  String get discLimitBody => 'Come back tomorrow for more people.';
+
+  @override
+  String get discRestrictedReason =>
+      'Browsing needs an active trial or membership.';
+
+  @override
+  String get discProfileIncomplete =>
+      'Finish your profile to start discovering people.';
+
+  @override
+  String get discBandStrong => 'Strong match';
+
+  @override
+  String get discBandGood => 'Good match';
+
+  @override
+  String get discBandPossible => 'Possible match';
+
+  @override
+  String discNameAge(String name, int age) {
+    return '$name, $age';
+  }
+
+  @override
+  String discCardSemantics(String name, int age, String district) {
+    return '$name, $age, $district';
+  }
+
+  @override
+  String get discTapToLoad => 'Tap to load photo';
+
+  @override
+  String get discNoPhoto => 'No photo yet';
+
+  @override
+  String get discBadgeAge => 'Age verified';
+
+  @override
+  String get discBadgeIdentity => 'Identity verified';
+
+  @override
+  String get discBadgePhoto => 'Photo verified';
+
+  @override
+  String get discViewProfile => 'View full profile';
+
+  @override
+  String get discProfileTitle => 'Profile';
+
+  @override
+  String get discAbout => 'About';
+
+  @override
+  String get discLanguages => 'Languages';
+
+  @override
+  String get discWork => 'Work';
+
+  @override
+  String get discEducation => 'Education';
+
+  @override
+  String get discIntention => 'Looking for';
+
+  @override
+  String get discTimeline => 'Timeline';
+
+  @override
+  String get discChildren => 'Children';
+
+  @override
+  String get discIntentionMarriageSoon => 'Marriage soon';
+
+  @override
+  String get discIntentionOpenTimeline => 'Marriage, no fixed timeline';
+
+  @override
+  String get discTimelineWithin1y => 'Within a year';
+
+  @override
+  String get discTimeline1to2y => 'In 1 to 2 years';
+
+  @override
+  String get discTimeline2to4y => 'In 2 to 4 years';
+
+  @override
+  String get discTimelineOpen => 'Open';
+
+  @override
+  String get discHasChildrenNo => 'No children';
+
+  @override
+  String get discHasChildrenWithMe => 'Has children living with them';
+
+  @override
+  String get discHasChildrenNotWithMe => 'Has children not living with them';
+
+  @override
+  String get discWantsYes => 'Wants children';
+
+  @override
+  String get discWantsNo => 'Doesn\'t want children';
+
+  @override
+  String get discWantsUnsure => 'Unsure about children';
+
+  @override
+  String get discEduPrimary => 'Primary school';
+
+  @override
+  String get discEduSecondary => 'Secondary school';
+
+  @override
+  String get discEduCertificate => 'Certificate or diploma';
+
+  @override
+  String get discEduBachelors => 'Bachelor\'s degree';
+
+  @override
+  String get discEduPostgraduate => 'Postgraduate';
+
+  @override
+  String get discFiltersTitle => 'Who you see';
+
+  @override
+  String discAgeRange(int min, int max) {
+    return 'Age $min to $max';
+  }
+
+  @override
+  String get discDistanceLabel => 'Maximum distance';
+
+  @override
+  String discDistanceKm(int km) {
+    return '$km km';
+  }
+
+  @override
+  String get discDistanceAny => 'Any distance';
+
+  @override
+  String get discDiaspora => 'Include people living abroad';
+
+  @override
+  String get discChildrenOk => 'Open to people who have children';
+
+  @override
+  String get discApply => 'Apply filters';
+
+  @override
+  String get discFiltersFailed => 'We couldn\'t save your filters.';
+
+  @override
+  String get discHiddenNote => 'We won\'t show this profile again.';
+
+  @override
+  String discPhotoCount(int n, int total) {
+    return 'Photo $n of $total';
+  }
+
+  @override
+  String get interestSendTitle => 'Send an interest';
+
+  @override
+  String interestSendBody(String name) {
+    return '$name will see this description right away. Make sure it sounds like you.';
+  }
+
+  @override
+  String get interestPreviewLabel => 'Your description';
+
+  @override
+  String get interestNoDescription =>
+      'You need an approved description before you can send interests.';
+
+  @override
+  String get interestSendButton => 'Send interest';
+
+  @override
+  String get interestSentTitle => 'Interest sent';
+
+  @override
+  String interestSentBody(String name, int n) {
+    return '$name can now see your description. You can send $n more today.';
+  }
+
+  @override
+  String get interestMatchedTitle => 'It\'s a match';
+
+  @override
+  String interestMatchedBody(String name) {
+    return '$name was already interested in you. You can start talking now.';
+  }
+
+  @override
+  String get interestOpenChat => 'Open chat';
+
+  @override
+  String get interestDone => 'Done';
+
+  @override
+  String get interestErrDuplicate =>
+      'You already have a pending interest with this person.';
+
+  @override
+  String get interestErrNotEligible =>
+      'You can\'t send an interest to this profile.';
+
+  @override
+  String get interestErrLimit =>
+      'You\'ve reached today\'s limit. Try again tomorrow.';
+
+  @override
+  String get interestErrDescription => 'Your description isn\'t approved yet.';
+
+  @override
+  String get interestErrProfile =>
+      'Finish your profile before sending interests.';
+
+  @override
+  String get interestTitle => 'Interests';
+
+  @override
+  String get interestTabReceived => 'Received';
+
+  @override
+  String get interestTabSent => 'Sent';
+
+  @override
+  String get interestReceivedEmptyTitle => 'No interests yet';
+
+  @override
+  String get interestReceivedEmptyBody =>
+      'When someone is interested in you, they\'ll appear here.';
+
+  @override
+  String get interestSentEmptyTitle => 'You haven\'t sent any interests';
+
+  @override
+  String get interestSentEmptyBody => 'Find people you like in Discover.';
+
+  @override
+  String get interestRestricted =>
+      'Verify your identity to see who\'s interested.';
+
+  @override
+  String get interestAccept => 'Accept';
+
+  @override
+  String get interestPass => 'Pass';
+
+  @override
+  String interestAccepted(String name) {
+    return 'You matched with $name.';
+  }
+
+  @override
+  String get interestPassedDone => 'Passed.';
+
+  @override
+  String get interestStatusPending => 'Waiting for a reply';
+
+  @override
+  String get interestStatusAccepted => 'Accepted';
+
+  @override
+  String get interestStatusExpired => 'Expired';
+
+  @override
+  String interestExpires(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Expires $dateString';
+  }
+
+  @override
+  String get interestDetailTitle => 'Interest';
+
+  @override
+  String interestMessageLabel(String name) {
+    return 'What $name wrote';
+  }
+
+  @override
+  String get interestLoadMore => 'Load more';
+
+  @override
+  String get interestNotFound =>
+      'We couldn\'t find that interest. It may have expired.';
+
+  @override
+  String get matchesTitle => 'Matches';
+
+  @override
+  String get matchesEmptyTitle => 'No matches yet';
+
+  @override
+  String get matchesEmptyBody =>
+      'When an interest is mutual, you\'ll see the person here.';
+
+  @override
+  String get matchesRestricted => 'Verify your identity to see your matches.';
+
+  @override
+  String matchesSince(DateTime date) {
+    final intl.DateFormat dateDateFormat = intl.DateFormat.yMMMd(localeName);
+    final String dateString = dateDateFormat.format(date);
+
+    return 'Matched $dateString';
+  }
+
+  @override
+  String get matchesStaleBanner =>
+      'Showing your saved matches. We\'ll update them when you\'re back online.';
+
+  @override
+  String get matchesUnmatch => 'Unmatch';
+
+  @override
+  String matchesUnmatchTitle(String name) {
+    return 'Unmatch $name?';
+  }
+
+  @override
+  String get matchesUnmatchBody =>
+      'You won\'t be able to message each other. This can\'t be undone.';
+
+  @override
+  String get matchesCancel => 'Cancel';
+
+  @override
+  String get chatTitleFallback => 'Chat';
+
+  @override
+  String get chatEmptyTitle => 'Say hello';
+
+  @override
+  String get chatEmptyBody =>
+      'Start the conversation, politely and respectfully.';
+
+  @override
+  String get chatComposerHint => 'Write a message';
+
+  @override
+  String get chatSend => 'Send';
+
+  @override
+  String get chatReadOnlyBanner =>
+      'Your membership has ended. You can read this conversation but not reply.';
+
+  @override
+  String get chatContactNote =>
+      'For safety, phone numbers and links can\'t be shared in the first 3 days of a match.';
+
+  @override
+  String get chatContactBlocked =>
+      'That message looks like it has a phone number or link. For safety these can\'t be shared in the first 3 days of a match.';
+
+  @override
+  String get chatNotSent => 'Not sent';
+
+  @override
+  String get chatDiscard => 'Delete';
+
+  @override
+  String get chatWaiting => 'Waiting for connection';
+
+  @override
+  String get chatDelivered => 'Delivered';
+
+  @override
+  String get chatRead => 'Read';
+
+  @override
+  String get chatConnecting => 'Connecting…';
+
+  @override
+  String get chatReconnecting => 'Reconnecting…';
+
+  @override
+  String get chatMatchEnded => 'This conversation has ended.';
+
+  @override
+  String get chatSystemMatchCreated => 'You matched. Say hello!';
+
+  @override
+  String get chatSystemOther => 'Update';
+
+  @override
+  String get chatMessageDeleted => 'This message was removed.';
+
+  @override
+  String get chatSafetyTip =>
+      'Be careful with requests for money or personal details. Never send money to someone you haven\'t met.';
+
+  @override
+  String get chatLoadOlder => 'Load earlier messages';
+
+  @override
+  String get chatAttach => 'Add photo';
+
+  @override
+  String chatPhotoLocked(int n) {
+    return 'Photos unlock once you\'ve each sent $n messages.';
+  }
+
+  @override
+  String chatPhotoProgress(int you, int they, int n) {
+    return 'You: $you of $n. Them: $they of $n.';
+  }
+
+  @override
+  String get chatPhotoGallery => 'Choose from gallery';
+
+  @override
+  String get chatPhotoCamera => 'Take a photo';
+
+  @override
+  String get chatPhotoTapToLoad => 'Tap to load photo';
+
+  @override
+  String get chatPhotoLabel => 'Photo';
+
+  @override
+  String get chatVoiceStart => 'Record a voice note';
+
+  @override
+  String chatVoiceRecording(int seconds, int max) {
+    return 'Recording $seconds s of $max s';
+  }
+
+  @override
+  String get chatVoiceCancel => 'Cancel';
+
+  @override
+  String get chatVoiceSend => 'Send voice note';
+
+  @override
+  String get chatVoicePlay => 'Play voice note';
+
+  @override
+  String get chatVoicePause => 'Pause voice note';
+
+  @override
+  String get chatVoiceTapToDownload => 'Tap to download voice note';
+
+  @override
+  String chatVoiceDuration(int seconds) {
+    return '$seconds s';
+  }
+
+  @override
+  String get chatVoicePermission =>
+      'Microphone access is needed to record a voice note.';
+
+  @override
+  String get chatUploading => 'Sending…';
+
+  @override
+  String get chatUploadFailed => 'We couldn\'t send that. Please try again.';
+
+  @override
+  String get chatMore => 'More';
+
+  @override
+  String get meLoading => 'Loading your account';
+
+  @override
+  String get verifTitle => 'Verify your identity';
+
+  @override
+  String get verifLoading => 'Loading verification status';
+
+  @override
+  String get verifIntroTitle => 'Let\'s confirm it\'s really you';
+
+  @override
+  String get verifIntroBody =>
+      'Everyone on Marriage Connect is a verified adult. It takes about two minutes: you\'ll scan your ID and take a short selfie video.';
+
+  @override
+  String get verifIntroPrivacy =>
+      'We check your ID with our verification partner. We never show your name or ID number to anyone.';
+
+  @override
+  String get verifIdTypeHeading => 'Which ID will you use?';
+
+  @override
+  String get verifIdNationalId => 'National ID';
+
+  @override
+  String get verifIdPassport => 'Passport';
+
+  @override
+  String get verifIdDriversLicense => 'Driving permit';
+
+  @override
+  String get verifStartCapture => 'Start verification';
+
+  @override
+  String get verifExpiredNote =>
+      'Your last attempt timed out. You can start again.';
+
+  @override
+  String get verifErrorNote =>
+      'We couldn\'t finish your last attempt. You can start again.';
+
+  @override
+  String get verifConsentsTitle => 'One more step first';
+
+  @override
+  String get verifConsentsBody =>
+      'Please accept our Terms and Privacy Notice before verifying.';
+
+  @override
+  String get verifConsentsAction => 'Review and accept';
+
+  @override
+  String get verifCaptureTitle => 'Scan your ID';
+
+  @override
+  String get verifCaptureBody =>
+      'Find good light, hold your ID flat, and look straight at the camera for the selfie. Screenshots are turned off on this screen to protect your ID.';
+
+  @override
+  String get verifCaptureOpen => 'Open camera';
+
+  @override
+  String get verifCaptureStarting => 'Getting ready...';
+
+  @override
+  String get verifCaptureCapturing => 'Follow the steps on screen...';
+
+  @override
+  String get verifCaptureSubmitting => 'Sending your details...';
+
+  @override
+  String get verifCaptureUnavailable =>
+      'ID capture isn\'t available in this version of the app yet. Please update the app and try again.';
+
+  @override
+  String get verifCaptureFailed =>
+      'The capture didn\'t finish. Check your camera permission and try again.';
+
+  @override
+  String get verifErrorPending =>
+      'We\'re still checking your previous submission.';
+
+  @override
+  String get verifErrorLimit =>
+      'You\'ve reached today\'s verification limit. Please try again tomorrow or contact support.';
+
+  @override
+  String get verifErrorForbidden =>
+      'Verification isn\'t available for this account.';
+
+  @override
+  String get verifErrorDuplicate => 'This account is already verified.';
+
+  @override
+  String get verifPendingTitle => 'We\'re checking your ID';
+
+  @override
+  String get verifPendingBody =>
+      'This usually takes a few minutes. You can close the app and come back; we\'ll tell you when it\'s done.';
+
+  @override
+  String get verifReviewTitle => 'A person is reviewing your ID';
+
+  @override
+  String get verifReviewBody =>
+      'This can take longer than usual. We\'ll tell you as soon as there\'s a result.';
+
+  @override
+  String get verifCheckAgain => 'Check again';
+
+  @override
+  String get verifFailedTitle => 'We couldn\'t verify you';
+
+  @override
+  String get verifReasonFaceMismatch =>
+      'Your selfie didn\'t match the photo on your ID.';
+
+  @override
+  String get verifReasonDocUnreadable =>
+      'We couldn\'t read your ID. Try again in better light.';
+
+  @override
+  String get verifReasonDocExpired =>
+      'That ID has expired. Please use one that is still valid.';
+
+  @override
+  String get verifReasonLiveness =>
+      'The selfie check didn\'t pass. Try again in good light, facing the camera.';
+
+  @override
+  String get verifReasonUnderage =>
+      'You must be 18 or older to use Marriage Connect.';
+
+  @override
+  String get verifReasonDuplicate =>
+      'This ID is already linked to another account.';
+
+  @override
+  String get verifReasonBanned => 'This ID can\'t be used on Marriage Connect.';
+
+  @override
+  String get verifReasonMissingData =>
+      'We couldn\'t read all the details on your ID. Try again or use a different ID.';
+
+  @override
+  String get verifReasonGeneric =>
+      'We couldn\'t confirm your details this time.';
+
+  @override
+  String get verifTryAgain => 'Try again';
+
+  @override
+  String get verifAppealHeading => 'Think we got it wrong?';
+
+  @override
+  String get verifAppealBody => 'You can ask a person to take another look.';
+
+  @override
+  String get verifAppealAction => 'Appeal this decision';
+
+  @override
+  String get verifAppealSupportOnly =>
+      'This decision can only be reviewed by our support team.';
+
+  @override
+  String get verifAppealSent =>
+      'Your appeal has been sent. A person will review it.';
+
+  @override
+  String get verifAppealTitle => 'Appeal';
+
+  @override
+  String get verifAppealPrompt =>
+      'Tell us what happened and why you think the result is wrong.';
+
+  @override
+  String get verifAppealHint => 'Your message (10 to 1,000 characters)';
+
+  @override
+  String get verifAppealTooShort => 'Please write at least 10 characters.';
+
+  @override
+  String get verifAppealSubmit => 'Send appeal';
+
+  @override
+  String get verifAppealBack => 'Back to verification';
+
+  @override
+  String get verifPassedTitle => 'You\'re verified';
+
+  @override
+  String get verifPassedBody => 'Thank you. Next, let\'s build your profile.';
+
+  @override
+  String get verifPassedContinue => 'Build my profile';
 }

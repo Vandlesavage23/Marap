@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -23,7 +24,46 @@ class OutboxMessages extends Table {
   Set<Column<Object>> get primaryKey => {clientMsgId};
 }
 
-@DriftDatabase(tables: [OutboxMessages])
+/// Matches cache (Bible §5.4 "Offline"). The whole table is replaced on every
+/// successful sync, so ended matches disappear. `position` keeps server order.
+class CachedMatches extends Table {
+  TextColumn get id => text()();
+  TextColumn get memberId => text()(); // the other member's public profile id
+  TextColumn get displayName => text()();
+  IntColumn get age => integer().nullable()();
+  TextColumn get district => text().withDefault(const Constant(''))();
+  TextColumn get maritalStatusLabel => text().nullable()();
+  BoolColumn get photoVerified =>
+      boolean().withDefault(const Constant(false))();
+  TextColumn get photoUrl => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  IntColumn get position => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+/// Chat history cache so a conversation can be read offline. Media URLs are
+/// signed and short-lived, so only the metadata JSON is kept (`mediaJson`).
+class CachedMessages extends Table {
+  TextColumn get id => text()();
+  TextColumn get matchId => text()();
+  TextColumn get clientMsgId => text().nullable()();
+  TextColumn get sender => text()(); // me | them | system
+  TextColumn get kind => text()(); // text | image | voice | system
+  TextColumn get body => text().nullable()();
+  TextColumn get mediaJson => text().nullable()();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get deliveredAt => dateTime().nullable()();
+  DateTimeColumn get readAt => dateTime().nullable()();
+  BoolColumn get safetyTip => boolean().withDefault(const Constant(false))();
+  BoolColumn get deleted => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [OutboxMessages, CachedMatches, CachedMessages])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
@@ -37,5 +77,23 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (m) => m.createAll(),
+        onUpgrade: (m, from, to) async {
+          if (from < 2) {
+            await m.createTable(cachedMatches);
+            await m.createTable(cachedMessages);
+          }
+        },
+      );
 }
+
+/// One database for the whole app. Closed with the container.
+final appDatabaseProvider = Provider<AppDatabase>((ref) {
+  final db = AppDatabase.open();
+  ref.onDispose(db.close);
+  return db;
+});

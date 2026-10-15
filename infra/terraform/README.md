@@ -121,10 +121,7 @@ Backend (state) configuration, passed at `terraform init`: `bucket`, `dynamodb_t
 
 1. Nothing was applied or validated against AWS (see top). Provider argument names and versions (`~> 5.70`) are
    from memory.
-2. ALB health checks cannot send a Host header, and the backend answers 400 to unknown hosts. The target group therefore
-   accepts `200,400` (liveness only). The container health check (Python, with `Host: api.<domain>`) and the deploy smoke
-   test check real readiness. Cleaner fix, outside this change: let the backend serve `/ready` for any host, then set
-   `alb_health_check_matcher = "200"`.
+2. ALB health checks carry the target IP as Host; the backend now serves `/ready` and `/health` for any host (probe paths only), so the matcher is a strict `200`. Check `alb_health_check_matcher` in each env if it is still `200,400`.
 3. Not provisioned: ClamAV/clamd (`MALWARE_SCANNER`, `CLAMD_HOST` need a service; Bible 3.2 has it locally), SES identities
    and DKIM, Route 53/ACM, FCM/Play/Apple credentials (only the secret slots exist), CloudFront in front of `static-public`.
 4. Redis has TLS and security-group isolation but no AUTH token. `REDIS_URL` is `rediss://...?ssl_cert_reqs=required`;
