@@ -2,11 +2,11 @@ import json
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.errors import NotFound
 from mc.common.idempotency import IdempotentMixin
 from mc.common.serializers import reject_unknown_fields
@@ -34,7 +34,7 @@ def media_payload(media, viewer=None) -> dict:  # type: ignore[no-untyped-def]
 
 
 class UploadsView(IdempotentMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=s.UploadRequestSerializer, responses={201: dict})
     def perform_idempotent(self, request):  # type: ignore[no-untyped-def]
@@ -58,7 +58,7 @@ class UploadsView(IdempotentMixin):
 
 
 class CompleteView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=None, responses={202: dict})
     def post(self, request, media_id):  # type: ignore[no-untyped-def]
@@ -67,7 +67,7 @@ class CompleteView(APIView):
 
 
 class MediaDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request, media_id):  # type: ignore[no-untyped-def]

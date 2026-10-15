@@ -321,3 +321,26 @@ def set_hidden(*, account: "Account", hidden: bool) -> Profile:
                 events.publish(ProfileWentLive(account_id=account.id, profile_id=profile.id))
         profile.save(update_fields=["status", "updated_at"])
     return profile
+
+
+# ---- enforcement hooks (safety module) ------------------------------------------------------------
+def suspend_profile(*, account_id: uuid.UUID) -> None:
+    """Hide the profile everywhere (discovery, views, photos) until reinstated."""
+    profile = Profile.objects.filter(account_id=account_id).first()
+    if profile is not None and profile.status != Profile.Status.SUSPENDED:
+        profile.status = Profile.Status.SUSPENDED
+        profile.save(update_fields=["status", "updated_at"])
+        events.publish(
+            ProfileWentOffline(account_id=account_id, profile_id=profile.id, reason="suspended")
+        )
+
+
+def restore_profile(*, account_id: uuid.UUID) -> None:
+    """After reinstatement: back to draft, then live again if every go-live rule still holds."""
+    profile = Profile.objects.filter(account_id=account_id, status=Profile.Status.SUSPENDED).first()
+    if profile is None:
+        return
+    profile.status = (
+        Profile.Status.LIVE if not readiness.missing_for_go_live(profile) else Profile.Status.DRAFT
+    )
+    profile.save(update_fields=["status", "updated_at"])

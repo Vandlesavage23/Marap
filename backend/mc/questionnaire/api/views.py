@@ -1,8 +1,8 @@
 from drf_spectacular.utils import extend_schema
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.serializers import reject_unknown_fields
 from mc.questionnaire import selectors, services
 from mc.questionnaire.models import Answer
@@ -26,7 +26,7 @@ def question_payload(q) -> dict[str, object]:  # type: ignore[no-untyped-def]
 
 
 class QuestionsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -39,7 +39,7 @@ class QuestionsView(APIView):
 
 
 class MyAnswersView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]

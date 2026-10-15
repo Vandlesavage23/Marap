@@ -2,11 +2,11 @@ import json
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.errors import EntitlementRequired, NotFound
 from mc.common.idempotency import IdempotentMixin, validate_key
 from mc.common.pagination import parse_limit
@@ -23,7 +23,7 @@ def _plain(body: dict) -> dict:
 
 
 class SendInterestView(IdempotentMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=s.SendInterestSerializer, responses={201: dict, 200: dict})
     def perform_idempotent(self, request):  # type: ignore[no-untyped-def]
@@ -72,7 +72,7 @@ def _received_item(i, summaries) -> dict:  # type: ignore[no-untyped-def]
 
 
 class ReceivedView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -92,7 +92,7 @@ class ReceivedView(APIView):
 
 
 class SentView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -118,7 +118,7 @@ class SentView(APIView):
 
 
 class AcceptView(IdempotentMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=None, responses={200: dict})
     def perform_idempotent(self, request, interest_id=None):  # type: ignore[no-untyped-def]
@@ -133,7 +133,7 @@ class AcceptView(IdempotentMixin):
 
 
 class PassView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=None, responses={204: None})
     def post(self, request, interest_id):  # type: ignore[no-untyped-def]

@@ -3,11 +3,11 @@ import json
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.idempotency import IdempotentMixin
 from mc.entitlements import selectors, services
 
@@ -29,7 +29,7 @@ def entitlements_payload(account) -> dict:  # type: ignore[no-untyped-def]
 
 
 class EntitlementsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -37,7 +37,7 @@ class EntitlementsView(APIView):
 
 
 class StartTrialView(IdempotentMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=None, responses={201: dict})
     def perform_idempotent(self, request):  # type: ignore[no-untyped-def]

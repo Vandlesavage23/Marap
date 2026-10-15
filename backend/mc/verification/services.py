@@ -30,6 +30,7 @@ from mc.common.errors import (
     VerificationPending,
 )
 from mc.common.timeutil import age_on, kampala_date
+from mc.safety import selectors as safety_selectors
 
 from . import reasons, selectors
 from .events import AccountVerified, SafetyFlagRaised
@@ -206,6 +207,8 @@ def _pass_failure(result: VendorResult, now: datetime) -> str | None:
     if not result.id_number or not normalise_id_number(result.id_number):
         return reasons.ID_NUMBER_MISSING
     id_hmac = hmac_value(normalise_id_number(result.id_number), purpose="id_number")
+    if safety_selectors.is_identity_banned(id_hmac):
+        return reasons.BANNED
     if VerificationAttempt.objects.filter(id_number_hmac=id_hmac, status="passed").exists():
         return reasons.DUPLICATE_IDENTITY
     return None

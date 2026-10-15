@@ -10,3 +10,17 @@ class UserBlocked(DomainEvent):
 
     blocker_id: uuid.UUID
     blocked_id: uuid.UUID
+
+
+@dataclass(frozen=True)
+class ReportCreated(DomainEvent):
+    report_id: uuid.UUID
+    severity: str
+    category: str
+
+
+@dataclass(frozen=True)
+class EnforcementApplied(DomainEvent):
+    subject_id: uuid.UUID
+    action_id: uuid.UUID
+    kind: str

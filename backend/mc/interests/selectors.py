@@ -56,3 +56,26 @@ def get_for_recipient(interest_id: uuid.UUID, account_id: uuid.UUID) -> Interest
         .select_related("snapshot")
         .first()
     )
+
+
+def evidence_for_report(
+    *, interest_id: uuid.UUID, reporter_id: uuid.UUID, subject_id: uuid.UUID
+) -> dict[str, object] | None:
+    """What the subject sent: only for interests between exactly these two members."""
+    i = (
+        Interest.objects.select_related("snapshot")
+        .filter(id=interest_id)
+        .filter(
+            Q(sender_id=subject_id, recipient_id=reporter_id)
+            | Q(sender_id=reporter_id, recipient_id=subject_id)
+        )
+        .first()
+    )
+    if i is None or i.snapshot is None:
+        return None
+    return {
+        "interest_id": str(i.id),
+        "from": "subject" if i.sender_id == subject_id else "reporter",
+        "display_name": i.snapshot.display_name,
+        "text": i.snapshot.text,
+    }

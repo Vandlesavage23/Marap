@@ -153,3 +153,10 @@ def mark_delivered(*, message_id: uuid.UUID) -> None:
     Message.objects.filter(id=message_id, delivered_at__isnull=True).update(
         delivered_at=timezone.now()
     )
+
+
+def hide_message(*, message_id: uuid.UUID) -> None:
+    """Moderation: replace a message with a 'deleted' placeholder for both members."""
+    Message.objects.filter(id=message_id).update(
+        deleted_placeholder=True, updated_at=timezone.now()
+    )

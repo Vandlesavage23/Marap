@@ -1,14 +1,17 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mc.accounts import selectors, services
 from mc.accounts.models import Account
+from mc.accounts.permissions import IsAuthenticatedAnyStatus
 from mc.accounts.policies import can_manage_session
 from mc.common.errors import NotFound
 from mc.common.net import client_ip
+from mc.profiles import selectors as profile_selectors
+from mc.safety import enforcement as safety_enforcement
 from mc.verification import selectors as verification_selectors
 
 from . import serializers as s
@@ -23,7 +26,8 @@ def _account_summary(account: Account) -> dict[str, object]:
         "status": account.status,
         "locale": account.locale,
         "verification_status": verification_selectors.latest_status(account)["status"],
-        "profile_status": "none",  # wired to the profiles module in MC-045
+        "profile_status": profile_selectors.status_for(account),
+        "enforcement": safety_enforcement.enforcement_status(account),
     }
 
 
@@ -85,7 +89,7 @@ class RefreshView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(request=None, responses={204: None})
     def post(self, request):  # type: ignore[no-untyped-def]
@@ -94,7 +98,7 @@ class LogoutView(APIView):
 
 
 class MeView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -102,7 +106,7 @@ class MeView(APIView):
 
 
 class SessionsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -122,7 +126,7 @@ class SessionsView(APIView):
 
 
 class SessionDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(responses={204: None})
     def delete(self, request, session_id):  # type: ignore[no-untyped-def]
@@ -136,7 +140,7 @@ class SessionDetailView(APIView):
 
 
 class ConsentsView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(request=s.ConsentsSerializer, responses={201: dict})
     def post(self, request):  # type: ignore[no-untyped-def]
@@ -160,7 +164,7 @@ class ConsentsView(APIView):
 
 
 class DevicesView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(request=s.RegisterDeviceSerializer, responses={200: dict})
     def post(self, request):  # type: ignore[no-untyped-def]

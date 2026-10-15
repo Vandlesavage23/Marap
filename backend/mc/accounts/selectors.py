@@ -69,9 +69,13 @@ def push_targets(account_id: uuid.UUID) -> list[tuple[str, str]]:
 
 def authenticate_access_token(token: str):  # type: ignore[no-untyped-def]
     """`(account, session)` for a valid access token with a live session, else raises Unauthenticated/TokenExpired."""
+    from mc.common.errors import Unauthenticated
+
     from .authentication import authenticate_token
 
     account, session, _ = authenticate_token(token)
+    if account.status == "suspended":  # restricted members get no realtime channel
+        raise Unauthenticated()
     return account, session
 
 

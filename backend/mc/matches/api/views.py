@@ -2,11 +2,11 @@ import json
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.errors import EntitlementRequired, NotFound
 from mc.common.pagination import paginate, parse_limit
 from mc.entitlements import selectors as entitlement_selectors
@@ -17,7 +17,7 @@ from mc.safety import selectors as safety_selectors
 
 
 class MatchesView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -50,7 +50,7 @@ class MatchesView(APIView):
 
 
 class UnmatchView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=None, responses={204: None})
     def post(self, request, match_id):  # type: ignore[no-untyped-def]

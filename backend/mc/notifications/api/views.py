@@ -2,11 +2,11 @@ import json
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsAuthenticatedAnyStatus
 from mc.common.pagination import parse_limit
 from mc.common.serializers import reject_unknown_fields
 from mc.notifications import selectors, services
@@ -17,7 +17,7 @@ class ReadSerializer(serializers.Serializer):
 
 
 class InboxView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -40,7 +40,7 @@ class InboxView(APIView):
 
 
 class MarkReadView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedAnyStatus]
 
     @extend_schema(request=ReadSerializer, responses={204: None})
     def post(self, request):  # type: ignore[no-untyped-def]

@@ -2,11 +2,11 @@ import json
 
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.errors import NotFound
 from mc.common.idempotency import IdempotentMixin
 from mc.common.serializers import reject_unknown_fields
@@ -17,7 +17,7 @@ from . import serializers as s
 
 
 class MyProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -33,7 +33,7 @@ class MyProfileView(APIView):
 
 
 class PublicProfileView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request, profile_id):  # type: ignore[no-untyped-def]
@@ -45,7 +45,7 @@ class PublicProfileView(APIView):
 
 
 class DescriptionsView(IdempotentMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=s.DescriptionSerializer, responses={201: dict})
     def perform_idempotent(self, request):  # type: ignore[no-untyped-def]
@@ -74,7 +74,7 @@ class DescriptionsView(IdempotentMixin):
 
 
 class PreferencesView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -94,7 +94,7 @@ class PreferencesView(APIView):
 
 
 class PhotosView(IdempotentMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=s.PhotoCreateSerializer, responses={201: dict})
     def perform_idempotent(self, request):  # type: ignore[no-untyped-def]
@@ -113,7 +113,7 @@ class PhotosView(IdempotentMixin):
 
 
 class PhotoDetailView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={204: None})
     def delete(self, request, photo_id):  # type: ignore[no-untyped-def]
@@ -122,7 +122,7 @@ class PhotoDetailView(APIView):
 
 
 class PhotoOrderView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=s.PhotoOrderSerializer, responses={200: dict})
     def put(self, request):  # type: ignore[no-untyped-def]
@@ -138,7 +138,7 @@ class PhotoOrderView(APIView):
 
 
 class GoLiveView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=None, responses={200: dict})
     def post(self, request):  # type: ignore[no-untyped-def]
@@ -146,7 +146,7 @@ class GoLiveView(APIView):
 
 
 class HideView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
     hidden = True
 
     @extend_schema(request=None, responses={200: dict})

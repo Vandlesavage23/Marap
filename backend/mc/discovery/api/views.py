@@ -1,9 +1,9 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.pagination import parse_limit
 from mc.common.serializers import reject_unknown_fields
 from mc.discovery import services
@@ -12,7 +12,7 @@ from . import serializers as s
 
 
 class DiscoveryView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
@@ -25,7 +25,7 @@ class DiscoveryView(APIView):
 
 
 class FeedbackView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=s.FeedbackSerializer, responses={204: None})
     def post(self, request):  # type: ignore[no-untyped-def]

@@ -226,3 +226,7 @@ PUSH_PROVIDER = env("PUSH_PROVIDER", "mc.notifications.providers.push.FakePush")
 FCM_PROJECT_ID = env("FCM_PROJECT_ID", "")
 FCM_SERVICE_ACCOUNT_JSON = env("FCM_SERVICE_ACCOUNT_JSON", "{}")
 INSTALLED_APPS += ["mc.notifications"]
+CELERY_BEAT_SCHEDULE["safety-lift-suspensions"] = {
+    "task": "mc.safety.tasks.lift_expired_suspensions",
+    "schedule": 600.0,
+}

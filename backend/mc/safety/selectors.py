@@ -39,3 +39,30 @@ def scam_flag(text: str) -> str | None:
 def blocked_members(account_id: uuid.UUID):  # type: ignore[no-untyped-def]
     """Blocks made BY `account_id` (what the blocker sees in their 'Blocked members' list)."""
     return Block.objects.filter(blocker_id=account_id).order_by("-id")
+
+
+def is_identity_banned(identity_hmac: bytes) -> bool:
+    """True if a verified person (keyed ID-number hash) was banned — they can't start over on a new phone."""
+    from .models import Ban
+
+    return Ban.objects.filter(identity_hmac=identity_hmac).exists()
+
+
+def open_cases(*, severity: str | None = None):  # type: ignore[no-untyped-def]
+    """The moderation queue: open cases, most urgent first (severity, then SLA due date)."""
+    from .models import Case
+
+    qs = Case.objects.filter(status="open").select_related("subject")
+    if severity:
+        qs = qs.filter(severity=severity)
+    return qs.order_by("severity", "sla_due_at", "id")
+
+
+def sla_breached(*, now=None):  # type: ignore[no-untyped-def]
+    from django.utils import timezone
+
+    from .models import Case
+
+    return Case.objects.filter(status="open", sla_due_at__lt=now or timezone.now()).order_by(
+        "sla_due_at"
+    )

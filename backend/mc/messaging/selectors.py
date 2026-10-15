@@ -51,3 +51,35 @@ def message_payload(msg: Message, viewer: "Account") -> dict[str, object]:
         # the flag is a safety tip for the *recipient*; the sender is never told they were flagged
         "safety_tip": bool(msg.moderation_flag) and not mine,
     }
+
+
+def evidence_for_report(
+    *, message_id: uuid.UUID, reporter_id: uuid.UUID, subject_id: uuid.UUID, prior: int
+) -> list[dict[str, object]] | None:
+    """The reported message (sent by `subject`) plus up to `prior` earlier messages in the same match, oldest
+    first. None if the reporter isn't a member of that match or the subject didn't send it."""
+    from mc.matches import selectors as match_selectors
+
+    msg = (
+        Message.objects.select_related("match").filter(id=message_id, sender_id=subject_id).first()
+    )
+    if msg is None or not match_selectors.is_match_member(msg.match, reporter_id):
+        return None
+    window = list(
+        Message.objects.filter(match=msg.match, id__lt=msg.id)
+        .exclude(kind="system")
+        .order_by("-id")[:prior]
+    )
+    rows = [*reversed(window), msg]
+    return [
+        {
+            "message_id": str(m.id),
+            "from": "reporter" if m.sender_id == reporter_id else "subject",
+            "kind": m.kind,
+            "body": m.body,
+            "media_id": str(m.media_id) if m.media_id else None,
+            "sent_at": m.created_at.isoformat(),
+            "reported": m.id == msg.id,
+        }
+        for m in rows
+    ]

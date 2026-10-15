@@ -292,3 +292,15 @@ def cancel_between(*, a: uuid.UUID, b: uuid.UUID) -> int:
     n = qs.update(status=Interest.Status.CANCELLED, updated_at=timezone.now())
     InterestSnapshot.objects.filter(id__in=[s for s in snapshot_ids if s]).delete()
     return n
+
+
+def cancel_interest(*, interest_id: uuid.UUID) -> None:
+    """Moderation: cancel one pending interest (its snapshot is deleted)."""
+    interest = Interest.objects.filter(id=interest_id, status=Interest.Status.PENDING).first()
+    if interest is None:
+        return
+    snapshot_id = interest.snapshot_id
+    interest.status = Interest.Status.CANCELLED
+    interest.save(update_fields=["status", "updated_at"])
+    if snapshot_id:
+        InterestSnapshot.objects.filter(id=snapshot_id).delete()

@@ -1,9 +1,10 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from mc.accounts.permissions import IsActiveMember
 from mc.common.idempotency import IdempotentMixin
 from mc.verification import selectors, services
 
@@ -11,7 +12,7 @@ from . import serializers as s
 
 
 class CreateSessionView(IdempotentMixin):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=s.CreateSessionSerializer, responses={201: dict})
     def perform_idempotent(self, request):  # type: ignore[no-untyped-def]
@@ -26,7 +27,7 @@ class CreateSessionView(IdempotentMixin):
 
 
 class SubmittedView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(request=None, responses={200: dict})
     def post(self, request, attempt_id):  # type: ignore[no-untyped-def]
@@ -35,7 +36,7 @@ class SubmittedView(APIView):
 
 
 class StatusView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]

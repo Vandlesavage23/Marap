@@ -163,3 +163,27 @@ def is_approved_photo_media(media) -> bool:  # type: ignore[no-untyped-def]
     from .models import Photo
 
     return Photo.objects.filter(media=media, moderation_status=Photo.Moderation.APPROVED).exists()
+
+
+def report_snapshot(profile_id: uuid.UUID) -> dict[str, object] | None:
+    """Frozen copy of a profile for report evidence (what a moderator needs, nothing private)."""
+    p = Profile.objects.select_related("current_description").filter(id=profile_id).first()
+    if p is None:
+        return None
+    return {
+        "profile_id": str(p.id),
+        "display_name": p.display_name,
+        "age": age_of(p),
+        "district": p.district,
+        "intention": p.intention,
+        "marital_status": p.marital_status,
+        "occupation": p.occupation,
+        "description": p.current_description.text if p.current_description else None,
+        "photo_media_ids": [str(ph.media_id) for ph in approved_photos(p)],
+    }
+
+
+def status_for(account) -> str:  # type: ignore[no-untyped-def]
+    """`none` before a profile exists, else draft | live | hidden_by_user | suspended."""
+    status = Profile.objects.filter(account=account).values_list("status", flat=True).first()
+    return status or "none"

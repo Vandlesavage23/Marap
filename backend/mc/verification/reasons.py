@@ -7,6 +7,7 @@ DOC_EXPIRED = "doc_expired"
 LIVENESS_FAILED = "liveness_failed"
 UNDERAGE = "underage"
 DUPLICATE_IDENTITY = "duplicate_identity"
+BANNED = "banned"
 DOB_MISSING = "dob_missing"
 ID_NUMBER_MISSING = "id_number_missing"
 VENDOR_ERROR = "vendor_error"
@@ -26,7 +27,7 @@ SMILE_ID_REASONS: dict[str, str] = {
 }
 
 # Reasons after which an in-app appeal is never offered (support only).
-NO_APPEAL = frozenset({UNDERAGE, DUPLICATE_IDENTITY})
+NO_APPEAL = frozenset({UNDERAGE, DUPLICATE_IDENTITY, BANNED})
 
 
 def map_smile_id(code: str) -> str:
