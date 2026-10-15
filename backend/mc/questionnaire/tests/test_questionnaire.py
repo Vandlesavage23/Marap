@@ -40,7 +40,7 @@ def test_seed_has_25_core_and_special_questions():
     assert special.count() == 3 and not special.filter(is_core=True).exists()
     assert all(q.consent_kind for q in special)
     dims = set(Question.objects.values_list("dimension", flat=True))
-    assert dims == {d for d in Question.Dimension.values}
+    assert dims == set(Question.Dimension.values)
 
 
 def test_seed_loader_is_idempotent():

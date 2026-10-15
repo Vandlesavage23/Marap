@@ -196,3 +196,19 @@ CELERY_BEAT_SCHEDULE = {
 INSTALLED_APPS += ["mc.entitlements"]
 INSTALLED_APPS += ["mc.profiles"]
 INSTALLED_APPS += ["mc.questionnaire"]
+
+# Object storage (Bible §3.3): private S3 bucket (MinIO locally). Never public.
+MEDIA_BUCKET = env("MEDIA_BUCKET", "media-private")
+MEDIA_SSE = env("MEDIA_SSE", "")  # e.g. "aws:kms" in cloud
+AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", "")
+AWS_REGION = env("AWS_REGION", "af-south-1")
+AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID", "")
+AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY", "")
+MALWARE_SCANNER = env("MALWARE_SCANNER", "mc.media.providers.scanner.FakeScanner")
+CLAMD_HOST = env("CLAMD_HOST", "localhost")
+CLAMD_PORT = int(env("CLAMD_PORT", "3310"))
+IMAGE_MODERATION_PROVIDER = env(
+    "IMAGE_MODERATION_PROVIDER", "mc.media.providers.moderation.FakeModeration"
+)
+INSTALLED_APPS += ["mc.media"]
+CELERY_TASK_ROUTES = {"mc.media.tasks.*": {"queue": "media"}}

@@ -13,3 +13,5 @@ CSRF_COOKIE_SECURE = True
 SMS_PROVIDER = env("SMS_PROVIDER")  # required: never the fake in prod
 MC_TRUSTED_PROXY_COUNT = int(env("MC_TRUSTED_PROXY_COUNT", "1"))
 IDENTITY_PROVIDER = env("IDENTITY_PROVIDER")  # required: never the fake in prod
+MALWARE_SCANNER = env("MALWARE_SCANNER")  # required: never the fake in prod
+IMAGE_MODERATION_PROVIDER = env("IMAGE_MODERATION_PROVIDER")

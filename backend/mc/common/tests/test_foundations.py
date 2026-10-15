@@ -69,6 +69,10 @@ def test_openapi_served_in_dev_only(api, monkeypatch):
     monkeypatch.setenv("DJANGO_SECRET_KEY", "x")
     monkeypatch.setenv("SMS_PROVIDER", "mc.accounts.providers.sms.AfricasTalkingSms")
     monkeypatch.setenv("IDENTITY_PROVIDER", "mc.verification.providers.smile_id.SmileIdProvider")
+    monkeypatch.setenv("MALWARE_SCANNER", "mc.media.providers.scanner.ClamdScanner")
+    monkeypatch.setenv(
+        "IMAGE_MODERATION_PROVIDER", "mc.media.providers.moderation.RekognitionModeration"
+    )
     import importlib
 
     prod = importlib.import_module("config.settings.prod")
