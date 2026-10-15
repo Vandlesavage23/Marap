@@ -1,0 +1,3 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Payments</h1><form method="get"><input name="account" value="{{ account }}" placeholder="Account id" size="40"><button>Look up</button></form>
+<table><tr><th>Purchase</th><th>Provider</th><th>Status</th><th>Amount</th><th></th></tr>{% for p in rows %}<tr><td>{{ p.id }}</td><td>{{ p.provider }}</td><td>{{ p.status }}</td><td>{{ p.amount_minor }} {{ p.currency }}</td><td>
+{% if "payments.refund" in perms and p.provider == "flutterwave" and p.status == "active" %}<form method="post" action="/payments/{{ p.id }}/refund">{% csrf_token %}<input name="reason" placeholder="Reason" required><button>Refund</button></form>{% endif %}</td></tr>{% endfor %}</table>{% endblock %}

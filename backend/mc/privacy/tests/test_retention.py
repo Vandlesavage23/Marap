@@ -190,6 +190,7 @@ def test_task_wrapper_runs_everything_and_is_idempotent():
         "terminal_interests",
         "export_files",
         "deletions",
+        "staff_sessions",
     }
     again = tasks.run_retention()
     assert all(v in (0, {"deleted": 0, "held": 0}) for v in again.values())

@@ -18,6 +18,7 @@ from django.utils import timezone
 from mc.accounts import constants as account_status
 from mc.accounts import selectors as account_selectors
 from mc.accounts import services as account_services
+from mc.adminportal import services as adminportal_services
 from mc.audit import services as audit
 from mc.common.errors import Conflict, Forbidden
 from mc.entitlements import selectors as entitlement_selectors
@@ -143,6 +144,7 @@ def _erase(account: "Account") -> None:
     media_services.delete_all_for(account_id=account.id)  # stored files first, then rows
     messaging_services.scrub_sent_by(account_id=account.id)
     interest_services.purge_for(account_id=account.id)
+    adminportal_services.purge_notes_for(account.id)
     account_services.hard_delete_account(
         account=account
     )  # cascades profile, answers, devices, sessions, consents…

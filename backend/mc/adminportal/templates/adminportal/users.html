@@ -1,0 +1,8 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Member lookup</h1>
+<form method="get">{% csrf_token %}<input name="q" value="{{ q }}" placeholder="Account id or phone" size="40"><button>Search</button></form>
+{% if found %}<table><tr><th>Account</th><td>{{ found.id }}</td></tr><tr><th>Status</th><td>{{ found.status }}</td></tr><tr><th>Joined</th><td>{{ found.created_at }}</td></tr><tr><th>Live sessions</th><td>{{ found.live_sessions }}</td></tr>
+<tr><th>Verification</th><td>{{ ver.status }}{% if ver.reason %} ({{ ver.reason }}){% endif %}</td></tr>
+{% if ent %}<tr><th>Access</th><td>{{ ent.state }}{% if ent.membership_ends_at %} until {{ ent.membership_ends_at }}{% endif %}</td></tr>{% endif %}</table>
+{% if "user.revoke_sessions" in perms %}<form method="post" action="/users/{{ found.id }}/revoke-sessions">{% csrf_token %}<input name="reason" placeholder="Reason (required)" required><button>Sign out everywhere</button></form>{% endif %}
+<h2>Notes</h2>{% for n in notes %}<p><small>{{ n.created_at }} · {{ n.staff.name }}</small><br>{{ n.body }}</p>{% empty %}<p>No notes.</p>{% endfor %}
+{% if "user.add_note" in perms %}<form method="post" action="/users/{{ found.id }}/notes">{% csrf_token %}<textarea name="body" rows="3" cols="60" placeholder="Note (no chat content or sensitive personal details)" required></textarea><button>Add note</button></form>{% endif %}{% endif %}{% endblock %}

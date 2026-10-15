@@ -6,6 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from mc.accounts import services as account_services
+from mc.adminportal import services as adminportal_services
 from mc.discovery import services as discovery_services
 from mc.interests import services as interest_services
 from mc.media import services as media_services
@@ -34,6 +35,9 @@ def run(*, now: datetime | None = None) -> dict[str, object]:
             before=_before(now, settings.RETENTION_REJECTED_MEDIA_DAYS)
         ),
         "dead_sessions": account_services.purge_dead_sessions(
+            before=_before(now, settings.RETENTION_DEAD_SESSIONS_DAYS)
+        ),
+        "staff_sessions": adminportal_services.purge_dead_staff_sessions(
             before=_before(now, settings.RETENTION_DEAD_SESSIONS_DAYS)
         ),
         "notifications": notification_services.purge_old(

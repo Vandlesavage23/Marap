@@ -18,3 +18,4 @@ IMAGE_MODERATION_PROVIDER = env("IMAGE_MODERATION_PROVIDER")
 PUSH_PROVIDER = env("PUSH_PROVIDER")  # required: never the fake in prod
 PAYMENT_GATEWAY = env("PAYMENT_GATEWAY")  # required: never the fake in prod
 EMAIL_PROVIDER = env("EMAIL_PROVIDER")  # required: never the fake in prod
+STAFF_SSO_PROVIDER = env("STAFF_SSO_PROVIDER")  # required: never the fake in prod

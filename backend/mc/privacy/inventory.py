@@ -32,7 +32,7 @@ def missing(path: Path = CSV_PATH) -> list[str]:
     covered = parse(path)
     out = []
     for model in apps.get_models():
-        if not model.__module__.startswith("mc."):
+        if not model.__module__.startswith("mc.") or ".tests." in model.__module__:
             continue
         key = f"{model._meta.app_label}.{model.__name__}"
         have = covered.get(key, set())

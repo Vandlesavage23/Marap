@@ -1,0 +1,2 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Moderation queue</h1><table><tr><th>Severity</th><th>Due</th><th>Case</th></tr>
+{% for c in cases %}<tr><td>{{ c.severity }}</td><td>{{ c.sla_due_at }}</td><td><a href="/safety/{{ c.id }}">{{ c.id }}</a></td></tr>{% empty %}<tr><td colspan="3">No open cases.</td></tr>{% endfor %}</table>{% endblock %}

@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marriage Connect · Staff</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;margin:0;color:#222}header{background:#3b1d3a;color:#fff;padding:.6rem 1rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center}header a{color:#fff}main{padding:1rem;max-width:960px;margin:auto}table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid #ddd;padding:.4rem;text-align:left}.flash{background:#fff3cd;padding:.6rem;border-radius:4px}input,select,textarea,button{font:inherit;padding:.35rem}</style></head>
+<body><header><strong>Marriage Connect · Staff</strong>
+{% if staff %}<a href="/">Home</a>
+{% if "user.read_limited" in perms %}<a href="/users">Members</a>{% endif %}
+{% if "verification.queue" in perms %}<a href="/verification">Verification</a>{% endif %}
+{% if "safety.queue" in perms %}<a href="/safety">Safety</a>{% endif %}
+{% if "payments.status" in perms %}<a href="/payments">Payments</a>{% endif %}
+{% if "privacy.requests" in perms %}<a href="/privacy">Privacy</a>{% endif %}
+{% if "audit.all" in perms %}<a href="/audit">Audit</a>{% endif %}
+<form method="post" action="/logout" style="margin-left:auto">{% csrf_token %}<button>Sign out</button></form>{% endif %}
+</header><main>{% if msg %}<p class="flash">{{ msg }}</p>{% endif %}{% block body %}{% endblock %}</main></body></html>

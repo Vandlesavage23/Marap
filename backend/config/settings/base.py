@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
     "mc.common.middleware.RequestIdMiddleware",
+    "mc.common.middleware.SecurityHeadersMiddleware",
 ]
 
 TEMPLATES = [
@@ -284,3 +285,19 @@ CELERY_BEAT_SCHEDULE["privacy-retention"] = {
 # Email (recovery + notices)
 EMAIL_PROVIDER = env("EMAIL_PROVIDER", "mc.accounts.providers.email.FakeEmail")
 EMAIL_FROM = env("EMAIL_FROM", "no-reply@marriageconnect.ug")
+
+# Admin portal (Bible §6.3, §12.4)
+STAFF_SSO_PROVIDER = env("STAFF_SSO_PROVIDER", "mc.adminportal.providers.sso.FakeSso")
+STAFF_OIDC_ISSUER = env("STAFF_OIDC_ISSUER", "")
+STAFF_OIDC_CLIENT_ID = env("STAFF_OIDC_CLIENT_ID", "")
+STAFF_OIDC_CLIENT_SECRET = env("STAFF_OIDC_CLIENT_SECRET", "")
+STAFF_ALLOWED_EMAIL_DOMAINS = [
+    d for d in env("STAFF_ALLOWED_EMAIL_DOMAINS", "marriageconnect.ug").split(",") if d
+]
+STAFF_SESSION_HOURS = int(env("STAFF_SESSION_HOURS", "8"))
+STAFF_REAUTH_MINUTES = int(env("STAFF_REAUTH_MINUTES", "10"))
+ADMIN_IP_ALLOWLIST = [
+    c for c in env("ADMIN_IP_ALLOWLIST", "").split(",") if c
+]  # CIDRs; empty = any
+STAFF_COOKIE = "mc_admin"
+INSTALLED_APPS += ["mc.adminportal"]

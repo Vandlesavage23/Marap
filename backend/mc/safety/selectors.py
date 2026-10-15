@@ -112,3 +112,32 @@ def accounts_under_hold() -> set[uuid.UUID]:
     from .models import Case
 
     return set(Case.objects.filter(status="open").values_list("subject_id", flat=True))
+
+
+def case_detail(case_id: uuid.UUID) -> dict[str, object] | None:
+    """Moderator view of one case: reports + captured evidence (never live chat). Callers audit the read."""
+    import json
+
+    from .models import Case
+
+    case = Case.objects.select_related("subject").filter(id=case_id).first()
+    if case is None:
+        return None
+    reports = []
+    for r in case.reports.order_by("id").prefetch_related("evidence"):
+        evidence = []
+        for e in r.evidence.order_by("position"):
+            try:
+                evidence.append({"kind": e.kind, "content": json.loads(e.content)})
+            except ValueError:
+                evidence.append({"kind": e.kind, "content": {}})
+        reports.append(
+            {
+                "id": r.id,
+                "category": r.category,
+                "severity": r.severity,
+                "text": r.text or "",
+                "evidence": evidence,
+            }
+        )
+    return {"case": case, "subject_id": case.subject_id, "reports": reports}

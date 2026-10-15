@@ -51,3 +51,6 @@ questionnaire.Question.*,questionnaire.Question,seeded reference data (no person
 verification.VerificationAttempt.(account/vendor/vendor_job_id/submitted_at/decided_at/reviewed_by),verification.VerificationAttempt,verification bookkeeping (vendor job id; no images stored),legal obligation/fraud prevention,retained after deletion (account link cleared),Smile ID,af-south-1 Postgres
 accounts.RecoverySession.*,accounts.RecoverySession,lost-phone recovery audit trail (ip as HMAC),legitimate interest (account security),retained while account exists,Smile ID (biometric re-check) / SES (email),af-south-1 Postgres
 verification.VerificationAppeal.*,verification.VerificationAppeal,appeal of a verification failure (message field-encrypted),legal obligation/fairness,retained with the attempt,none,af-south-1 Postgres
+adminportal.StaffUser.*,adminportal.StaffUser,staff access control (work email; TOTP secret encrypted),legitimate interest (security),while employed + 1y,company SSO provider,af-south-1 Postgres
+adminportal.StaffSession.*,adminportal.StaffSession,staff portal sessions (token hash; ip as HMAC),legitimate interest (security),purged 30d after expiry,none,af-south-1 Postgres
+adminportal.SupportNote.*,adminportal.SupportNote,support case notes (encrypted; no chat or special data),legitimate interest (support),erased with the account,none,af-south-1 Postgres

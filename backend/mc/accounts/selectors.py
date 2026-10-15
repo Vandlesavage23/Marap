@@ -130,3 +130,13 @@ def export_for_account(account: Account) -> dict[str, object]:
             for d in account.devices.all()
         ],
     }
+
+
+def staff_summary(account: Account) -> dict[str, object]:
+    """Limited support view: no phone, no profile text, no answers."""
+    return {
+        "id": account.id,
+        "status": account.status,
+        "created_at": account.created_at,
+        "live_sessions": active_sessions(account).count(),
+    }

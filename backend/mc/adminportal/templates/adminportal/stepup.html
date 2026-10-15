@@ -1,0 +1,2 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Confirm it's you</h1><p>This action needs a fresh authenticator code.</p>
+<form method="post">{% csrf_token %}<input name="code" inputmode="numeric" maxlength="6" autofocus required><button>Confirm</button></form>{% endblock %}
