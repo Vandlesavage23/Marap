@@ -10,6 +10,7 @@ Each runbook: **symptom → check → act → verify → follow-up**. Alerts are
 | `admin_access_denied` | A staff member tried something their role doesn't allow | [admin-access-denied.md](admin-access-denied.md) |
 | `otp_send_spike` | Global OTP sends crossed the hourly threshold (SMS pumping) | [otp-spike.md](otp-spike.md) |
 | (health) `/ready` red, 5xx spike | Dependency outage | [outage.md](outage.md) |
+| (manual) | Suspected account takeover | [account-takeover.md](account-takeover.md) |
 | (manual) | Suspected personal-data incident | [data-incident.md](data-incident.md) |
 | (manual) | Restore from backup / key rotation | [restore-and-keys.md](restore-and-keys.md) |
 
