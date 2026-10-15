@@ -57,3 +57,10 @@ FEATURE_FLAGS_DEFAULT = {
     "voice_notes": True,
     "data_saver_default_on_cellular": True,
 }
+
+OTP_SENDS_PER_PREFIX_PER_HOUR = _int("OTP_SENDS_PER_PREFIX_PER_HOUR", 300)  # SMS-pumping guard
+OTP_VERIFY_PER_IP_PER_HOUR = _int("OTP_VERIFY_PER_IP_PER_HOUR", 60)
+# Uganda-only OTP by default; diaspora calling codes are allowlisted (A, Bible §12.3).
+OTP_ALLOWED_CALLING_CODES = [
+    c for c in os.environ.get("OTP_ALLOWED_CALLING_CODES", "256").split(",") if c
+]

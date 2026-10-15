@@ -162,3 +162,19 @@ if SENTRY_DSN:
         before_send=sentry_before_send,  # type: ignore[arg-type]
         traces_sample_rate=0.1,
     )
+
+# SMS (Bible §11.4). Fake in local/test; real environments must set SMS_PROVIDER explicitly.
+SMS_PROVIDER = env("SMS_PROVIDER", "mc.accounts.providers.sms.FakeSms")
+AT_USERNAME = env("AT_USERNAME", "")
+AT_API_KEY = env("AT_API_KEY", "")
+AT_SENDER_ID = env("AT_SENDER_ID", "")
+
+# JWT (Bible §12.1): asymmetric (EdDSA) keys from Secrets Manager; dev keys derived in local/test.
+MC_JWT_PRIVATE_KEY_PEM = env("MC_JWT_PRIVATE_KEY_PEM", "")
+MC_JWT_PUBLIC_KEY_PEM = env("MC_JWT_PUBLIC_KEY_PEM", "")
+
+# Number of trusted reverse proxies (ALB=1) for X-Forwarded-For parsing.
+MC_TRUSTED_PROXY_COUNT = int(env("MC_TRUSTED_PROXY_COUNT", "0"))
+
+INSTALLED_APPS += ["mc.accounts"]
+REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = ["mc.accounts.authentication.JWTAuthentication"]

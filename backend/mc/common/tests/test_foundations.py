@@ -82,9 +82,9 @@ def test_default_permission_is_deny():
 
     request = APIRequestFactory().get("/x")
     resp = Open.as_view()(request)
-    assert resp.status_code == 403
+    assert resp.status_code == 401  # anonymous → authenticate first; authenticated → 403 forbidden
     resp.render()
-    assert json.loads(resp.content)["code"] == "forbidden"
+    assert json.loads(resp.content)["code"] == "unauthenticated"
     assert resp["Content-Type"].startswith("application/problem+json")
 
 

@@ -126,3 +126,24 @@ def hmac_value(value: str, *, purpose: str) -> bytes:
     except KeyError as exc:
         raise ValueError(f"no pepper configured for purpose {purpose!r}") from exc
     return hmac.new(pepper, value.encode(), hashlib.sha256).digest()
+
+
+def dev_ed25519_pems(secret: str) -> tuple[str, str]:
+    """Deterministic Ed25519 keypair for local/test only (real environments inject keys)."""
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    key = Ed25519PrivateKey.from_private_bytes(
+        hashlib.sha256(f"mc-dev-jwt|{secret}".encode()).digest()
+    )
+    private = key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    ).decode()
+    public = (
+        key.public_key()
+        .public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
+        .decode()
+    )
+    return private, public

@@ -15,3 +15,12 @@ def _clean_redis():
 def api():
     """Test client bound to the api host."""
     return Client(headers={"host": "api.mc.test"})
+
+
+@pytest.fixture(autouse=True)
+def _fake_sms():
+    from mc.accounts.providers.sms import FakeSms
+
+    FakeSms.reset()
+    yield FakeSms
+    FakeSms.reset()

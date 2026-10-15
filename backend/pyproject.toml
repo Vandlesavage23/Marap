@@ -86,12 +86,19 @@ include_external_packages = false
 name = "common is a leaf: it never imports domain modules"
 type = "forbidden"
 source_modules = ["mc.common"]
-forbidden_modules = ["mc.audit"]
+forbidden_modules = ["mc.audit", "mc.accounts"]
 ignore_imports = ["mc.common.tests.** -> mc.**"]
 
 [[tool.importlinter.contracts]]
-name = "audit is not imported across modules except via services/selectors"
+name = "audit internals are private to audit"
 type = "forbidden"
-source_modules = ["mc.common"]
-forbidden_modules = ["mc.audit.models", "mc.audit.api"]
-ignore_imports = ["mc.common.tests.** -> mc.**"]
+source_modules = ["mc.accounts"]
+forbidden_modules = ["mc.audit.models", "mc.audit.api", "mc.audit.tasks"]
+ignore_imports = ["mc.accounts.tests.** -> mc.**"]
+
+[[tool.importlinter.contracts]]
+name = "accounts internals are private to accounts"
+type = "forbidden"
+source_modules = ["mc.audit"]
+forbidden_modules = ["mc.accounts.models", "mc.accounts.api", "mc.accounts.tasks"]
+ignore_imports = ["mc.audit.tests.** -> mc.**"]

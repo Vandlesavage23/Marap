@@ -1,1 +1,8 @@
 field,model,purpose,lawful_basis,retention,processor,location
+accounts.Account.phone_e164,accounts.Account,sign-in and account recovery,contract,until account deletion + 30d grace,SMS provider (OTP),af-south-1 Postgres
+accounts.Account.email,accounts.Account,account recovery,consent,until account deletion,SES (transactional),af-south-1 Postgres
+accounts.Account.status / locale / country_of_residence / last_seen_at,accounts.Account,service operation,contract,until account deletion,none,af-south-1 Postgres
+accounts.Device.*,accounts.Device,push delivery and new-device alerts,legitimate interest,until account deletion,FCM (push token),af-south-1 Postgres
+accounts.Session.*,accounts.Session,authentication,contract,expiry + 90d then purge,none,af-south-1 Postgres
+accounts.ConsentRecord.*,accounts.ConsentRecord,proof of consent (ip stored only as HMAC),legal obligation,retained as evidence,none,af-south-1 Postgres
+audit.AuditEvent.*,audit.AuditEvent,security audit trail (no PII; ip as HMAC),legitimate interest/legal obligation,retained,none,af-south-1 Postgres
