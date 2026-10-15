@@ -107,3 +107,31 @@ def membership_ends_at(account_id: uuid.UUID, now: datetime | None = None) -> da
         .first()
     )
     return ent.ends_at if ent else None
+
+
+def has_unrevoked_window(
+    purchase_id: uuid.UUID, *, still_running_at: datetime | None = None
+) -> bool:
+    """Is there a non-revoked window for this purchase (optionally one that hasn't ended at `still_running_at`)?"""
+    qs = Entitlement.objects.filter(purchase_id=purchase_id, revoked_at__isnull=True)
+    if still_running_at is not None:
+        qs = qs.filter(ends_at__gt=still_running_at)
+    return qs.exists()
+
+
+def export_for_account(account) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    trial = Trial.objects.filter(account=account).first()
+    return {
+        "trial": {"started_at": trial.started_at.isoformat(), "ends_at": trial.ends_at.isoformat()}
+        if trial
+        else None,
+        "entitlements": [
+            {
+                "source": e.source,
+                "starts_at": e.starts_at.isoformat(),
+                "ends_at": e.ends_at.isoformat(),
+                "revoked": e.revoked_at is not None,
+            }
+            for e in Entitlement.objects.filter(account=account).order_by("starts_at")
+        ],
+    }

@@ -266,3 +266,13 @@ CELERY_BEAT_SCHEDULE["billing-nightly-reconciliation"] = {
     "task": "mc.billing.tasks.nightly_reconciliation",
     "schedule": 86400.0,
 }
+INSTALLED_APPS += ["mc.privacy"]
+CELERY_BEAT_SCHEDULE["privacy-hard-deletions"] = {
+    "task": "mc.privacy.tasks.run_hard_deletions",
+    "schedule": 86400.0,
+}
+EXPORTS_BUCKET = env("EXPORTS_BUCKET", "exports-private")
+CELERY_BEAT_SCHEDULE["privacy-purge-exports"] = {
+    "task": "mc.privacy.tasks.purge_expired_exports",
+    "schedule": 3600.0,
+}

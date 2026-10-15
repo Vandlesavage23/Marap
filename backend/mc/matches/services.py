@@ -42,7 +42,10 @@ def unmatch(*, match_id: uuid.UUID, by: uuid.UUID, reason: str = "unmatched") ->
             raise NotFound()
         if match.status != Match.Status.ACTIVE:
             return match
-        match.status = Match.Status.BLOCKED if reason == "blocked" else Match.Status.UNMATCHED
+        match.status = {
+            "blocked": Match.Status.BLOCKED,
+            "deleted": Match.Status.CLOSED_DELETED,
+        }.get(reason, Match.Status.UNMATCHED)
         match.ended_at, match.ended_by_id = timezone.now(), by
         match.save(update_fields=["status", "ended_at", "ended_by", "updated_at"])
         events.publish(
@@ -75,3 +78,11 @@ def record_participant_message(*, match_id: uuid.UUID, sender_id: uuid.UUID, at)
         if changed:
             match.save(update_fields=[*changed, "updated_at"])
     return match
+
+
+def end_all_for(*, account_id: uuid.UUID, reason: str) -> int:
+    """Account deactivation/deletion: end every active match of the account (the partner's chat is hidden)."""
+    ids = [m.id for m in selectors.active_matches(account_id)]
+    for match_id in ids:
+        unmatch(match_id=match_id, by=account_id, reason=reason)
+    return len(ids)

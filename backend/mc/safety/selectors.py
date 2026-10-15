@@ -66,3 +66,42 @@ def sla_breached(*, now=None):  # type: ignore[no-untyped-def]
     return Case.objects.filter(status="open", sla_due_at__lt=now or timezone.now()).order_by(
         "sla_due_at"
     )
+
+
+def has_deletion_hold(account_id: uuid.UUID) -> str:
+    """Reason hard deletion must wait (open safety case or enforcement in force), else ''."""
+    from .models import Action, Case
+
+    if Case.objects.filter(subject_id=account_id, status="open").exists():
+        return "open_safety_case"
+    if Action.objects.filter(
+        subject_id=account_id, kind__in=["suspend_7d", "ban"], lifted_at__isnull=True
+    ).exists():
+        return "enforcement_in_force"
+    return ""
+
+
+def export_for_account(account) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    from .models import Action, Report
+
+    return {
+        "reports_filed": [
+            {
+                "category": r.category,
+                "context": r.context_type,
+                "note": r.text,
+                "at": r.created_at.isoformat(),
+            }
+            for r in Report.objects.filter(reporter=account).order_by("id")
+        ],
+        "enforcement_actions": [
+            {
+                "kind": a.kind,
+                "at": a.created_at.isoformat(),
+                "expires_at": a.expires_at.isoformat() if a.expires_at else None,
+            }
+            for a in Action.objects.filter(subject=account).order_by("id")
+        ],
+        "blocked_count": len(blocked_either_way_ids(account.id))
+        and Block.objects.filter(blocker=account).count(),
+    }

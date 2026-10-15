@@ -44,3 +44,7 @@ def counterpart_ids(account_id: uuid.UUID, *, ended_since=None) -> set[uuid.UUID
         .values_list("user_a_id", "user_b_id")
     )
     return {b if a == account_id else a for a, b in rows}
+
+
+def all_matches(account_id: uuid.UUID) -> QuerySet[Match]:
+    return Match.objects.filter(Q(user_a_id=account_id) | Q(user_b_id=account_id)).order_by("id")

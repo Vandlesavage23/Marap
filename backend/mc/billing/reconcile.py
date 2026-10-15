@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from mc.audit import services as audit
 from mc.common.errors import ProviderError
-from mc.entitlements.models import Entitlement
+from mc.entitlements import selectors as entitlement_selectors
 
 from . import services, store, web
 from .events import GRANT, NormalizedEvent
@@ -100,7 +100,7 @@ def nightly_report(*, now=None) -> dict[str, Any]:  # type: ignore[no-untyped-de
     mismatches: list[dict[str, str]] = []
 
     for p in Purchase.objects.filter(status=Purchase.Status.ACTIVE, updated_at__gte=since):
-        if not Entitlement.objects.filter(purchase_id=p.id, revoked_at__isnull=True).exists():
+        if not entitlement_selectors.has_unrevoked_window(p.id):
             mismatches.append(
                 {"purchase": str(p.id), "problem": "active_purchase_without_entitlement"}
             )
@@ -109,9 +109,7 @@ def nightly_report(*, now=None) -> dict[str, Any]:  # type: ignore[no-untyped-de
     for p in Purchase.objects.filter(
         status__in=[Purchase.Status.REFUNDED, Purchase.Status.REVOKED]
     ):
-        if Entitlement.objects.filter(
-            purchase_id=p.id, revoked_at__isnull=True, ends_at__gt=now
-        ).exists():
+        if entitlement_selectors.has_unrevoked_window(p.id, still_running_at=now):
             mismatches.append(
                 {"purchase": str(p.id), "problem": "refunded_purchase_still_entitled"}
             )
@@ -120,6 +118,10 @@ def nightly_report(*, now=None) -> dict[str, Any]:  # type: ignore[no-untyped-de
     )
     for ev in failed:
         mismatches.append({"event": str(ev.id), "problem": f"failed_event:{ev.error}"})
+    for ev in PaymentEvent.objects.filter(error="account_deleted", received_at__gte=since):
+        mismatches.append(
+            {"event": str(ev.id), "problem": "payment_for_deleted_account"}
+        )  # refund candidate
     stuck = Purchase.objects.filter(
         provider="flutterwave",
         status=Purchase.Status.PENDING,

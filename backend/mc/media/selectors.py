@@ -18,3 +18,9 @@ def signed_url(media: MediaObject, viewer) -> str | None:  # type: ignore[no-unt
     if not can_view_media(viewer, media):
         return None
     return storage.presign_get(key=media.storage_key, ttl=settings.MEDIA_SIGNED_URL_SECONDS)
+
+
+def owned_ready_media(account_id: uuid.UUID):  # type: ignore[no-untyped-def]
+    return MediaObject.objects.filter(
+        owner_id=account_id, status=MediaObject.Status.READY
+    ).order_by("id")

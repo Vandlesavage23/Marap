@@ -80,3 +80,26 @@ def put_bytes(key: str, data: bytes, content_type: str) -> None:
 
 def delete(key: str) -> None:
     _client().delete_object(Bucket=settings.MEDIA_BUCKET, Key=key)
+
+
+def put_file(key: str, path: str, content_type: str, *, bucket: str | None = None) -> None:
+    extra = {"ServerSideEncryption": settings.MEDIA_SSE} if settings.MEDIA_SSE else {}
+    _client().upload_file(
+        path, bucket or settings.MEDIA_BUCKET, key, ExtraArgs={"ContentType": content_type, **extra}
+    )
+
+
+def presign_get_in(*, bucket: str, key: str, ttl: int) -> str:
+    return str(
+        _client().generate_presigned_url(
+            "get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=ttl
+        )
+    )
+
+
+def delete_in(*, bucket: str, key: str) -> None:
+    _client().delete_object(Bucket=bucket, Key=key)
+
+
+def read_bytes(key: str) -> bytes:
+    return bytes(_client().get_object(Bucket=settings.MEDIA_BUCKET, Key=key)["Body"].read())

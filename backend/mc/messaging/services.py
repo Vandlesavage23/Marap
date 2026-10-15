@@ -160,3 +160,14 @@ def hide_message(*, message_id: uuid.UUID) -> None:
     Message.objects.filter(id=message_id).update(
         deleted_placeholder=True, updated_at=timezone.now()
     )
+
+
+def scrub_sent_by(*, account_id: uuid.UUID) -> int:
+    """Erasure: messages the member sent become 'message deleted' placeholders (body and media dropped)."""
+    return Message.objects.filter(sender_id=account_id).update(
+        body=None,
+        media=None,
+        deleted_placeholder=True,
+        moderation_flag=None,
+        updated_at=timezone.now(),
+    )

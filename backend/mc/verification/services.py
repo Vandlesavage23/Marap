@@ -119,7 +119,7 @@ def apply_result(result: VendorResult) -> VerificationAttempt | None:
     verified: tuple[Account, VerificationAttempt] | None = None
     with transaction.atomic():
         attempt = (
-            VerificationAttempt.objects.select_for_update()
+            VerificationAttempt.objects.select_for_update(of=("self",))
             .select_related("account")
             .filter(vendor_job_id=result.job_id)
             .first()
@@ -136,6 +136,8 @@ def apply_result(result: VendorResult) -> VerificationAttempt | None:
             {"outcome": result.outcome, "reason": result.vendor_reason, **result.summary}
         )
         account = attempt.account
+        if account is None:  # the member deleted their account while the vendor was still deciding
+            return attempt
 
         if result.outcome == "error":
             attempt.status, attempt.reason_code = "error", reasons.VENDOR_ERROR
@@ -209,7 +211,9 @@ def _pass_failure(result: VendorResult, now: datetime) -> str | None:
     id_hmac = hmac_value(normalise_id_number(result.id_number), purpose="id_number")
     if safety_selectors.is_identity_banned(id_hmac):
         return reasons.BANNED
-    if VerificationAttempt.objects.filter(id_number_hmac=id_hmac, status="passed").exists():
+    if VerificationAttempt.objects.filter(
+        id_number_hmac=id_hmac, status="passed", account__isnull=False
+    ).exists():
         return reasons.DUPLICATE_IDENTITY
     return None
 

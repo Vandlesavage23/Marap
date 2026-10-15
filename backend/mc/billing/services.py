@@ -159,6 +159,11 @@ def process_event(*, event_id: uuid.UUID) -> PaymentEvent | None:
         elif norm.account_id and purchase.account_id != norm.account_id:
             return _finish(event, PaymentEvent.Status.FAILED, "account_mismatch")
 
+        if (
+            purchase.account_id is None
+        ):  # the member deleted their account: keep the ledger, grant nothing
+            return _finish(event, PaymentEvent.Status.PROCESSED, "account_deleted")
+
         state = _fold([n for _, n in _events_for(norm.provider, norm.transaction_id)] + [norm])
         # Prepaid web periods carry no dates from the provider: fix them once, at first confirmation, so the
         # window starts when current access ends (overlapping purchases extend) and never shifts on replay.

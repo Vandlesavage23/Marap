@@ -187,3 +187,52 @@ def status_for(account) -> str:  # type: ignore[no-untyped-def]
     """`none` before a profile exists, else draft | live | hidden_by_user | suspended."""
     status = Profile.objects.filter(account=account).values_list("status", flat=True).first()
     return status or "none"
+
+
+def export_for_account(account) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    p = Profile.objects.filter(account=account).first()
+    if p is None:
+        return {}
+    pref = getattr(p, "preference", None) if hasattr(p, "preference") else None
+    return {
+        "display_name": p.display_name,
+        "gender": p.gender,
+        "birth_date": p.birth_date.isoformat(),
+        "district": p.district,
+        "diaspora_country": p.diaspora_country,
+        "intention": p.intention,
+        "marriage_timeline": p.marriage_timeline,
+        "marital_status": p.marital_status,
+        "has_children": p.has_children,
+        "wants_children": p.wants_children,
+        "languages": p.languages,
+        "religion": p.religion,
+        "religion_practice": p.religion_practice,
+        "occupation": p.occupation,
+        "education": p.education,
+        "status": p.status,
+        "descriptions": [
+            {
+                "version": d.version,
+                "text": d.text,
+                "status": d.status,
+                "created_at": d.created_at.isoformat(),
+            }
+            for d in p.descriptions.order_by("version")
+        ],
+        "photos": [
+            {"position": ph.position, "media_id": str(ph.media_id), "status": ph.moderation_status}
+            for ph in p.photos.all()
+        ],
+        "preferences": (
+            {
+                "age_min": pref.age_min,
+                "age_max": pref.age_max,
+                "max_distance_km": pref.max_distance_km,
+                "include_diaspora": pref.include_diaspora,
+                "accept_has_children": pref.accept_has_children,
+            }
+            if pref
+            else None
+        ),
+    }

@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.db.models import QuerySet
 
@@ -83,3 +83,21 @@ def evidence_for_report(
         }
         for m in rows
     ]
+
+
+def export_for_account(account) -> list[dict[str, Any]]:  # type: ignore[no-untyped-def]
+    """Every conversation the member was in: messages they sent and received, nothing else about the other person."""
+    from mc.matches import selectors as match_selectors
+
+    out = []
+    for match in match_selectors.all_matches(account.id):
+        msgs = Message.objects.filter(match=match).exclude(kind="system").order_by("id")
+        out.append({
+            "match_id": str(match.id), "status": match.status, "started_at": match.created_at.isoformat(),
+            "messages": [
+                {"from": "me" if m.sender_id == account.id else "them", "kind": m.kind, "body": None if m.deleted_placeholder else m.body,
+                 "media_id": str(m.media_id) if m.media_id and m.sender_id == account.id else None, "sent_at": m.created_at.isoformat()}
+                for m in msgs
+            ],
+        })  # fmt: skip
+    return out

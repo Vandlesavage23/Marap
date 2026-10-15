@@ -104,6 +104,27 @@ class MeView(APIView):
     def get(self, request):  # type: ignore[no-untyped-def]
         return Response(_account_summary(request.user))
 
+    @extend_schema(request=None, responses={200: dict})
+    def delete(self, request):  # type: ignore[no-untyped-def]
+        """Delete my account: needs a fresh OTP (`POST /me/reauth/start`). Deactivates now, erases after the grace period."""
+        import json
+
+        from rest_framework.utils.encoders import JSONEncoder
+
+        from mc.common.errors import ValidationFailed
+        from mc.privacy import services as privacy_services
+
+        code = request.data.get("code") if isinstance(request.data, dict) else None
+        if (
+            set(request.data) - {"code"}
+            or not isinstance(code, str)
+            or not code.isdigit()
+            or len(code) != 6
+        ):
+            raise ValidationFailed("Send the 6-digit confirmation code.")
+        _req, body = privacy_services.request_deletion(account=request.user, code=code)
+        return Response(json.loads(json.dumps(body, cls=JSONEncoder)))
+
 
 class SessionsView(APIView):
     permission_classes = [IsAuthenticatedAnyStatus]

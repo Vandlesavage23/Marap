@@ -36,3 +36,7 @@ safety.Case.*,safety.Case,moderation work queue and SLA,legitimate interest (saf
 safety.Action.*,safety.Action,enforcement history,legitimate interest (safety),retained (audit),none,af-south-1 Postgres
 safety.Ban.*,safety.Ban,prevent a banned person from re-registering (keyed hash only),legitimate interest (safety),retained,none,af-south-1 Postgres
 safety.EnforcementAppeal.*,safety.EnforcementAppeal,appeal of an enforcement action (message field-encrypted),legal obligation/fairness,retained with the action,none,af-south-1 Postgres
+privacy.PrivacyRequest.*,privacy.PrivacyRequest,export and deletion requests (account link cleared after deletion),legal obligation,retained as compliance record,none,af-south-1 Postgres
+billing.Product.*,billing.Product,catalogue (no personal data),n/a,n/a,none,af-south-1 Postgres
+billing.PaymentEvent.*,billing.PaymentEvent,append-only payment ledger,legal obligation (tax),retained after account deletion,Apple/Google/Flutterwave,af-south-1 Postgres
+billing.Purchase.*,billing.Purchase,membership purchases (store token field-encrypted),contract/legal obligation (tax),retained after account deletion (account link cleared),Apple/Google/Flutterwave,af-south-1 Postgres

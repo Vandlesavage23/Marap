@@ -79,3 +79,23 @@ def evidence_for_report(
         "display_name": i.snapshot.display_name,
         "text": i.snapshot.text,
     }
+
+
+def export_for_account(account) -> dict[str, list[dict[str, object]]]:  # type: ignore[no-untyped-def]
+    """Interests the member sent (with the text they sent) and received (the text addressed to them)."""
+    snap = lambda i: i.snapshot.text if i.snapshot else None  # noqa: E731
+    return {
+        "sent": [
+            {"status": i.status, "sent_at": i.created_at.isoformat(), "text_sent": snap(i)}
+            for i in Interest.objects.filter(sender=account).select_related("snapshot")
+        ],
+        "received": [
+            {
+                "status": i.status,
+                "received_at": i.created_at.isoformat(),
+                "from_display_name": i.snapshot.display_name if i.snapshot else None,
+                "text_received": snap(i),
+            }
+            for i in Interest.objects.filter(recipient=account).select_related("snapshot")
+        ],
+    }

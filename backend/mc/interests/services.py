@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.db import IntegrityError, connection, transaction
+from django.db.models import Q as models_Q
 from django.utils import timezone
 
 from mc.common import events
@@ -304,3 +305,23 @@ def cancel_interest(*, interest_id: uuid.UUID) -> None:
     interest.save(update_fields=["status", "updated_at"])
     if snapshot_id:
         InterestSnapshot.objects.filter(id=snapshot_id).delete()
+
+
+def cancel_all_for(*, account_id: uuid.UUID) -> int:
+    """Account deactivation: cancel every pending interest to/from the account and delete the snapshots."""
+    qs = Interest.objects.filter(status=Interest.Status.PENDING).filter(
+        models_Q(sender_id=account_id) | models_Q(recipient_id=account_id)
+    )
+    snapshot_ids = [s for s in qs.values_list("snapshot_id", flat=True) if s]
+    n = qs.update(status=Interest.Status.CANCELLED, updated_at=timezone.now())
+    InterestSnapshot.objects.filter(id__in=snapshot_ids).delete()
+    return n
+
+
+def purge_for(*, account_id: uuid.UUID) -> int:
+    """Erasure: delete every interest to/from the account together with its description snapshot."""
+    qs = Interest.objects.filter(models_Q(sender_id=account_id) | models_Q(recipient_id=account_id))
+    snapshot_ids = [s for s in qs.values_list("snapshot_id", flat=True) if s]
+    InterestSnapshot.objects.filter(id__in=snapshot_ids).delete()
+    deleted, _ = qs.delete()
+    return deleted

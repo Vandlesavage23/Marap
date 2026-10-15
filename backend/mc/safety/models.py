@@ -52,11 +52,11 @@ class Report(BaseModel):
         DISMISSED = "dismissed"
 
     reporter = models.ForeignKey(
-        "accounts.Account", on_delete=models.CASCADE, related_name="reports_made"
-    )
+        "accounts.Account", null=True, on_delete=models.SET_NULL, related_name="reports_made"
+    )  # pseudonymised (NULL) after the reporter is deleted
     subject = models.ForeignKey(
-        "accounts.Account", on_delete=models.CASCADE, related_name="reports_about"
-    )
+        "accounts.Account", null=True, on_delete=models.SET_NULL, related_name="reports_about"
+    )  # pseudonymised (NULL) after the subject is deleted
     category = models.CharField(max_length=20, choices=Category.choices)
     context_type = models.CharField(max_length=10, choices=ContextType.choices)
     context_id = models.UUIDField(null=True, blank=True)

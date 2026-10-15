@@ -14,3 +14,15 @@ def inbox(account_id: uuid.UUID, *, cursor: str | None, limit: int) -> Page[Noti
 
 def unread_count(account_id: uuid.UUID) -> int:
     return Notification.objects.filter(account_id=account_id, read_at__isnull=True).count()
+
+
+def export_for_account(account) -> list[dict[str, object]]:  # type: ignore[no-untyped-def]
+    return [
+        {
+            "type": n.type,
+            "payload": n.payload,
+            "at": n.created_at.isoformat(),
+            "read": n.read_at is not None,
+        }
+        for n in Notification.objects.filter(account=account).order_by("id")
+    ]

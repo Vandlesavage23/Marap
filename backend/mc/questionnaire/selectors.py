@@ -65,3 +65,17 @@ def answers_for_scoring(
 
 def has_optional_answers(account_id: uuid.UUID) -> bool:
     return Answer.objects.filter(account_id=account_id, question__is_core=False).exists()
+
+
+def export_for_account(account) -> list[dict[str, object]]:  # type: ignore[no-untyped-def]
+    return [
+        {
+            "question": a.question.key,
+            "value": answer_value(a),
+            "importance": a.importance,
+            "deal_breaker": a.is_dealbreaker,
+        }
+        for a in Answer.objects.filter(account=account)
+        .select_related("question")
+        .order_by("question__position")
+    ]

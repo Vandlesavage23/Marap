@@ -48,3 +48,15 @@ def attempts_in_last_24h(account: "Account") -> int:
 
 def get_attempt(attempt_id: uuid.UUID) -> VerificationAttempt | None:
     return VerificationAttempt.objects.filter(id=attempt_id).first()
+
+
+def export_for_account(account) -> list[dict[str, object]]:  # type: ignore[no-untyped-def]
+    return [
+        {
+            "status": a.status,
+            "reason": a.reason_code or None,
+            "date_of_birth": a.date_of_birth.isoformat() if a.date_of_birth else None,
+            "at": a.created_at.isoformat(),
+        }
+        for a in VerificationAttempt.objects.filter(account=account).order_by("id")
+    ]

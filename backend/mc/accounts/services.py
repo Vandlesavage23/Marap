@@ -361,3 +361,38 @@ def hard_delete_account(*, account: Account) -> None:
 def clear_push_token(*, platform: str, token: str) -> int:
     """Prune a token the push provider reported invalid."""
     return Device.objects.filter(platform=platform, push_token=token).update(push_token=None)
+
+
+# ---------------------------------------------------------------- re-authentication (sensitive actions)
+def start_reauth(*, account: Account, ip: str) -> None:
+    """Send a fresh OTP to the account's own phone for a sensitive action (deletion). Same limits as login."""
+    ratelimit.hit(
+        f"otp:send:ip:{hmac_value(ip, purpose='ip').hex()[:32]}",
+        limit=settings.OTP_SENDS_PER_IP_PER_HOUR,
+        window_seconds=HOUR,
+    )
+    ratelimit.hit(
+        f"otp:send:phone:{hmac_value(account.phone_e164, purpose='phone').hex()}",
+        limit=settings.OTP_SENDS_PER_PHONE_PER_HOUR,
+        window_seconds=HOUR,
+    )
+    code = f"{secrets.randbelow(10**6):06d}"
+    r = get_redis()
+    key = _otp_key("reauth", account.phone_e164)
+    pipe = r.pipeline()
+    pipe.delete(key)
+    pipe.hset(key, mapping={"code_hash": _code_hash(account.phone_e164, code), "attempts": 0})
+    pipe.expire(key, settings.OTP_TTL_MINUTES * 60)
+    pipe.execute()
+    get_sms_provider().send(
+        to_e164=account.phone_e164,
+        body=f"Your Marriage Connect confirmation code is {code}. Never share it.",
+    )
+
+
+def consume_reauth_otp(*, account: Account, code: str) -> bool:
+    try:
+        _check_otp(e164=account.phone_e164, code=code, purpose="reauth")
+    except ValidationFailed:
+        return False
+    return True

@@ -142,3 +142,35 @@ def process_media(*, media_id: uuid.UUID) -> MediaObject | None:
         media.status, media.processed_at = MediaObject.Status.READY, timezone.now()
         media.save()
     return media
+
+
+def delete_all_for(*, account_id: uuid.UUID) -> int:
+    """Erasure: remove every stored object (raw and processed) and the rows, for one owner."""
+    n = 0
+    for media in MediaObject.objects.filter(owner_id=account_id):
+        for key in {media.upload_key, media.storage_key}:
+            if key:
+                storage.delete(key)
+        n += 1
+    MediaObject.objects.filter(owner_id=account_id).delete()
+    return n
+
+
+def export_files_for(*, account_id: uuid.UUID) -> list[tuple[str, bytes]]:
+    """`[(name, bytes)]` of the member's own processed uploads for their data export."""
+    out = []
+    for m in selectors_owned(account_id):
+        out.append(
+            (f"media/{m.id}.{m.storage_key.rsplit('.', 1)[-1]}", storage.read_bytes(m.storage_key))
+        )
+    return out
+
+
+def selectors_owned(account_id: uuid.UUID):  # type: ignore[no-untyped-def]
+    from . import selectors
+
+    return selectors.owned_ready_media(account_id)
+
+
+def delete_export_object(*, key: str) -> None:
+    storage.delete_in(bucket=settings.EXPORTS_BUCKET, key=key)

@@ -91,3 +91,42 @@ def session_is_live(session_id: uuid.UUID) -> bool:
         .exclude(account__status__in=["deactivated", "deleted", "suspended"])
         .exists()
     )
+
+
+def verify_reauth_code(*, account: "Account", code: str) -> bool:
+    """True if `code` is a live 'reauth' OTP for the account's phone (consumed on success)."""
+    from . import services
+
+    return services.consume_reauth_otp(account=account, code=code)
+
+
+def export_for_account(account: Account) -> dict[str, object]:
+    """Data-subject export: the member's own account data (never tokens or hashes)."""
+    return {
+        "id": str(account.id),
+        "phone": account.phone_e164,
+        "email": account.email,
+        "email_verified": account.email_verified_at is not None,
+        "status": account.status,
+        "locale": account.locale,
+        "created_at": account.created_at.isoformat(),
+        "consents": [
+            {
+                "kind": c.kind,
+                "version": c.version,
+                "granted": c.granted,
+                "source": c.source,
+                "at": c.created_at.isoformat(),
+            }
+            for c in ConsentRecord.objects.filter(account=account).order_by("id")
+        ],
+        "devices": [
+            {
+                "platform": d.platform,
+                "app_version": d.app_version,
+                "os_version": d.os_version,
+                "first_seen_at": d.first_seen_at.isoformat(),
+            }
+            for d in account.devices.all()
+        ],
+    }

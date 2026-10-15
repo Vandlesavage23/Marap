@@ -72,8 +72,9 @@ class Purchase(BaseModel):
         REFUNDED = "refunded"
         REVOKED = "revoked"
 
+    # Purchases are retained for tax law after account deletion, hence SET_NULL.
     account = models.ForeignKey(
-        "accounts.Account", on_delete=models.CASCADE, related_name="purchases"
+        "accounts.Account", null=True, on_delete=models.SET_NULL, related_name="purchases"
     )
     provider = models.CharField(max_length=12, choices=PaymentEvent.Provider.choices)
     product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name="purchases")

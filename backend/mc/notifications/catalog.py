@@ -8,5 +8,6 @@ CATALOG: dict[str, dict[str, object]] = {
     "trial_ended": {"inbox": True, "body": "Your free trial has ended"},
     "warning": {"inbox": True, "body": "Please review our community guidelines"},
     "appeal_decided": {"inbox": True, "body": "Your appeal has been reviewed"},
+    "export_ready": {"inbox": True, "body": "Your data export is ready"},
     "new_device": {"inbox": True, "body": "New sign-in on your account"},
 }

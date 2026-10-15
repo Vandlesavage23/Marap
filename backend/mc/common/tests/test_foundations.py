@@ -71,6 +71,7 @@ def test_openapi_served_in_dev_only(api, monkeypatch):
     monkeypatch.setenv("IDENTITY_PROVIDER", "mc.verification.providers.smile_id.SmileIdProvider")
     monkeypatch.setenv("MALWARE_SCANNER", "mc.media.providers.scanner.ClamdScanner")
     monkeypatch.setenv("PUSH_PROVIDER", "mc.notifications.providers.push.FcmPush")
+    monkeypatch.setenv("PAYMENT_GATEWAY", "mc.billing.providers.flutterwave.FlutterwaveGateway")
     monkeypatch.setenv(
         "IMAGE_MODERATION_PROVIDER", "mc.media.providers.moderation.RekognitionModeration"
     )

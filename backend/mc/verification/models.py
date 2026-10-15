@@ -20,8 +20,12 @@ class VerificationAttempt(BaseModel):
     class Vendor(models.TextChoices):
         SMILE_ID = "smile_id"
 
+    # Retained after account deletion for fraud prevention (decision only), hence SET_NULL.
     account = models.ForeignKey(
-        "accounts.Account", on_delete=models.CASCADE, related_name="verification_attempts"
+        "accounts.Account",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="verification_attempts",
     )
     vendor = models.CharField(max_length=20, choices=Vendor.choices, default=Vendor.SMILE_ID)
     vendor_job_id = models.CharField(max_length=64, unique=True)
@@ -44,7 +48,9 @@ class VerificationAttempt(BaseModel):
             # one verified identity → one account
             models.UniqueConstraint(
                 fields=["id_number_hmac"],
-                condition=models.Q(status="passed"),
+                condition=models.Q(
+                    status="passed", account__isnull=False
+                ),  # a deleted account frees its identity
                 name="uniq_passed_identity",
             ),
         ]
