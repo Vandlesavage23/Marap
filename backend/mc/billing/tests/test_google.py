@@ -230,9 +230,8 @@ def test_rtdn_cancel_renew_revoke_and_void(oidc):
             "voidedPurchaseNotification": {"purchaseToken": "tok-abc", "orderId": "GPA.1234-5678", "productType": 1, "refundType": 1}}  # fmt: skip
     assert push(oidc(), void).status_code == 200
     p.refresh_from_db()
-    assert (p.status == "refunded" and services.ledger_balance(p) < 0) or services.ledger_balance(
-        p
-    ) == 0
+    assert p.status == "refunded"
+    assert services.ledger_balance(p) == 20000  # two charges (purchase + renewal); one voided order refunded
     assert ent.entitlement_summary(who[2]).state != "member"
 
 
