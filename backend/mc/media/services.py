@@ -157,12 +157,12 @@ def delete_all_for(*, account_id: uuid.UUID) -> int:
 
 
 def export_files_for(*, account_id: uuid.UUID) -> list[tuple[str, bytes]]:
-    """`[(name, bytes)]` of the member's own processed uploads for their data export."""
+    """`[(name, bytes)]` of the member's own processed uploads for their data export (missing files skipped)."""
     out = []
     for m in selectors_owned(account_id):
-        out.append(
-            (f"media/{m.id}.{m.storage_key.rsplit('.', 1)[-1]}", storage.read_bytes(m.storage_key))
-        )
+        blob = storage.read_bytes(m.storage_key)
+        if blob is not None:
+            out.append((f"media/{m.id}.{m.storage_key.rsplit('.', 1)[-1]}", blob))
     return out
 
 

@@ -46,12 +46,13 @@ def s3():
 
     with mock_aws():
         storage.reset_client()
-        boto3.client(
+        client = boto3.client(
             "s3", region_name=settings.AWS_REGION, aws_access_key_id="x", aws_secret_access_key="x"
-        ).create_bucket(
-            Bucket=settings.MEDIA_BUCKET,
-            CreateBucketConfiguration={"LocationConstraint": settings.AWS_REGION},
         )
+        for bucket in (settings.MEDIA_BUCKET, settings.EXPORTS_BUCKET):
+            client.create_bucket(
+                Bucket=bucket, CreateBucketConfiguration={"LocationConstraint": settings.AWS_REGION}
+            )
         yield storage
     storage.reset_client()
 

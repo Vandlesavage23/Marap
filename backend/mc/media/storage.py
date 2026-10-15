@@ -101,5 +101,11 @@ def delete_in(*, bucket: str, key: str) -> None:
     _client().delete_object(Bucket=bucket, Key=key)
 
 
-def read_bytes(key: str) -> bytes:
-    return bytes(_client().get_object(Bucket=settings.MEDIA_BUCKET, Key=key)["Body"].read())
+def read_bytes(key: str) -> bytes | None:
+    """Object contents, or None if it no longer exists (never fail a whole export for one missing file)."""
+    try:
+        return bytes(_client().get_object(Bucket=settings.MEDIA_BUCKET, Key=key)["Body"].read())
+    except ClientError as exc:
+        if exc.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
+            return None
+        raise
