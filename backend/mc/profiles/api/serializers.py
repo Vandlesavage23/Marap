@@ -102,3 +102,17 @@ def public_profile(profile: Profile) -> dict[str, object]:
         "education": profile.education,
         "badges": ["age_verified", "identity_verified"],
     }
+
+
+class DescriptionSerializer(serializers.Serializer):
+    text = serializers.CharField(max_length=5000, trim_whitespace=False)
+
+
+def description_payload(desc) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    return {
+        "id": str(desc.id),
+        "version": desc.version,
+        "status": desc.status,
+        "reject_reason": desc.reject_reason or None,
+        "created_at": desc.created_at,
+    }

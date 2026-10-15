@@ -1,5 +1,6 @@
 """Profile writes (Bible §7.3, §10.3)."""
 
+import unicodedata
 import uuid
 from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Any
@@ -19,6 +20,8 @@ from .names import normalise_display_name
 
 if TYPE_CHECKING:
     from mc.accounts.models import Account
+
+    from .models import Description
 
 SPECIAL_FIELDS = {"religion": "special_religion", "religion_practice": "special_religion"}
 MARRIED = {Profile.MaritalStatus.MARRIED_CUSTOMARY, Profile.MaritalStatus.MARRIED_ISLAMIC}
@@ -191,3 +194,78 @@ def clear_special_data(*, account_id: uuid.UUID, kind: str) -> None:
         Profile.objects.filter(account_id=account_id).update(
             show_married_profiles=False, updated_at=timezone.now()
         )
+
+
+# ---- descriptions (MC-049) --------------------------------------------------------------------
+def submit_description(*, account: "Account", text: str) -> "Description":
+    """Create the next immutable version and screen it. Approved → becomes the shown description;
+    borderline → pending human review; clear violation → rejected with a reason code (and the
+    caller returns 422). A newer submission supersedes an older pending one."""
+    from mc.common.errors import DescriptionRejected
+
+    from .models import Description
+    from .text_screen import APPROVE, REJECT, RULESET_VERSION, screen
+
+    get_or_create_profile(account=account)
+    text = unicodedata.normalize("NFKC", text).strip()
+    if not settings.DESCRIPTION_MIN <= len(text) <= settings.DESCRIPTION_MAX:
+        raise ValidationFailed(
+            f"Your description must be {settings.DESCRIPTION_MIN}-{settings.DESCRIPTION_MAX} characters.",
+            min_length=settings.DESCRIPTION_MIN,
+            max_length=settings.DESCRIPTION_MAX,
+        )
+    verdict = screen(text)
+    with transaction.atomic():
+        profile = Profile.objects.select_for_update().get(account=account)
+        last = profile.descriptions.order_by("-version").first()
+        profile.descriptions.filter(status=Description.Status.PENDING).update(
+            status=Description.Status.REJECTED, reject_reason="superseded"
+        )
+        status = {
+            APPROVE: Description.Status.APPROVED,
+            REJECT: Description.Status.REJECTED,
+        }.get(verdict.outcome, Description.Status.PENDING)
+        desc = Description.objects.create(
+            profile=profile,
+            version=(last.version + 1) if last else 1,
+            text=text,
+            status=status,
+            reject_reason=verdict.reason if status != Description.Status.APPROVED else "",
+            ruleset_version=RULESET_VERSION,
+        )
+        if status == Description.Status.APPROVED:
+            _make_current(profile, desc)
+    if status == Description.Status.REJECTED:
+        raise DescriptionRejected(
+            "Your description can't include contact details, links or requests for money.",
+            reason=desc.reject_reason,
+            description_id=str(desc.id),
+            version=desc.version,
+        )
+    return desc
+
+
+def _make_current(profile: Profile, desc: "Description") -> None:
+    profile.current_description = desc
+    profile.save(update_fields=["current_description", "updated_at"])
+
+
+def review_description(
+    *, description_id: uuid.UUID, approve: bool, reviewer_id: uuid.UUID, reason: str = ""
+) -> "Description":
+    """Human decision on a pending description (admin queue). Audited by the admin layer."""
+    from .models import Description
+
+    with transaction.atomic():
+        desc = (
+            Description.objects.select_for_update().select_related("profile").get(id=description_id)
+        )
+        if desc.status != Description.Status.PENDING:
+            raise Conflict("This description was already decided.")
+        desc.status = Description.Status.APPROVED if approve else Description.Status.REJECTED
+        desc.reject_reason = "" if approve else (reason or "rejected_by_reviewer")[:40]
+        desc.reviewed_by = reviewer_id
+        desc.save(update_fields=["status", "reject_reason", "reviewed_by", "updated_at"])
+        if approve:
+            _make_current(desc.profile, desc)
+    return desc

@@ -91,6 +91,9 @@ class Profile(BaseModel):
     religion_practice = EncryptedTextField(null=True, blank=True)
     occupation = models.CharField(max_length=60, blank=True, default="")
     education = models.CharField(max_length=24, choices=Education.choices, blank=True, default="")
+    current_description = models.ForeignKey(
+        "Description", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT)
     completeness = models.PositiveSmallIntegerField(default=0)
 
@@ -99,3 +102,37 @@ class Profile(BaseModel):
             models.Index(fields=["status", "gender", "birth_date"]),
             models.Index(fields=["status", "district"]),
         ]
+
+
+class Description(BaseModel):
+    """Immutable text version (Bible §7.3). Edits create a new version; only status/reject_reason change."""
+
+    class Status(models.TextChoices):
+        PENDING = "pending"
+        APPROVED = "approved"
+        REJECTED = "rejected"
+
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name="descriptions")
+    version = models.PositiveIntegerField()
+    text = models.TextField()
+    status = models.CharField(max_length=10, choices=Status.choices)
+    reject_reason = models.CharField(max_length=40, blank=True, default="")
+    ruleset_version = models.CharField(max_length=20, blank=True, default="")
+    reviewed_by = models.UUIDField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["profile", "version"], name="uniq_description_version")
+        ]
+        indexes = [models.Index(fields=["status", "created_at"])]
+
+    def save(self, *args, **kwargs):  # type: ignore[no-untyped-def]
+        if not self._state.adding:
+            original = type(self).objects.only("text", "version", "profile_id").get(pk=self.pk)
+            if (
+                original.text != self.text
+                or original.version != self.version
+                or original.profile_id != self.profile_id
+            ):
+                raise ValueError("Description text is immutable; create a new version.")
+        super().save(*args, **kwargs)

@@ -29,3 +29,11 @@ def has_special_consent(account, kind: str) -> bool:  # type: ignore[no-untyped-
 
 def is_verified(account) -> bool:  # type: ignore[no-untyped-def]
     return verification_selectors.is_verified_adult(account)
+
+
+def current_description(profile: Profile):  # type: ignore[no-untyped-def]
+    return profile.current_description
+
+
+def has_approved_description(account_id: uuid.UUID) -> bool:
+    return Profile.objects.filter(account_id=account_id, current_description__isnull=False).exists()
