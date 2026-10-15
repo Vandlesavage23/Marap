@@ -126,3 +126,30 @@ def test_scenario_03_crossing_interests_end_in_exactly_one_match():
     assert Match.objects.filter(status="active").count() == 1
     assert Interest.objects.count() == 1 and Interest.objects.get().status == "accepted"
     _ = (login, send)
+
+
+# ---- scenario 04: message retried after timeout → one row ---------------------------------------
+@pytest.mark.django_db(transaction=True)
+def test_scenario_04_message_retried_after_timeout_is_one_row():
+    from mc.accounts.tests.helpers import bearer  # noqa: F401
+    from mc.messaging.models import Message
+    from mc.messaging.tests.helpers import matched
+
+    m, f, mid = matched()
+    token = m[1].json()["access"]
+    cid = str(uuid.uuid4())
+
+    def resend(_):
+        c = Client(headers={"host": "api.mc.test"})
+        return c.post(
+            f"/api/v1/matches/{mid}/messages",
+            {"client_msg_id": cid, "kind": "text", "body": "hello"},
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {token}",
+        ).status_code
+
+    results = _hammer(
+        resend, 6
+    )  # the client "timed out" and retried while the first was still in flight
+    assert set(results) <= {200, 201}
+    assert Message.objects.filter(kind="text").count() == 1

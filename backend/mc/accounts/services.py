@@ -356,3 +356,8 @@ def hard_delete_account(*, account: Account) -> None:
         with connection.cursor() as cur:
             cur.execute("SET LOCAL mc.purge_consents = 'on'")
         account.delete()
+
+
+def clear_push_token(*, platform: str, token: str) -> int:
+    """Prune a token the push provider reported invalid."""
+    return Device.objects.filter(platform=platform, push_token=token).update(push_token=None)

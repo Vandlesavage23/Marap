@@ -66,3 +66,12 @@ def _fake_media_providers():
     yield
     FakeModeration.reset()
     FakeScanner.unavailable = False
+
+
+@pytest.fixture(autouse=True)
+def _fake_push():
+    from mc.notifications.providers.push import FakePush
+
+    FakePush.reset()
+    yield FakePush
+    FakePush.reset()

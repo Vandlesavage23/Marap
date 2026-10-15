@@ -220,3 +220,9 @@ CELERY_BEAT_SCHEDULE["interests-expire"] = {
     "schedule": 900.0,
 }
 INSTALLED_APPS += ["mc.messaging"]
+
+# Push (Bible §11.4)
+PUSH_PROVIDER = env("PUSH_PROVIDER", "mc.notifications.providers.push.FakePush")
+FCM_PROJECT_ID = env("FCM_PROJECT_ID", "")
+FCM_SERVICE_ACCOUNT_JSON = env("FCM_SERVICE_ACCOUNT_JSON", "{}")
+INSTALLED_APPS += ["mc.notifications"]

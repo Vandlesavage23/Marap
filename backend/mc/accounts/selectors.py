@@ -55,3 +55,13 @@ def has_required_verification_consents(account: Account) -> bool:
 def lock_account(account_id: uuid.UUID) -> Account:
     """SELECT ... FOR UPDATE (call inside a transaction) to serialise per-account operations."""
     return Account.objects.select_for_update().get(id=account_id)
+
+
+def push_targets(account_id: uuid.UUID) -> list[tuple[str, str]]:
+    """`[(platform, push_token)]` for the account's devices that have a token."""
+    from .models import Device
+
+    rows = Device.objects.filter(account_id=account_id, push_token__isnull=False).values_list(
+        "platform", "push_token"
+    )
+    return [(platform, token) for platform, token in rows if token]

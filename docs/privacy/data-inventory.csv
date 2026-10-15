@@ -28,3 +28,5 @@ safety.Block.*,safety.Block,absolute two-way blocking,legitimate interest/safety
 interests.Interest.*,interests.Interest,expression of interest lifecycle,contract,deleted with account (paid-service records retained separately),none,af-south-1 Postgres
 interests.InterestSnapshot.*,interests.InterestSnapshot,description + display name as sent,contract,deleted on block / account deletion,none,af-south-1 Postgres
 matches.Match.*,matches.Match,mutual match and chat membership (first-message timestamps drive the Phase 5 clock),contract,history deleted 90 days after unmatch unless report hold; closed on account deletion,none,af-south-1 Postgres
+messaging.Message.*,messaging.Message,chat between matched members (media signed per viewer),contract,deleted 90 days after unmatch unless report hold; sender deletion → placeholder,none,af-south-1 Postgres/S3
+notifications.Notification.*,notifications.Notification,in-app inbox (ids only),contract,deleted with account / on block,none,af-south-1 Postgres

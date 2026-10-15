@@ -15,6 +15,7 @@ urlpatterns = [
     path("api/v1/", include("mc.interests.api.urls")),
     path("api/v1/", include("mc.matches.api.urls")),
     path("api/v1/", include("mc.messaging.api.urls")),
+    path("api/v1/", include("mc.notifications.api.urls")),
     # Unversioned probes for load balancers.
     path("", include((common_urls.probe_urlpatterns, "probes"))),
 ]
