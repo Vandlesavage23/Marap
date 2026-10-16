@@ -49,6 +49,6 @@ MC-110–116 **Done** (incl. admin portal, support notes, dashboards, runtime fl
 | MC-123 pen test | Needs human | docs/security/pentest-scope.md; internal security review done and fixed (Q30–Q40). |
 | MC-124 staging/prod infra | **Done*** | Written + validated, not applied; restore drill needs an AWS account. |
 | MC-125 store package | Partial | docs/release/store-submission.md; reviewer account + public deletion page built; screenshots/accounts need human. |
-| MC-126 runbooks/alerting | Partial | 10 runbooks + alarms in Terraform; game-day plan docs/runbooks/game-day.md not executed. |
+| MC-126 runbooks/alerting | Partial | 11 runbooks (incl. the game-day plan) + alarms in Terraform; game-day plan docs/runbooks/game-day.md not executed. |
 | MC-127 closed beta tooling | **Done** | Invite codes (backend + mobile field), feedback, per-district throttle. |
 | MC-128 design polish/goldens | Partial | Token kit + 102 goldens (Ahem font); final designs and fonts pending (docs/design/fonts.md). |
