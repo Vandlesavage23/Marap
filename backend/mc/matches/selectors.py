@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from django.db.models import Q, QuerySet
 
@@ -57,3 +58,16 @@ def ended_matches_before(cutoff):  # type: ignore[no-untyped-def]
         .exclude(status=Match.Status.ACTIVE)
         .values_list("id", "user_a_id", "user_b_id")
     )
+
+
+def funnel_first_match_count(*, start: datetime, end: datetime) -> int | None:
+    """Dashboard funnel, stage 5: accounts registered in `[start, end)` that are (or were) in at least one match."""
+    from mc.common.aggregates import suppress
+
+    a = Match.objects.filter(user_a__created_at__gte=start, user_a__created_at__lt=end).values_list(
+        "user_a_id"
+    )
+    b = Match.objects.filter(user_b__created_at__gte=start, user_b__created_at__lt=end).values_list(
+        "user_b_id"
+    )
+    return suppress(a.union(b).count())

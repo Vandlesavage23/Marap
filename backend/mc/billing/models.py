@@ -104,3 +104,17 @@ class Purchase(BaseModel):
             models.Index(fields=["account", "-created_at"]),
             models.Index(fields=["status", "period_end"]),
         ]
+
+
+class ReconciliationReport(BaseModel):
+    """The output of each nightly reconciliation run (MC-101), kept so payments_ops can see the latest result and
+    its mismatches on the staff portal. Ids and problem codes only: no amounts, no member data."""
+
+    generated_at = models.DateTimeField(db_index=True)
+    window_hours = models.PositiveSmallIntegerField()
+    purchases_active = models.PositiveIntegerField()
+    events_received = models.PositiveIntegerField()
+    mismatch_count = models.PositiveIntegerField()
+    mismatches = models.JSONField(
+        default=list
+    )  # [{"purchase"|"event": uuid, "problem": code}], capped

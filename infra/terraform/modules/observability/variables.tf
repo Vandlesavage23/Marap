@@ -66,13 +66,26 @@ variable "log_groups" {
 variable "alert_names" {
   description = "Values of the structured log field `alert` that become alarms."
   type        = set(string)
-  default     = ["s1_report", "payments_reconciliation_mismatch", "admin_access_denied"]
+  default = [
+    "s1_report",
+    "payments_reconciliation_mismatch",
+    "admin_access_denied",
+    "queue_age_high",
+    "payment_webhook_failures",
+    "otp_send_spike",
+  ]
 }
 
 variable "alb_5xx_percent_threshold" {
   description = "Target 5xx as percent of requests (Bible 15: 2% for 5 min)."
   type        = number
   default     = 2
+}
+
+variable "alb_p95_response_seconds_threshold" {
+  description = "p95 target response time in seconds (Bible 15: 1 s for 10 min)."
+  type        = number
+  default     = 1
 }
 
 variable "alb_elb_5xx_count_threshold" {

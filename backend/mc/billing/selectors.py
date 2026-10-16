@@ -1,6 +1,7 @@
 import uuid
+from datetime import datetime
 
-from .models import Product, Purchase
+from .models import PaymentEvent, Product, Purchase
 
 
 def active_products(*, platform: str) -> list[Product]:
@@ -35,3 +36,19 @@ def export_for_account(account) -> list[dict[str, object]]:  # type: ignore[no-u
         }
         for p in purchase_history(account.id)
     ]
+
+
+def failed_webhook_events(*, since: datetime) -> dict[str, int]:
+    """Payment events received since `since` whose processing failed, counted per provider (ledger rows only;
+    no payloads, accounts or error text)."""
+    rows = (
+        PaymentEvent.objects.filter(
+            process_status=PaymentEvent.Status.FAILED, received_at__gte=since
+        )
+        .values_list("provider")
+        .order_by()
+    )
+    counts: dict[str, int] = {}
+    for (provider,) in rows:
+        counts[provider] = counts.get(provider, 0) + 1
+    return counts

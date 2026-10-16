@@ -1,0 +1,2174 @@
+openapi: 3.0.3
+info:
+  title: Marriage Connect API
+  version: 1.0.0
+paths:
+  /api/v1/auth/logout:
+    post:
+      operationId: api_v1_auth_logout_create
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/otp/start:
+    post:
+      operationId: api_v1_auth_otp_start_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpStart'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/otp/verify:
+    post:
+      operationId: api_v1_auth_otp_verify_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpVerify'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/recover/complete:
+    post:
+      operationId: api_v1_auth_recover_complete_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoverComplete'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/recover/new-phone:
+    post:
+      operationId: api_v1_auth_recover_new_phone_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoverNewPhone'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/recover/start:
+    post:
+      operationId: api_v1_auth_recover_start_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoverStart'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/recover/status:
+    post:
+      operationId: api_v1_auth_recover_status_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoveryToken'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/recover/verify-email:
+    post:
+      operationId: api_v1_auth_recover_verify_email_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecoverVerifyEmail'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/auth/refresh:
+    post:
+      operationId: api_v1_auth_refresh_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Refresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/beta/feedback:
+    post:
+      operationId: api_v1_beta_feedback_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BetaFeedback'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          description: No response body
+  /api/v1/billing/products:
+    get:
+      operationId: api_v1_billing_products_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/billing/store/verify:
+    post:
+      operationId: api_v1_billing_store_verify_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StoreVerify'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/billing/trial/start:
+    post:
+      operationId: api_v1_billing_trial_start_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/billing/web/checkout:
+    post:
+      operationId: api_v1_billing_web_checkout_create
+      description: Served on the pay host (pay.<domain>) by the web checkout pages;
+        same API surface, member token auth.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Checkout'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/billing/web/products:
+    get:
+      operationId: api_v1_billing_web_products_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/billing/web/purchases/{purchase_id}:
+    get:
+      operationId: api_v1_billing_web_purchases_retrieve
+      parameters:
+      - in: path
+        name: purchase_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/blocks:
+    get:
+      operationId: api_v1_blocks_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: api_v1_blocks_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Block'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/blocks/{profile_id}:
+    delete:
+      operationId: api_v1_blocks_destroy
+      parameters:
+      - in: path
+        name: profile_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/config/flags:
+    get:
+      operationId: api_v1_config_flags_retrieve
+      description: 'Public, non-sensitive flags only (a fixed allowlist: never phase
+        5 or ranking keys).'
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/discovery:
+    get:
+      operationId: api_v1_discovery_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/discovery/feedback:
+    post:
+      operationId: api_v1_discovery_feedback_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiscoveryFeedback'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/health:
+    get:
+      operationId: api_v1_health_retrieve
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/interests:
+    post:
+      operationId: api_v1_interests_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendInterest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/interests/{interest_id}/accept:
+    post:
+      operationId: api_v1_interests_accept_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      parameters:
+      - in: path
+        name: interest_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/interests/{interest_id}/pass:
+    post:
+      operationId: api_v1_interests_pass_create
+      parameters:
+      - in: path
+        name: interest_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/interests/received:
+    get:
+      operationId: api_v1_interests_received_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/interests/sent:
+    get:
+      operationId: api_v1_interests_sent_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/matches:
+    get:
+      operationId: api_v1_matches_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/matches/{match_id}/messages:
+    get:
+      operationId: api_v1_matches_messages_retrieve
+      parameters:
+      - in: path
+        name: match_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: api_v1_matches_messages_create
+      description: REST fallback for the outbox when the socket is down; same semantics
+        as the `msg.send` frame.
+      parameters:
+      - in: path
+        name: match_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessage'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/matches/{match_id}/read:
+    post:
+      operationId: api_v1_matches_read_create
+      parameters:
+      - in: path
+        name: match_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagesRead'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/matches/{match_id}/unmatch:
+    post:
+      operationId: api_v1_matches_unmatch_create
+      parameters:
+      - in: path
+        name: match_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me:
+    get:
+      operationId: api_v1_me_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: api_v1_me_destroy
+      description: 'Delete my account: needs a fresh OTP (`POST /me/reauth/start`).
+        Deactivates now, erases after the grace period.'
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/answers:
+    get:
+      operationId: api_v1_me_answers_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: api_v1_me_answers_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Answers'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/consents:
+    get:
+      operationId: api_v1_me_consents_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: api_v1_me_consents_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Consents'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/descriptions:
+    get:
+      operationId: api_v1_me_descriptions_retrieve
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: api_v1_me_descriptions_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Description'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/devices:
+    get:
+      operationId: api_v1_me_devices_retrieve
+      description: My registered devices. Never returns the push token itself, only
+        whether one is registered.
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: api_v1_me_devices_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDevice'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/email/start:
+    post:
+      operationId: api_v1_me_email_start_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailStart'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/email/verify:
+    post:
+      operationId: api_v1_me_email_verify_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Code'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/entitlements:
+    get:
+      operationId: api_v1_me_entitlements_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/export:
+    post:
+      operationId: api_v1_me_export_create
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/export/{request_id}:
+    get:
+      operationId: api_v1_me_export_retrieve
+      parameters:
+      - in: path
+        name: request_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/photos:
+    get:
+      operationId: api_v1_me_photos_retrieve
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: api_v1_me_photos_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoCreate'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/photos/{photo_id}:
+    delete:
+      operationId: api_v1_me_photos_destroy
+      parameters:
+      - in: path
+        name: photo_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/me/photos/order:
+    put:
+      operationId: api_v1_me_photos_order_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhotoOrder'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/preferences:
+    get:
+      operationId: api_v1_me_preferences_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    put:
+      operationId: api_v1_me_preferences_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Preference'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/profile:
+    get:
+      operationId: api_v1_me_profile_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: api_v1_me_profile_partial_update
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProfileUpdate'
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/profile/go-live:
+    post:
+      operationId: api_v1_me_profile_go_live_create
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/profile/hide:
+    post:
+      operationId: api_v1_me_profile_hide_create
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/profile/unhide:
+    post:
+      operationId: api_v1_me_profile_unhide_create
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/reauth/start:
+    post:
+      operationId: api_v1_me_reauth_start_create
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/sessions:
+    get:
+      operationId: api_v1_me_sessions_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/me/sessions/{session_id}:
+    delete:
+      operationId: api_v1_me_sessions_destroy
+      parameters:
+      - in: path
+        name: session_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/media/{media_id}:
+    get:
+      operationId: api_v1_media_retrieve
+      parameters:
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/media/{media_id}/complete:
+    post:
+      operationId: api_v1_media_complete_create
+      parameters:
+      - in: path
+        name: media_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/media/uploads:
+    post:
+      operationId: api_v1_media_uploads_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/notifications:
+    get:
+      operationId: api_v1_notifications_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/notifications/read:
+    post:
+      operationId: api_v1_notifications_read_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationsRead'
+      security:
+      - bearerAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/profiles/{profile_id}:
+    get:
+      operationId: api_v1_profiles_retrieve
+      parameters:
+      - in: path
+        name: profile_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/questions:
+    get:
+      operationId: api_v1_questions_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/ready:
+    get:
+      operationId: api_v1_ready_retrieve
+      description: Checks DB + Redis. Returns no data beyond pass/fail (Bible §8.2).
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/reports:
+    post:
+      operationId: api_v1_reports_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Report'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/safety/appeals:
+    post:
+      operationId: api_v1_safety_appeals_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SafetyAppeal'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/verification/appeals:
+    post:
+      operationId: api_v1_verification_appeals_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerificationAppeal'
+        required: true
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/verification/sessions:
+    post:
+      operationId: api_v1_verification_sessions_create
+      description: |-
+        DRF mixin for POST views marked ⓘ in the endpoint catalogue.
+
+        Subclasses implement `perform_idempotent(request) -> (status, body)` and may set
+        `idempotency_required = False` (e.g. endpoints that also accept `client_*_id`).
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSession'
+      security:
+      - bearerAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/verification/sessions/{attempt_id}/submitted:
+    post:
+      operationId: api_v1_verification_sessions_submitted_create
+      parameters:
+      - in: path
+        name: attempt_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/verification/status:
+    get:
+      operationId: api_v1_verification_status_retrieve
+      tags:
+      - api
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/webhooks/apple:
+    post:
+      operationId: api_v1_webhooks_apple_create
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/webhooks/flutterwave:
+    post:
+      operationId: api_v1_webhooks_flutterwave_create
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/webhooks/google:
+    post:
+      operationId: api_v1_webhooks_google_create
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/webhooks/smile-id:
+    post:
+      operationId: api_v1_webhooks_smile_id_create
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /health:
+    get:
+      operationId: health_retrieve
+      tags:
+      - health
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /ready:
+    get:
+      operationId: ready_retrieve
+      description: Checks DB + Redis. Returns no data beyond pass/fail (Bible §8.2).
+      tags:
+      - ready
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    ActionEnum:
+      enum:
+      - pass
+      - not_relevant
+      type: string
+      description: |-
+        * `pass` - pass
+        * `not_relevant` - not_relevant
+    AnswerItem:
+      type: object
+      properties:
+        question:
+          type: string
+          maxLength: 60
+        value: {}
+        importance:
+          type: integer
+          maximum: 3
+          minimum: 1
+          default: 2
+        is_dealbreaker:
+          type: boolean
+          default: false
+      required:
+      - question
+      - value
+    Answers:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnswerItem'
+      required:
+      - answers
+    BetaFeedback:
+      type: object
+      properties:
+        message:
+          type: string
+          maxLength: 2000
+          minLength: 3
+        screen:
+          type: string
+          default: ''
+          maxLength: 40
+        rating:
+          type: integer
+          maximum: 5
+          minimum: 1
+          nullable: true
+        app_version:
+          type: string
+          default: ''
+          maxLength: 32
+      required:
+      - message
+    Block:
+      type: object
+      properties:
+        profile_id:
+          type: string
+          format: uuid
+      required:
+      - profile_id
+    Checkout:
+      type: object
+      properties:
+        product_code:
+          type: string
+          maxLength: 30
+        method:
+          $ref: '#/components/schemas/MethodEnum'
+        phone:
+          type: string
+          default: ''
+          maxLength: 32
+        network:
+          type: string
+          default: ''
+          maxLength: 10
+      required:
+      - method
+      - product_code
+    Code:
+      type: object
+      properties:
+        code:
+          type: string
+          maxLength: 6
+          pattern: ^\d{6}$
+      required:
+      - code
+    ConsentItem:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/ConsentItemKindEnum'
+        version:
+          type: string
+          maxLength: 20
+        granted:
+          type: boolean
+      required:
+      - granted
+      - kind
+      - version
+    ConsentItemKindEnum:
+      enum:
+      - terms
+      - privacy
+      - data_transfer
+      - special_religion
+      - special_finance
+      - married_visibility
+      - marketing
+      type: string
+      description: |-
+        * `terms` - terms
+        * `privacy` - privacy
+        * `data_transfer` - data_transfer
+        * `special_religion` - special_religion
+        * `special_finance` - special_finance
+        * `married_visibility` - married_visibility
+        * `marketing` - marketing
+    Consents:
+      type: object
+      properties:
+        consents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConsentItem'
+        source:
+          allOf:
+          - $ref: '#/components/schemas/SourceEnum'
+          default: app
+      required:
+      - consents
+    ContextTypeEnum:
+      enum:
+      - profile
+      - interest
+      - message
+      type: string
+      description: |-
+        * `profile` - profile
+        * `interest` - interest
+        * `message` - message
+    CreateSession:
+      type: object
+      properties:
+        id_type:
+          type: string
+          default: ''
+          maxLength: 30
+        issuing_country:
+          oneOf:
+          - type: string
+            default: ''
+            pattern: ^[A-Za-z]{2}$
+          - type: string
+            maxLength: 0
+    Description:
+      type: object
+      properties:
+        text:
+          type: string
+          maxLength: 1000
+          minLength: 150
+      required:
+      - text
+    DeviceInfo:
+      type: object
+      properties:
+        install_id:
+          type: string
+          format: uuid
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        app_version:
+          type: string
+          default: ''
+          maxLength: 32
+        os_version:
+          type: string
+          default: ''
+          maxLength: 32
+      required:
+      - install_id
+      - platform
+    DiscoveryFeedback:
+      type: object
+      properties:
+        profile_id:
+          type: string
+          format: uuid
+        action:
+          $ref: '#/components/schemas/ActionEnum'
+      required:
+      - action
+      - profile_id
+    EmailStart:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+      required:
+      - email
+    Location:
+      type: object
+      properties:
+        lat:
+          type: number
+          format: double
+          maximum: 90
+          minimum: -90
+        lng:
+          type: number
+          format: double
+          maximum: 180
+          minimum: -180
+      required:
+      - lat
+      - lng
+    MessagesRead:
+      type: object
+      properties:
+        up_to_message_id:
+          type: string
+          format: uuid
+      required:
+      - up_to_message_id
+    MethodEnum:
+      enum:
+      - mobile_money
+      - card
+      type: string
+      description: |-
+        * `mobile_money` - mobile_money
+        * `card` - card
+    NotificationsRead:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+    OtpStart:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 32
+        purpose:
+          allOf:
+          - $ref: '#/components/schemas/OtpStartPurposeEnum'
+          default: login
+      required:
+      - phone
+    OtpStartPurposeEnum:
+      enum:
+      - login
+      - recover
+      type: string
+      description: |-
+        * `login` - login
+        * `recover` - recover
+    OtpVerify:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 32
+        code:
+          type: string
+          maxLength: 6
+          pattern: ^\d{6}$
+        device:
+          $ref: '#/components/schemas/DeviceInfo'
+        invite_code:
+          type: string
+          default: ''
+          maxLength: 20
+      required:
+      - code
+      - phone
+    PatchedProfileUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+          maxLength: 30
+          minLength: 2
+        gender:
+          type: string
+          maxLength: 10
+        district:
+          type: string
+          maxLength: 40
+        diaspora_country:
+          type: string
+          maxLength: 2
+        location:
+          allOf:
+          - $ref: '#/components/schemas/Location'
+          nullable: true
+        intention:
+          type: string
+          maxLength: 24
+        marriage_timeline:
+          type: string
+          maxLength: 10
+        marital_status:
+          type: string
+          maxLength: 20
+        married_declaration:
+          type: boolean
+        marriage_form_preference:
+          type: string
+          maxLength: 30
+        show_married_profiles:
+          type: boolean
+        has_children:
+          type: string
+          maxLength: 24
+        wants_children:
+          type: string
+          maxLength: 8
+        languages:
+          type: array
+          items:
+            type: string
+            maxLength: 3
+          maxItems: 8
+        religion:
+          type: string
+          nullable: true
+          maxLength: 60
+        religion_practice:
+          type: string
+          nullable: true
+          maxLength: 60
+        occupation:
+          type: string
+          maxLength: 60
+        education:
+          type: string
+          maxLength: 24
+    PhotoCreate:
+      type: object
+      properties:
+        media_id:
+          type: string
+          format: uuid
+      required:
+      - media_id
+    PhotoOrder:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 6
+      required:
+      - ids
+    PlatformEnum:
+      enum:
+      - android
+      - ios
+      type: string
+      description: |-
+        * `android` - android
+        * `ios` - ios
+    Preference:
+      type: object
+      properties:
+        age_min:
+          type: integer
+          maximum: 80
+          minimum: 18
+        age_max:
+          type: integer
+          maximum: 80
+          minimum: 18
+        max_distance_km:
+          type: integer
+          maximum: 2000
+          minimum: 1
+          nullable: true
+        include_diaspora:
+          type: boolean
+        accept_has_children:
+          type: boolean
+    RecoverComplete:
+      type: object
+      properties:
+        recovery_token:
+          type: string
+          maxLength: 500
+        code:
+          type: string
+          maxLength: 6
+          pattern: ^\d{6}$
+      required:
+      - code
+      - recovery_token
+    RecoverNewPhone:
+      type: object
+      properties:
+        recovery_token:
+          type: string
+          maxLength: 500
+        new_phone:
+          type: string
+          maxLength: 32
+      required:
+      - new_phone
+      - recovery_token
+    RecoverStart:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 32
+      required:
+      - phone
+    RecoverVerifyEmail:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 32
+        code:
+          type: string
+          maxLength: 6
+          pattern: ^\d{6}$
+      required:
+      - code
+      - phone
+    RecoveryToken:
+      type: object
+      properties:
+        recovery_token:
+          type: string
+          maxLength: 500
+      required:
+      - recovery_token
+    Refresh:
+      type: object
+      properties:
+        refresh:
+          type: string
+          maxLength: 128
+      required:
+      - refresh
+    RegisterDevice:
+      type: object
+      properties:
+        install_id:
+          type: string
+          format: uuid
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        app_version:
+          type: string
+          default: ''
+          maxLength: 32
+        os_version:
+          type: string
+          default: ''
+          maxLength: 32
+        push_token:
+          type: string
+          nullable: true
+          maxLength: 512
+      required:
+      - install_id
+      - platform
+    Report:
+      type: object
+      properties:
+        profile_id:
+          type: string
+          format: uuid
+        category:
+          type: string
+          maxLength: 20
+        context_type:
+          $ref: '#/components/schemas/ContextTypeEnum'
+        context_id:
+          type: string
+          format: uuid
+          nullable: true
+        text:
+          type: string
+          default: ''
+          maxLength: 1000
+        also_block:
+          type: boolean
+          default: false
+      required:
+      - category
+      - context_type
+      - profile_id
+    SafetyAppeal:
+      type: object
+      properties:
+        action_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+          maxLength: 1000
+          minLength: 10
+      required:
+      - action_id
+      - message
+    SendInterest:
+      type: object
+      properties:
+        recipient_id:
+          type: string
+          format: uuid
+      required:
+      - recipient_id
+    SendMessage:
+      type: object
+      properties:
+        client_msg_id:
+          type: string
+          format: uuid
+        kind:
+          $ref: '#/components/schemas/SendMessageKindEnum'
+        body:
+          type: string
+          nullable: true
+          maxLength: 2000
+        media_id:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - client_msg_id
+      - kind
+    SendMessageKindEnum:
+      enum:
+      - text
+      - image
+      - voice
+      type: string
+      description: |-
+        * `text` - text
+        * `image` - image
+        * `voice` - voice
+    SourceEnum:
+      enum:
+      - app
+      - web
+      type: string
+      description: |-
+        * `app` - app
+        * `web` - web
+    StoreVerify:
+      type: object
+      properties:
+        platform:
+          $ref: '#/components/schemas/PlatformEnum'
+        signed_transaction:
+          type: string
+          maxLength: 20000
+        product_id:
+          type: string
+          maxLength: 100
+        purchase_token:
+          type: string
+          maxLength: 4096
+      required:
+      - platform
+    UploadRequest:
+      type: object
+      properties:
+        purpose:
+          $ref: '#/components/schemas/UploadRequestPurposeEnum'
+        mime:
+          type: string
+          maxLength: 40
+        bytes:
+          type: integer
+          minimum: 1
+        sha256:
+          type: string
+          default: ''
+          maxLength: 64
+      required:
+      - bytes
+      - mime
+      - purpose
+    UploadRequestPurposeEnum:
+      enum:
+      - profile_photo
+      - chat_image
+      - voice_note
+      type: string
+      description: |-
+        * `profile_photo` - profile_photo
+        * `chat_image` - chat_image
+        * `voice_note` - voice_note
+    VerificationAppeal:
+      type: object
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+          nullable: true
+        message:
+          type: string
+          maxLength: 1000
+          minLength: 10
+      required:
+      - message
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

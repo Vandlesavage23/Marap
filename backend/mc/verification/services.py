@@ -19,7 +19,7 @@ from django.utils import timezone
 from mc.accounts import constants as account_status
 from mc.accounts import selectors as account_selectors
 from mc.accounts import services as account_services
-from mc.common import events
+from mc.common import events, metrics
 from mc.common.crypto import hmac_value
 from mc.common.errors import (
     Duplicate,
@@ -210,6 +210,7 @@ def apply_result(result: VendorResult) -> VerificationAttempt | None:
             events.publish(
                 SafetyFlagRaised(account_id=account.id, attempt_id=attempt.id, flag=flag[2])
             )
+    metrics.count_verification(attempt.status)
     return attempt
 
 

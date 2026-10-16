@@ -5,20 +5,25 @@
 events sorted by the provider's clock, so duplicates, replays and out-of-order delivery converge on the same
 purchase and entitlement windows (the payments-ops worst case: a refund webhook arriving before the purchase)."""
 
+import logging
 import uuid
 from datetime import datetime, timedelta
 from typing import Any
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from mc.accounts import selectors as account_selectors
-from mc.common import events
+from mc.common import events, metrics
 from mc.entitlements import selectors as entitlement_selectors
 from mc.entitlements import services as entitlement_services
 
+from . import selectors
 from .events import CANCEL, GRANT, KINDS, REFUND, REVOKE, NormalizedEvent, PurchaseUpdated
 from .models import PaymentEvent, Product, Purchase
+
+log = logging.getLogger(__name__)
 
 
 def ingest_event(
@@ -61,6 +66,7 @@ def ingest_event(
         return PaymentEvent.objects.get(
             provider=provider, provider_event_id=provider_event_id
         ), False
+    metrics.count_payment_event(provider, "received")
     if event.process_status == PaymentEvent.Status.PENDING:
         from .tasks import process_event as process_event_task
 
@@ -215,6 +221,7 @@ def process_event(*, event_id: uuid.UUID) -> PaymentEvent | None:
 def _finish(event: PaymentEvent, status: str, error: str) -> PaymentEvent:
     event.process_status, event.error, event.processed_at = status, error, timezone.now()
     event.save(update_fields=["process_status", "error", "processed_at", "account", "updated_at"])
+    metrics.count_payment_event(event.provider, status)
     return event
 
 
@@ -228,6 +235,29 @@ def retry_failed(*, limit: int = 200) -> int:
         process_event(event_id=ev.id)
         n += 1
     return n
+
+
+def check_webhook_failures(*, now: datetime | None = None) -> int:
+    """Beat job: WARNING `alert=payment_webhook_failures` when MORE than `PAYMENT_WEBHOOK_FAILURE_THRESHOLD`
+    (5) payment events received in the last `PAYMENT_WEBHOOK_FAILURE_WINDOW_MINUTES` (10) are in `failed`.
+    Returns the failed count in the window."""
+    now = now or timezone.now()
+    window = settings.PAYMENT_WEBHOOK_FAILURE_WINDOW_MINUTES
+    by_provider = selectors.failed_webhook_events(since=now - timedelta(minutes=window))
+    total = sum(by_provider.values())
+    if total > settings.PAYMENT_WEBHOOK_FAILURE_THRESHOLD:
+        metrics.count_alert("payment_webhook_failures")
+        log.warning(
+            "payment webhook failures",
+            extra={
+                "alert": "payment_webhook_failures",
+                "count": total,
+                "window_minutes": window,
+                "threshold": settings.PAYMENT_WEBHOOK_FAILURE_THRESHOLD,
+                "by_provider": by_provider,
+            },
+        )
+    return total
 
 
 def expire_purchases(*, now: datetime | None = None) -> int:

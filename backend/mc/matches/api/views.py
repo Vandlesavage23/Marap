@@ -12,6 +12,7 @@ from mc.common.pagination import paginate, parse_limit
 from mc.entitlements import selectors as entitlement_selectors
 from mc.matches import selectors, services
 from mc.matches.models import Match
+from mc.messaging import selectors as messaging_selectors
 from mc.profiles import selectors as profile_selectors
 from mc.safety import selectors as safety_selectors
 
@@ -38,12 +39,21 @@ class MatchesView(APIView):
         )
         others = {m.id: selectors.other_member(m, request.user.id) for m in page.items}
         summaries = profile_selectors.member_summaries(others.values(), request.user)
+        chats = messaging_selectors.conversation_summaries(
+            [m.id for m in page.items], request.user.id
+        )
 
         def item(m: Match) -> dict:
+            chat = chats.get(m.id, messaging_selectors.EMPTY_SUMMARY)
             return {
                 "id": str(m.id),
                 "member": summaries.get(others[m.id]),
                 "created_at": m.created_at,
+                # chat activity for the list screen; never the message text
+                "last_message_at": chat.last_message_at,
+                "last_message_kind": chat.last_message_kind,
+                "last_message_sender": chat.last_message_sender,
+                "unread_count": chat.unread_count,
             }
 
         return Response(json.loads(json.dumps(page.as_dict(item), cls=JSONEncoder)))

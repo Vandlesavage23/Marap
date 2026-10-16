@@ -61,6 +61,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.middleware.common.CommonMiddleware",
     "mc.common.middleware.RequestIdMiddleware",
+    "mc.common.middleware.RequestMetricsMiddleware",
     "mc.common.middleware.SecurityHeadersMiddleware",
 ]
 
@@ -152,6 +153,21 @@ LOGGING = {
     "loggers": {"django.server": {"level": "WARNING"}},
 }
 
+# Metrics (Bible §15). `/metrics` is served ONLY on the admin host and needs `Authorization: Bearer <token>`;
+# when METRICS_TOKEN is unset the endpoint is disabled (403), i.e. it fails closed.
+METRICS_TOKEN = env("METRICS_TOKEN", "")
+# Alert `queue_age_high`: oldest waiting task older than this (Bible §15: 5 minutes).
+QUEUE_AGE_ALERT_SECONDS = int(env("QUEUE_AGE_ALERT_SECONDS", "300"))
+CELERY_MONITORED_QUEUES = ("default", "media", "billing", "notify")
+# Alert `payment_webhook_failures`: more than N failed PaymentEvents received in the window.
+PAYMENT_WEBHOOK_FAILURE_THRESHOLD = int(env("PAYMENT_WEBHOOK_FAILURE_THRESHOLD", "5"))
+PAYMENT_WEBHOOK_FAILURE_WINDOW_MINUTES = int(env("PAYMENT_WEBHOOK_FAILURE_WINDOW_MINUTES", "10"))
+
+# Tracing (Bible §15): OpenTelemetry is OFF unless an OTLP endpoint is configured.
+OTEL_EXPORTER_OTLP_ENDPOINT = env("OTEL_EXPORTER_OTLP_ENDPOINT", "")
+OTEL_TRACES_SAMPLER_RATIO = float(env("OTEL_TRACES_SAMPLER_RATIO", "0.1"))
+OTEL_SERVICE_NAME = env("OTEL_SERVICE_NAME", "mc-backend")
+
 if SENTRY_DSN:
     import sentry_sdk
 
@@ -169,6 +185,10 @@ SMS_PROVIDER = env("SMS_PROVIDER", "mc.accounts.providers.sms.FakeSms")
 AT_USERNAME = env("AT_USERNAME", "")
 AT_API_KEY = env("AT_API_KEY", "")
 AT_SENDER_ID = env("AT_SENDER_ID", "")
+TWILIO_ACCOUNT_SID = env("TWILIO_ACCOUNT_SID", "")
+TWILIO_AUTH_TOKEN = env("TWILIO_AUTH_TOKEN", "")
+TWILIO_FROM = env("TWILIO_FROM", "")
+TWILIO_MESSAGING_SERVICE_SID = env("TWILIO_MESSAGING_SERVICE_SID", "")
 
 # JWT (Bible §12.1): asymmetric (EdDSA) keys from Secrets Manager; dev keys derived in local/test.
 MC_JWT_PRIVATE_KEY_PEM = env("MC_JWT_PRIVATE_KEY_PEM", "")
@@ -189,6 +209,10 @@ SMILE_ID_ENV = env("SMILE_ID_ENV", "sandbox")
 INSTALLED_APPS += ["mc.verification"]
 
 CELERY_BEAT_SCHEDULE = {
+    "queue-age-check": {
+        "task": "mc.common.tasks.queue_age_check",
+        "schedule": 60.0,
+    },
     "verification-poll-stale": {
         "task": "mc.verification.tasks.poll_stale_attempts",
         "schedule": 300.0,
@@ -235,6 +259,10 @@ INSTALLED_APPS += ["mc.billing"]
 CELERY_BEAT_SCHEDULE["billing-expire-purchases"] = {
     "task": "mc.billing.tasks.expire_purchases",
     "schedule": 3600.0,
+}
+CELERY_BEAT_SCHEDULE["billing-webhook-failure-check"] = {
+    "task": "mc.billing.tasks.check_webhook_failures",
+    "schedule": 300.0,
 }
 CELERY_BEAT_SCHEDULE["billing-retry-failed"] = {
     "task": "mc.billing.tasks.retry_failed",
@@ -306,3 +334,4 @@ INSTALLED_APPS += ["mc.webcheckout"]
 # Closed beta (MC-127)
 BETA_INVITE_REQUIRED = env("BETA_INVITE_REQUIRED", "false").lower() == "true"
 INSTALLED_APPS += ["mc.beta"]
+INSTALLED_APPS += ["mc.flags"]

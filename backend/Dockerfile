@@ -1,6 +1,11 @@
 FROM python:3.12-slim AS base
 ENV PYTHONUNBUFFERED=1 UV_COMPILE_BYTECODE=1
-COPY --from=ghcr.io/astral-sh/uv:0.11 /uv /usr/local/bin/uv
+# Native libraries the media pipeline needs at runtime: libmagic (python-magic), libvips (pyvips), ffmpeg (voice/audio).
+RUN apt-get update \
+    && (apt-get install -y --no-install-recommends libmagic1t64 libvips42t64 ffmpeg \
+        || apt-get install -y --no-install-recommends libmagic1 libvips42 ffmpeg) \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir uv==0.11.32
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project

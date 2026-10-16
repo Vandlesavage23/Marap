@@ -14,7 +14,7 @@ from django.utils import timezone
 
 from mc.audit import services as audit
 from mc.beta import services as beta_services
-from mc.common import events, ratelimit
+from mc.common import events, metrics, ratelimit
 from mc.common.crypto import hmac_value
 from mc.common.errors import Forbidden, Unauthenticated, ValidationFailed
 from mc.common.redis import get_redis
@@ -82,6 +82,7 @@ def start_otp(*, phone: str, purpose: str, ip: str) -> None:
         to_e164=e164,
         body=f"Your Marriage Connect code is {code}. Never share it with anyone.",
     )
+    metrics.count_otp_send(e164)
 
 
 def _is_review_phone(e164: str) -> bool:
@@ -100,6 +101,7 @@ def _count_global_send() -> None:
     if n == 1:
         r.expire(key, 2 * HOUR)
     if n == settings.OTP_SPIKE_ALERT_PER_HOUR:
+        metrics.count_alert("otp_send_spike")
         log.warning("otp send spike", extra={"alert": "otp_send_spike", "sends_this_hour": n})
 
 
@@ -330,6 +332,7 @@ def _touch_device(
     app_version: str = "",
     os_version: str = "",
     push_token: str | None = None,
+    clear_push_token: bool = False,
 ) -> tuple[Device, bool]:
     if platform not in Device.Platform.values:
         raise ValidationFailed("Unknown platform.")
@@ -347,7 +350,10 @@ def _touch_device(
         if value and getattr(device, field) != value:
             setattr(device, field, value)
             changed.append(field)
-    if push_token is not None and device.push_token != push_token:
+    if clear_push_token and device.push_token is not None:
+        device.push_token = None
+        changed.append("push_token")
+    elif push_token is not None and device.push_token != push_token:
         # A push token belongs to exactly one device per platform: it moves if the phone changes hands.
         Device.objects.filter(platform=platform, push_token=push_token).exclude(
             id=device.id
@@ -363,9 +369,10 @@ def register_device(
     account: Account,
     install_id: uuid.UUID,
     platform: str,
-    push_token: str | None,
+    push_token: str | None = None,
     app_version: str = "",
     os_version: str = "",
+    clear_push_token: bool = False,
 ) -> Device:
     """Upsert the device and its push token. A device that is new to an account that already has
     others triggers the new-device alert."""
@@ -378,6 +385,7 @@ def register_device(
             app_version=app_version,
             os_version=os_version,
             push_token=push_token,
+            clear_push_token=clear_push_token,
         )
         if created and had_devices:
             _alert_new_device(account, device)
@@ -438,6 +446,7 @@ def start_reauth(*, account: Account, ip: str) -> None:
         to_e164=account.phone_e164,
         body=f"Your Marriage Connect confirmation code is {code}. Never share it.",
     )
+    metrics.count_otp_send(account.phone_e164)
 
 
 def consume_reauth_otp(*, account: Account, code: str) -> bool:

@@ -15,6 +15,7 @@ from mc.common.errors import (
     ValidationFailed,
 )
 from mc.entitlements import selectors as entitlement_selectors
+from mc.flags import selectors as flag_selectors
 from mc.matches import selectors as match_selectors
 from mc.safety import selectors as safety_selectors
 
@@ -59,7 +60,7 @@ def check_can_send(account: "Account", match: "Match", *, kind: str, body: str |
                 you_sent=sent,
                 they_sent=theirs,
             )
-    if kind == Message.Kind.VOICE and not settings.FEATURE_FLAGS_DEFAULT.get("voice_notes", True):
+    if kind == Message.Kind.VOICE and not flag_selectors.flag_enabled("voice_notes"):
         raise ValidationFailed("Voice notes aren't available yet.")
     if kind == Message.Kind.TEXT and body:
         window = timedelta(hours=settings.CONTACT_BLOCK_HOURS)

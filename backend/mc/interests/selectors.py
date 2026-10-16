@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from django.db.models import Q, QuerySet
 
@@ -99,3 +100,16 @@ def export_for_account(account) -> dict[str, list[dict[str, object]]]:  # type: 
             for i in Interest.objects.filter(recipient=account).select_related("snapshot")
         ],
     }
+
+
+def funnel_first_interest_count(*, start: datetime, end: datetime) -> int | None:
+    """Dashboard funnel, stage 4: accounts registered in `[start, end)` that have sent at least one interest."""
+    from mc.common.aggregates import suppress
+
+    n = (
+        Interest.objects.filter(sender__created_at__gte=start, sender__created_at__lt=end)
+        .values("sender_id")
+        .distinct()
+        .count()
+    )
+    return suppress(n)

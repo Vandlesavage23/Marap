@@ -1,0 +1,5 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Feature flags</h1>
+<p class="muted">Changes need a recent step-up and a reason, and are written to the audit log. Phase 5 features are locked off until a backlog epic is approved.</p>
+<table><tr><th>Flag</th><th>Now</th><th>Source</th><th>Last change</th><th></th></tr>
+{% for f in rows %}<tr><td><code>{{ f.key }}</code><br><span class="muted">{{ f.description }}</span></td><td><span class="badge {% if f.enabled %}ok{% else %}soon{% endif %}">{% if f.enabled %}on{% else %}off{% endif %}</span></td><td>{{ f.source }}</td><td>{% if f.updated_at %}{{ f.updated_at }}{% endif %}</td><td>
+{% if f.locked %}<span class="muted">locked</span>{% else %}<form method="post">{% csrf_token %}<input type="hidden" name="key" value="{{ f.key }}"><input name="reason" placeholder="Reason" required><button name="value" value="{% if f.enabled %}off{% else %}on{% endif %}">Turn {% if f.enabled %}off{% else %}on{% endif %}</button></form>{% endif %}</td></tr>{% endfor %}</table>{% endblock %}

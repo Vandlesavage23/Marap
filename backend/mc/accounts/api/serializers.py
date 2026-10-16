@@ -43,9 +43,8 @@ class ConsentsSerializer(serializers.Serializer):
 
 
 class RegisterDeviceSerializer(DeviceInfoSerializer):
-    push_token = serializers.CharField(
-        max_length=512, allow_null=True, required=False, default=None
-    )
+    # Omitted = leave the stored token alone; explicit null = clear it (opt-out / sign-out).
+    push_token = serializers.CharField(max_length=512, allow_null=True, required=False)
 
 
 class EmailStartSerializer(serializers.Serializer):

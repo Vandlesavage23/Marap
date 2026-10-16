@@ -637,7 +637,7 @@ Stable error codes (extend in `mc/common/errors.py`): `validation_error`, `unaut
 | GET /me | Account + status summary | ✓ | includes `verification_status`, `profile_status` |
 | GET /me/sessions, DELETE /me/sessions/{id} | Manage devices | ✓ | |
 | POST /me/consents | Record consents | ✓ | list of `{kind, version, granted}` |
-| POST /me/devices | Register push token | ✓ | |
+| GET /me/devices, POST /me/devices | List my devices (never the push token) / register push token | ✓ | |
 | POST /verification/sessions ⓘ | Start Smile ID job | ✓ | returns SDK params (signature, job id, partner params) |
 | GET /verification/status | Current status + reason | ✓ | |
 | POST /verification/appeals ⓘ | Appeal | ✓ | |
@@ -654,7 +654,7 @@ Stable error codes (extend in `mc/common/errors.py`): `validation_error`, `unaut
 | GET /interests/sent | Sent list | ✓ | |
 | POST /interests/{id}/accept ⓘ | Accept → match | ✓ capability `accept_interest` | |
 | POST /interests/{id}/pass | Pass | ✓ | |
-| GET /matches | Matches | ✓ | |
+| GET /matches | Matches | ✓ | items carry `last_message_at`, `last_message_kind`, `last_message_sender`, `unread_count` (never message text) |
 | POST /matches/{id}/unmatch | Unmatch | ✓ | |
 | GET /matches/{id}/messages?before= | History | ✓ policy `can_read_conversation` | |
 | WS /ws/chat | Realtime | ✓ (token in first frame) | §9 |
@@ -665,7 +665,7 @@ Stable error codes (extend in `mc/common/errors.py`): `validation_error`, `unaut
 | GET /billing/products | Products for platform | ✓ | store ids + display prices |
 | POST /billing/store/verify ⓘ | Verify store purchase | ✓ | Apple signed transaction / Google purchase token |
 | POST /blocks | Block | ✓ | immediate |
-| DELETE /blocks/{account_id} | Unblock | ✓ | does NOT restore matches |
+| DELETE /blocks/{profile_id} | Unblock | ✓ | does NOT restore matches; members only know profile ids (OPEN_QUESTIONS Q12/Q33) |
 | POST /reports ⓘ | Report | ✓ | |
 | GET /notifications | In-app inbox | ✓ | |
 | POST /me/export | Data export | ✓ | async; link by email + in-app |
@@ -674,6 +674,7 @@ Stable error codes (extend in `mc/common/errors.py`): `validation_error`, `unaut
 | POST /webhooks/flutterwave | Payment webhook | `verif-hash` + re-verify | |
 | POST /webhooks/apple | App Store Server Notifications v2 | JWS verify | |
 | POST /webhooks/google | Play RTDN (Pub/Sub push) | OIDC token verify | |
+| GET /config/flags | Public non-sensitive feature flags | public | `{flags: {voice_notes, data_saver_default_on_cellular}}` (OPEN_QUESTIONS Q32) |
 | GET /health, /ready | Probes | public | no data |
 
 ### 8.3 Representative contracts
@@ -1187,6 +1188,10 @@ Product values live in `backend/config/settings/product.py` (env-overridable) an
 
 Feature flags (`django-waffle` or a small table + cache): `phase5_disclosure` (off), `phase5_counselling`
 (off), `phase5_due_diligence` (off), `voice_notes`, `data_saver_default_on_cellular`, `ranking_model_vN`.
+
+Implemented as a small table + cache (`mc/flags`, OPEN_QUESTIONS Q32): read with `mc.flags.selectors.flag_enabled(key)` (never
+`settings.FEATURE_FLAGS_DEFAULT` directly), changed only through `mc.flags.services.set_flag` or the staff page `/flags`
+(`config.flags`, step-up, audited). The `phase5_*` flags are locked off.
 
 ---
 

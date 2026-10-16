@@ -1,0 +1,4 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Live profiles by district</h1>
+<p class="muted">Profiles that are live now. A district with fewer than 5 is shown as {{ min_cell }}. Shown districts add up to {{ shown_total }}; {{ hidden_cells }} district(s) are hidden.</p>
+<table><tr><th>District</th><th class="num">Live profiles</th></tr>
+{% for r in rows %}<tr><td>{{ r.district }}</td><td class="num">{{ r.text }}</td></tr>{% endfor %}</table>{% endblock %}

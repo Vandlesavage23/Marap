@@ -1,0 +1,9 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Payments reconciliation</h1>
+{% if stale %}<p class="flash">{% if latest %}The nightly reconciliation has not run for over 36 hours. Last run: {{ latest.generated_at }}.{% else %}No nightly reconciliation has run yet.{% endif %}</p>{% endif %}
+{% if latest %}<p>Latest run: {{ latest.generated_at }} &middot; window {{ latest.window_hours }} h &middot; {{ latest.purchases_active }} active purchases &middot; {{ latest.events_received }} events received &middot;
+<span class="badge {% if latest.mismatch_count %}overdue{% else %}ok{% endif %}">{{ latest.mismatch_count }} mismatch{{ latest.mismatch_count|pluralize:"es" }}</span></p>
+{% if latest.mismatches %}<table><tr><th>Purchase / event</th><th>Problem</th></tr>
+{% for m in latest.mismatches %}<tr><td>{% if m.purchase %}purchase {{ m.purchase }}{% else %}event {{ m.event }}{% endif %}</td><td>{{ m.problem }}</td></tr>{% endfor %}</table>
+{% if latest.mismatch_count > latest.mismatches|length %}<p class="muted">Showing the first {{ latest.mismatches|length }} of {{ latest.mismatch_count }}.</p>{% endif %}{% endif %}
+<h2>Recent runs</h2><table><tr><th>When</th><th class="num">Active purchases</th><th class="num">Events</th><th class="num">Mismatches</th></tr>
+{% for h in history %}<tr><td>{{ h.generated_at }}</td><td class="num">{{ h.purchases_active }}</td><td class="num">{{ h.events_received }}</td><td class="num">{{ h.mismatch_count }}</td></tr>{% endfor %}</table>{% endif %}{% endblock %}

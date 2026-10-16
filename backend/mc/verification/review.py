@@ -4,9 +4,10 @@ decision is audited."""
 
 import json
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
+from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.utils import timezone
@@ -54,6 +55,8 @@ def queue(*, actor_id: uuid.UUID, role: str) -> list[dict[str, object]]:
             "country": a.issuing_country,
             "outcome": _summary(a),
             "waiting_since": a.created_at,
+            # SLA clock (A): a decision is due `VERIFICATION_REVIEW_SLA_HOURS` after the attempt was opened
+            "due_at": a.created_at + timedelta(hours=settings.VERIFICATION_REVIEW_SLA_HOURS),
         }
         for a in rows
     ]

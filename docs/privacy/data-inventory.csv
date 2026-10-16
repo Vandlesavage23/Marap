@@ -58,3 +58,5 @@ beta.InviteCode.*,beta.InviteCode,closed-beta sign-up gating (no personal data),
 beta.InviteRedemption.*,beta.InviteRedemption,link an account to the invite it used,legitimate interest,erased with the account,none,af-south-1 Postgres
 beta.BetaFeedback.*,beta.BetaFeedback,product feedback from beta testers (encrypted free text),consent (member submits),erased with the account,none,af-south-1 Postgres
 beta.DistrictCap.*,beta.DistrictCap,throttle go-lives per district (no personal data),legitimate interest,until beta ends,none,af-south-1 Postgres
+flags.FeatureFlag.*,flags.FeatureFlag,runtime feature-flag overrides (no personal data; updated_by is a staff id),legitimate interest,retained,none,af-south-1 Postgres
+billing.ReconciliationReport.*,billing.ReconciliationReport,show payments_ops the nightly reconciliation result (ids and problem codes only),legitimate interest (payments integrity),last 90 nights,none,af-south-1 Postgres

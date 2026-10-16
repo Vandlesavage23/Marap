@@ -16,6 +16,11 @@ def retry_failed() -> int:
 
 
 @shared_task(queue="billing")
+def check_webhook_failures() -> int:
+    return services.check_webhook_failures()
+
+
+@shared_task(queue="billing")
 def expire_purchases() -> int:
     return services.expire_purchases()
 
@@ -29,7 +34,9 @@ def sweep_pending_web() -> dict[str, int]:
 
 @shared_task(queue="billing")
 def nightly_reconciliation() -> dict:
-    from . import reconcile
+    from . import recon_reports, reconcile
 
     reconcile.reconcile_google()
-    return reconcile.nightly_report()
+    report = reconcile.nightly_report()
+    recon_reports.save_report(report)  # the staff portal shows the latest run
+    return report

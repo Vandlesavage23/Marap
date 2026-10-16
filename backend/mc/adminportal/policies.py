@@ -7,6 +7,10 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .models import StaffUser
 
+# Dashboards (Bible §15) are aggregate-only (no member rows; cells under 5 suppressed). The matrix in §12.4 has no
+# column for them, so: `dashboard.funnel` (conversion) -> payments_ops, privacy_officer; `dashboard.density` (where live
+# profiles are) -> trust_safety, privacy_officer; `payments.reconciliation` -> the roles with full payments access.
+# engineer_oncall stays at "no production data" and superadmin grants nothing by itself (OPEN_QUESTIONS Q22/Q30).
 PERMISSIONS: dict[str, frozenset[str]] = {
     # Users & profiles: read limited (no answers, no special data)
     "support": frozenset(
@@ -31,6 +35,7 @@ PERMISSIONS: dict[str, frozenset[str]] = {
             "safety.appeals",
             "verification.status",
             "audit.own",
+            "dashboard.density",
         }
     ),
     "payments_ops": frozenset(
@@ -38,8 +43,10 @@ PERMISSIONS: dict[str, frozenset[str]] = {
             "user.read_basic",
             "payments.full",
             "payments.refund",
+            "payments.reconciliation",
             "entitlement.read",
             "entitlement.grant",
+            "dashboard.funnel",
         }
     ),
     "privacy_officer": frozenset(
@@ -53,6 +60,9 @@ PERMISSIONS: dict[str, frozenset[str]] = {
             "privacy.requests",
             "privacy.cancel_deletion",
             "entitlement.read",
+            "payments.reconciliation",
+            "dashboard.funnel",
+            "dashboard.density",
         }
     ),
     "engineer_oncall": frozenset({"config.flags"}),

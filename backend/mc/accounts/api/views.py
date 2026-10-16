@@ -200,11 +200,37 @@ class ConsentsView(APIView):
 class DevicesView(APIView):
     permission_classes = [IsAuthenticatedAnyStatus]
 
+    @extend_schema(responses={200: dict})
+    def get(self, request):  # type: ignore[no-untyped-def]
+        """My registered devices. Never returns the push token itself, only whether one is registered."""
+        items = [
+            {
+                "id": str(d.id),
+                "install_id": str(d.install_id),
+                "platform": d.platform,
+                "app_version": d.app_version,
+                "os_version": d.os_version,
+                "push_enabled": bool(d.push_token),
+                "trusted": d.trusted,
+                "first_seen_at": d.first_seen_at,
+                "last_seen_at": d.last_seen_at,
+            }
+            for d in selectors.devices_for(request.user)
+        ]
+        return Response({"items": items, "next_cursor": None})
+
     @extend_schema(request=s.RegisterDeviceSerializer, responses={200: dict})
     def post(self, request):  # type: ignore[no-untyped-def]
         data = s.RegisterDeviceSerializer(data=request.data)
         data.is_valid(raise_exception=True)
-        device = services.register_device(account=request.user, **data.validated_data)
+        values = dict(data.validated_data)
+        clear = "push_token" in values and values["push_token"] is None
+        device = services.register_device(
+            account=request.user,
+            push_token=values.pop("push_token", None),
+            clear_push_token=clear,
+            **values,
+        )
         return Response({"id": str(device.id)})
 
 

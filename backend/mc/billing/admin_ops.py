@@ -130,3 +130,20 @@ def _refund(*, purchase_id: uuid.UUID, actor_id: uuid.UUID, role: str, reason: s
         )
     p.refresh_from_db()
     return p
+
+
+RECON_ROLES = {"payments_ops", "privacy_officer"}
+
+
+def reconciliation_overview(*, actor_id: uuid.UUID, role: str) -> dict[str, object]:
+    """Latest nightly reconciliation report, a short history and whether the job looks overdue (payments_ops,
+    privacy_officer). Ids and problem codes only. The page view itself is audited by the portal."""
+    _check(role, RECON_ROLES)
+    from . import recon_reports
+
+    latest = recon_reports.latest()
+    return {
+        "latest": latest,
+        "stale": recon_reports.is_stale(latest),
+        "history": recon_reports.history(),
+    }

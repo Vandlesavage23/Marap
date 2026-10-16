@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from django.utils import timezone
@@ -60,3 +60,18 @@ def export_for_account(account) -> list[dict[str, object]]:  # type: ignore[no-u
         }
         for a in VerificationAttempt.objects.filter(account=account).order_by("id")
     ]
+
+
+def funnel_verified_count(*, start: datetime, end: datetime) -> int | None:
+    """Dashboard funnel, stage 2: accounts registered in `[start, end)` that hold a passed verification."""
+    from mc.common.aggregates import suppress
+
+    n = (
+        VerificationAttempt.objects.filter(
+            status="passed", account__created_at__gte=start, account__created_at__lt=end
+        )
+        .values("account_id")
+        .distinct()
+        .count()
+    )
+    return suppress(n)

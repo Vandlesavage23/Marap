@@ -1,4 +1,6 @@
-{% extends "adminportal/base.html" %}{% block body %}<h1>Verification review</h1><table><tr><th>Case</th><th>ID type</th><th>Outcome</th><th>Waiting since</th><th></th></tr>
-{% for r in rows %}<tr><td>{{ r.attempt_id }}</td><td>{{ r.id_type }} {{ r.country }}</td><td>{{ r.outcome }}</td><td>{{ r.waiting_since }}</td><td>
+{% extends "adminportal/base.html" %}{% block body %}<h1>Verification review</h1>
+<p class="muted">{{ summary.open }} waiting &middot; {{ summary.overdue }} overdue &middot; {{ summary.soon }} due within the hour</p>
+<table><tr><th>Case</th><th>ID type</th><th>Outcome</th><th>Waiting since</th><th>Due</th><th></th></tr>
+{% for r in rows %}<tr><td>{{ r.attempt_id }}</td><td>{{ r.id_type }} {{ r.country }}</td><td>{{ r.outcome }}</td><td>{{ r.waiting_since }}</td><td><span class="badge {{ r.sla.state }}">{{ r.sla.text }}</span></td><td>
 <form method="post">{% csrf_token %}<input type="hidden" name="attempt" value="{{ r.attempt_id }}">
-{% if not r.claimed %}<button name="action" value="claim">Claim</button>{% elif "verification.decide" in perms %}<input name="reason" placeholder="Reason" required><button name="action" value="approve">Approve</button><button name="action" value="reject">Reject</button>{% endif %}</form></td></tr>{% empty %}<tr><td colspan="5">Nothing waiting.</td></tr>{% endfor %}</table>{% endblock %}
+{% if not r.claimed %}<button name="action" value="claim">Claim</button>{% elif "verification.decide" in perms %}<input name="reason" placeholder="Reason" required><button name="action" value="approve">Approve</button><button name="action" value="reject">Reject</button>{% endif %}</form></td></tr>{% empty %}<tr><td colspan="6">Nothing waiting.</td></tr>{% endfor %}</table>{% endblock %}

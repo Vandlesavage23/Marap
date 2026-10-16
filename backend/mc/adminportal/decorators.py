@@ -11,6 +11,7 @@ from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_protect
 
 from mc.audit import services as audit
+from mc.common import metrics
 from mc.common.net import client_ip
 
 from . import auth, policies
@@ -32,6 +33,7 @@ def deny(request: HttpRequest, permission: str, why: str) -> HttpResponse:
         action="admin.denied", target_type="permission", reason=f"{permission}: {why}", ip=client_ip(request),
         metadata={"path": request.path[:120], "permission": permission},
     )  # fmt: skip
+    metrics.count_alert("admin_access_denied")
     log.warning(
         "admin access denied",
         extra={"alert": "admin_access_denied", "permission": permission, "why": why},

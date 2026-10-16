@@ -4,7 +4,7 @@ from datetime import datetime
 from django.db.models import QuerySet
 from django.utils import timezone
 
-from .models import Account, ConsentRecord, Session
+from .models import Account, ConsentRecord, Device, Session
 
 REQUIRED_VERIFICATION_CONSENTS = (
     ConsentRecord.Kind.TERMS,
@@ -140,3 +140,15 @@ def staff_summary(account: Account) -> dict[str, object]:
         "created_at": account.created_at,
         "live_sessions": active_sessions(account).count(),
     }
+
+
+def funnel_registered_count(*, start: datetime, end: datetime) -> int | None:
+    """Dashboard funnel, stage 1: accounts registered in `[start, end)`. Aggregate only; small cells suppressed."""
+    from mc.common.aggregates import suppress
+
+    return suppress(Account.objects.filter(created_at__gte=start, created_at__lt=end).count())
+
+
+def devices_for(account: Account) -> QuerySet[Device]:
+    """The member's own registered devices, most recently seen first."""
+    return Device.objects.filter(account=account).order_by("-last_seen_at", "-id")

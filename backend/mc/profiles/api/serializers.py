@@ -1,6 +1,7 @@
 """Explicit allowlists only (CLAUDE.md rule 3). Nothing here may expose legal name, ID numbers,
 ID hashes, phone, email or birth date; `test_serializers_never_expose_identity_fields` enforces it."""
 
+from django.conf import settings
 from rest_framework import serializers
 
 from mc.profiles import selectors
@@ -14,7 +15,9 @@ class LocationSerializer(serializers.Serializer):
 
 
 class ProfileUpdateSerializer(serializers.Serializer):
-    display_name = serializers.CharField(max_length=60, required=False)
+    display_name = serializers.CharField(
+        min_length=2, max_length=30, required=False
+    )  # as `normalise_display_name`
     gender = serializers.CharField(max_length=10, required=False)
     district = serializers.CharField(max_length=40, required=False)
     diaspora_country = serializers.CharField(max_length=2, required=False, allow_blank=True)
@@ -108,7 +111,9 @@ def public_profile(profile: Profile, viewer=None) -> dict[str, object]:  # type:
 
 
 class DescriptionSerializer(serializers.Serializer):
-    text = serializers.CharField(max_length=5000, trim_whitespace=False)
+    text = serializers.CharField(
+        min_length=settings.DESCRIPTION_MIN, max_length=settings.DESCRIPTION_MAX
+    )  # as `submit_description` enforces
 
 
 def description_payload(desc) -> dict[str, object]:  # type: ignore[no-untyped-def]
@@ -136,7 +141,9 @@ class PhotoCreateSerializer(serializers.Serializer):
 
 
 class PhotoOrderSerializer(serializers.Serializer):
-    ids = serializers.ListField(child=serializers.UUIDField(), allow_empty=False, max_length=6)
+    ids = serializers.ListField(
+        child=serializers.UUIDField(), allow_empty=False, max_length=settings.PHOTOS_MAX
+    )
 
 
 def preference_payload(pref) -> dict[str, object]:  # type: ignore[no-untyped-def]

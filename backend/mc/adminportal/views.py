@@ -7,6 +7,7 @@ from typing import Any
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
 
 from mc.accounts import phone as phone_lib
@@ -15,17 +16,21 @@ from mc.accounts import services as account_services
 from mc.audit import selectors as audit_selectors
 from mc.audit import services as audit
 from mc.billing import admin_ops
+from mc.common import aggregates
 from mc.common.errors import DomainError
 from mc.common.net import client_ip
 from mc.entitlements import selectors as entitlement_selectors
+from mc.flags import selectors as flag_selectors
+from mc.flags import services as flag_services
 from mc.privacy import selectors as privacy_selectors
 from mc.privacy import services as privacy_services
+from mc.profiles import selectors as profile_selectors
 from mc.safety import enforcement
 from mc.safety import selectors as safety_selectors
 from mc.verification import review
 from mc.verification import selectors as verification_selectors
 
-from . import auth, policies, services
+from . import auth, dashboards, policies, services
 from .decorators import StaffRequest, staff_required
 
 ACTION_KINDS = ["warn", "hide_content", "suspend_7d", "ban", "reinstate"]
@@ -249,13 +254,28 @@ def verification_queue(request: StaffRequest) -> HttpResponse:
                 "Decision saved.",
             )
     rows = review.queue(**_who(request, "verification.queue"))
-    return _page(request, "verification.html", rows=rows, msg=msg)
+    now = timezone.now()
+    for row in rows:
+        row["sla"] = dashboards.sla_badge(row["due_at"], now=now)  # type: ignore[arg-type]
+    summary = dashboards.queue_summary([r["due_at"] for r in rows], now=now)  # type: ignore[misc]
+    return _page(request, "verification.html", rows=rows, summary=summary, msg=msg)
 
 
 # ------------------------------------------------------------------------------------------------ safety
 @staff_required("safety.queue")
 def safety_queue(request: StaffRequest) -> HttpResponse:
-    return _page(request, "safety.html", cases=list(safety_selectors.open_cases()[:200]))
+    now = timezone.now()
+    cases = [
+        {
+            "id": c.id,
+            "severity": c.severity,
+            "sla_due_at": c.sla_due_at,
+            "sla": dashboards.sla_badge(c.sla_due_at, now=now),
+        }
+        for c in safety_selectors.open_cases()[:200]
+    ]
+    summary = dashboards.queue_summary([c["sla_due_at"] for c in cases], now=now)
+    return _page(request, "safety.html", cases=cases, summary=summary)
 
 
 @staff_required("safety.evidence")
@@ -378,3 +398,67 @@ def add_note(request: StaffRequest, account_id: uuid.UUID) -> HttpResponse:
     return _page(
         request, "users.html", q=str(account_id), found=None, ent=None, ver=None, msg=msg, notes=[]
     )
+
+
+# ------------------------------------------------------------------------------------------------ dashboards (Bible §15)
+@staff_required("dashboard.funnel")
+def funnel_dashboard(request: StaffRequest) -> HttpResponse:
+    rng = dashboards.parse_range(
+        request.GET.get("from", ""), request.GET.get("to", ""), now=timezone.now()
+    )
+    return _page(
+        request,
+        "funnel.html",
+        rng=rng,
+        rows=dashboards.funnel(rng),
+        min_cell=aggregates.label(None),
+        msg=rng.error,
+    )
+
+
+@staff_required("dashboard.density")
+def density_dashboard(request: StaffRequest) -> HttpResponse:
+    rows = profile_selectors.live_density_by_district()
+    for row in rows:
+        row["text"] = aggregates.label(row["live"])  # type: ignore[arg-type]
+    shown = [r for r in rows if r["live"] is not None]
+    return _page(
+        request,
+        "density.html",
+        rows=rows,
+        shown_total=sum(r["live"] for r in shown),
+        hidden_cells=len(rows) - len(shown),
+        min_cell=aggregates.label(None),
+    )
+
+
+@staff_required("payments.reconciliation")
+def reconciliation(request: StaffRequest) -> HttpResponse:
+    overview = admin_ops.reconciliation_overview(**_who(request, "payments.reconciliation"))
+    return _page(request, "reconciliation.html", **overview, msg="")
+
+
+# ------------------------------------------------------------------------------------------------ feature flags
+@staff_required("config.flags")
+def flags(request: StaffRequest) -> HttpResponse:
+    msg = ""
+    if request.method == "POST":
+        if not auth.recently_reauthed(request.staff_session):
+            return redirect(f"/stepup?next={request.path}")
+        enabled = {"on": True, "off": False}.get(request.POST.get("value", ""))
+        if enabled is None:
+            msg = "Choose on or off."
+        else:
+            changed: list[bool] = []
+
+            def change() -> None:
+                _, did = flag_services.set_flag(
+                    key=request.POST.get("key", ""), enabled=enabled, reason=request.POST.get("reason", ""),
+                    ip=client_ip(request), staff_id=request.staff.id, role=policies.primary_role(request.staff, "config.flags"),
+                )  # fmt: skip
+                changed.append(did)
+
+            msg = _run(request, change, "Saved.")
+            if msg == "Saved." and changed == [False]:
+                msg = "No change: the flag already has that value."
+    return _page(request, "flags.html", rows=flag_selectors.all_flags(), msg=msg)

@@ -4,7 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from mc.common.exception_handler import problem_body
+from mc.common.exception_handler import PROBLEM_CONTENT_TYPE, problem_body
 from mc.common.redis import get_redis
 
 
@@ -36,5 +36,6 @@ class ReadyView(APIView):
                     detail="A dependency is unavailable.",
                 ),
                 status=503,
+                content_type=PROBLEM_CONTENT_TYPE,
             )
         return Response({"status": "ready"})

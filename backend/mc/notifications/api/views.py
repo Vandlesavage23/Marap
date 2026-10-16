@@ -1,6 +1,6 @@
 import json
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_serializer
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
@@ -12,6 +12,7 @@ from mc.common.serializers import reject_unknown_fields
 from mc.notifications import selectors, services
 
 
+@extend_schema_serializer(component_name="NotificationsRead")
 class ReadSerializer(serializers.Serializer):
     ids = serializers.ListField(child=serializers.UUIDField(), required=False, allow_null=True)
 

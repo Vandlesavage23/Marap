@@ -18,7 +18,10 @@ pytestmark = pytest.mark.django_db
 
 def test_unauthenticated_requests_redirect_to_login():
     c = client()
-    for path in ("/", "/users", "/verification", "/safety", "/payments", "/privacy", "/audit"):
+    for path in (
+        "/", "/users", "/verification", "/safety", "/payments", "/privacy", "/audit", "/flags",
+        "/payments/reconciliation", "/dashboards/funnel", "/dashboards/density",
+    ):  # fmt: skip
         r = c.get(path)
         assert r.status_code == 302 and r["Location"].endswith("/login"), path
 
@@ -94,6 +97,8 @@ def test_role_matrix_over_http():
     paths = {
         "/users": "user.read_limited", "/verification": "verification.queue", "/safety": "safety.queue",
         "/payments": "payments.status", "/privacy": "privacy.requests", "/audit": "audit.all",
+        "/payments/reconciliation": "payments.reconciliation", "/dashboards/funnel": "dashboard.funnel",
+        "/dashboards/density": "dashboard.density", "/flags": "config.flags",
     }  # fmt: skip
     for role in policies.PERMISSIONS:
         s = staff([role], email=f"{role}@marriageconnect.ug")

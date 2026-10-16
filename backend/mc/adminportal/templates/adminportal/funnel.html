@@ -1,0 +1,5 @@
+{% extends "adminportal/base.html" %}{% block body %}<h1>Registration funnel</h1>
+<form method="get">From <input type="date" name="from" value="{{ rng.first|date:'Y-m-d' }}"> to <input type="date" name="to" value="{{ rng.last|date:'Y-m-d' }}"> <button>Show</button></form>
+<p class="muted">Members who registered between {{ rng.first|date:'j M Y' }} and {{ rng.last|date:'j M Y' }} (Kampala time), and how many have reached each step since. Totals only: no member details. A figure under 5 is hidden ({{ min_cell }}). "Live profile" includes members who paused their profile; "Paying member" counts un-refunded purchases (trials and staff grants excluded). Members who deleted their account are not counted.</p>
+<table><tr><th>Step</th><th class="num">Members</th><th class="num">Of registered</th><th class="num">Of previous step</th></tr>
+{% for r in rows %}<tr><td>{{ r.title }}</td><td class="num">{{ r.text }}</td><td class="num">{{ r.of_registered|default:"" }}</td><td class="num">{{ r.of_previous|default:"" }}</td></tr>{% endfor %}</table>{% endblock %}

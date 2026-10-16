@@ -1,7 +1,10 @@
 import uuid
+from collections.abc import Iterable
+from dataclasses import dataclass
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from django.db.models import QuerySet
+from django.db.models import Count, QuerySet
 
 from mc.common.pagination import Page, paginate
 
@@ -16,6 +19,54 @@ def history(match: "Match", *, before: str | None, limit: int) -> Page[Message]:
     """Newest first. `before` is the opaque cursor from the previous page's `next_cursor`."""
     qs: QuerySet[Message] = Message.objects.filter(match=match).select_related("media")
     return paginate(qs, cursor=before, limit=limit)
+
+
+@dataclass(frozen=True)
+class ConversationSummary:
+    """What a match list needs about its chat. Never the message text: only when, what kind, who, how many unread."""
+
+    last_message_at: datetime | None
+    last_message_kind: str | None  # text | image | voice (never `system`)
+    last_message_sender: str | None  # me | them
+    unread_count: int
+
+
+EMPTY_SUMMARY = ConversationSummary(None, None, None, 0)
+
+
+def conversation_summaries(
+    match_ids: Iterable[uuid.UUID], viewer_id: uuid.UUID
+) -> dict[uuid.UUID, ConversationSummary]:
+    """Per-match chat summary as `viewer` sees it, in two queries for any number of matches. The caller has already
+    restricted `match_ids` to the viewer's own, unblocked matches. System messages ("you matched") are not
+    conversation activity; the viewer's own messages are never "unread"."""
+    ids = list(match_ids)
+    if not ids:
+        return {}
+    real = Message.objects.filter(match_id__in=ids).exclude(kind=Message.Kind.SYSTEM)
+    last = {
+        m.match_id: m
+        for m in real.order_by("match_id", "-id")
+        .distinct("match_id")
+        .only("match_id", "created_at", "kind", "sender_id")
+    }
+    unread = dict(
+        real.filter(read_at__isnull=True)
+        .exclude(sender_id=viewer_id)
+        .values_list("match_id")
+        .annotate(n=Count("id"))
+        .order_by()
+    )
+    out: dict[uuid.UUID, ConversationSummary] = {}
+    for mid in ids:
+        m = last.get(mid)
+        out[mid] = ConversationSummary(
+            last_message_at=m.created_at if m else None,
+            last_message_kind=m.kind if m else None,
+            last_message_sender=("me" if m.sender_id == viewer_id else "them") if m else None,
+            unread_count=unread.get(mid, 0),
+        )
+    return out
 
 
 def get_message(message_id: uuid.UUID) -> Message | None:

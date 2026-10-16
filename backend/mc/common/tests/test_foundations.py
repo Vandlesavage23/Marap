@@ -52,6 +52,32 @@ def test_ready_503_when_db_down(api, monkeypatch):
     r = api.get("/api/v1/ready")
     assert r.status_code == 503
     assert "db down" not in r.content.decode()
+    assert r["Content-Type"] == "application/problem+json"
+    assert r.json()["code"] == "provider_error" and r.json()["status"] == 503
+
+
+def test_ready_503_problem_json_when_redis_down(api, monkeypatch):
+    import redis
+
+    from mc.common.api import views
+
+    class DeadRedis:
+        def ping(self):
+            raise redis.exceptions.ConnectionError("redis secret-host:6379 refused")
+
+    monkeypatch.setattr(views, "get_redis", lambda: DeadRedis())
+    for path in ("/api/v1/ready", "/ready"):
+        r = api.get(path)
+        assert r.status_code == 503
+        assert r["Content-Type"] == "application/problem+json"
+        assert r.json()["status"] == 503 and r.json()["code"] == "provider_error"
+        assert "secret-host" not in r.content.decode()  # no dependency detail leaks
+    assert api.get("/api/v1/health").status_code == 200  # liveness stays green
+
+
+def test_ready_requires_both_dependencies_healthy(api):
+    r = api.get("/api/v1/ready")
+    assert r.status_code == 200 and r.json() == {"status": "ready"}
 
 
 def test_unknown_host_is_400():

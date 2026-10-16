@@ -51,7 +51,7 @@ infra/scripts/        bootstrap-state.sh, compose-database-url.sh, ecs-*.sh, smo
 | S3 | `media-private`, `exports-private`: block public access, SSE-KMS (mc-media), versioning, TLS-only policy, lifecycle (exports expire after 14 days). `static-public`: public read of objects only, SSE-S3. Names are `mc-<env>-<account id>-<purpose>`. |
 | KMS | `mc-data` (RDS, Redis, secrets, backups, ECR, field-key wrapping) and `mc-media` (S3), rotation on. |
 | Secrets Manager | One empty secret per name in `secret_env_vars` at `mc/<env>/<ENV_VAR>`. Tasks receive them only through the ECS `secrets` block. `environment` holds non-secret values only, and a precondition rejects secret names in `app_extra_environment`. |
-| Alarms | `observability`: ALB target 5xx percent and ELB 5xx, unhealthy and zero healthy targets (api, ws), RDS CPU / free storage / connections, Redis engine CPU / memory / evictions per node, ECS running task count (Container Insights), and log-metric-filter alarms for the JSON log field `alert` = `s1_report`, `payments_reconciliation_mismatch`, `admin_access_denied`. All go to the SNS topic `mc-<env>-alerts`. |
+| Alarms | `observability`: ALB target 5xx percent and ELB 5xx, unhealthy and zero healthy targets (api, ws), RDS CPU / free storage / connections, Redis engine CPU / memory / evictions per node, ECS running task count (Container Insights), p95 target response time above 1 s for 10 minutes (`alb_p95_latency`), RDS CPU above 80% for 15 minutes, and log-metric-filter alarms for the JSON log field `alert` = `s1_report`, `payments_reconciliation_mismatch`, `admin_access_denied`, `queue_age_high`, `payment_webhook_failures`, `otp_send_spike` (each pointing at a runbook in `docs/runbooks/`). All go to the SNS topic `mc-<env>-alerts`. |
 
 Deploy role: `mc-<env>-github-deploy`, assumed through GitHub OIDC. Dev trusts `refs/heads/main`, staging trusts
 `refs/tags/rc-*`, prod trusts only the `environment:production` subject.
@@ -137,6 +137,11 @@ Backend (state) configuration, passed at `terraform init`: `bucket`, `dynamodb_t
 9. GitHub Actions are pinned by major version, not by commit SHA. The OIDC thumbprint is a placeholder that AWS ignores for GitHub.
 10. WAF rule tuning (CommonRuleSet body-size and similar rules) is untested against real mobile traffic. The auth rate-limit path
     prefix `/api/v1/auth` is an assumption; adjust `auth_path_prefix` to the real OTP routes.
-11. The restore drill required by MC-124 (restore evidence from a snapshot and from PITR) has not been done. Runbooks (MC-126)
-    do not exist yet, so alarm descriptions point to `docs/runbooks/` which is still to be written.
+11. The restore drill required by MC-124 (restore evidence from a snapshot and from PITR) has not been done. Runbooks exist in `docs/runbooks/` but have never been exercised by a game-day.
 12. Sizing numbers are starting guesses; no load test informed them.
+
+13. The alarms added for Bible §15 (`alb_p95_latency`, and the `queue_age_high`, `payment_webhook_failures`, `otp_send_spike`
+    metric filters/alarms) were written but NEVER planned or applied (no AWS access or registry here); `terraform fmt` and the
+    env-parity script are the only checks run. The metric filters depend on the application emitting those JSON `alert`
+    lines (covered by backend unit tests). `METRICS_TOKEN` is a new empty Secrets Manager entry: an operator must set a value,
+    otherwise `/metrics` stays disabled (403). To enable tracing set `OTEL_EXPORTER_OTLP_ENDPOINT` via `app_extra_environment`.

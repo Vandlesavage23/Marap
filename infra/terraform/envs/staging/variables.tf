@@ -56,6 +56,7 @@ variable "secret_env_vars" {
     "MC_JWT_PRIVATE_KEY_PEM",
     "MC_JWT_PUBLIC_KEY_PEM",
     "SENTRY_DSN",
+    "METRICS_TOKEN",
     "AT_API_KEY",
     "SMILE_ID_API_KEY",
     "FLUTTERWAVE_SECRET_KEY",

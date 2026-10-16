@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_serializer
 from rest_framework import serializers
 
 
@@ -8,6 +9,8 @@ class CreateSessionSerializer(serializers.Serializer):
     )
 
 
+@extend_schema_serializer(component_name="VerificationAppeal")
 class AppealSerializer(serializers.Serializer):
     attempt_id = serializers.UUIDField(required=False, allow_null=True)
-    message = serializers.CharField(max_length=1200)
+    # 10-1,000 characters, as `review.open_appeal` enforces
+    message = serializers.CharField(min_length=10, max_length=1000)

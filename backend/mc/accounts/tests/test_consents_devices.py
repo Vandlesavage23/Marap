@@ -165,3 +165,62 @@ def test_hard_delete_is_the_only_way_to_remove_consents():
     services.hard_delete_account(account=acct)
     assert not Account.objects.filter(id=acct.id).exists()
     assert not ConsentRecord.objects.exists()
+
+
+# ---------------------------------------------------------------- GET /me/devices
+def test_list_devices_requires_auth(api):
+    assert api.get("/api/v1/me/devices").status_code == 401
+
+
+def test_list_devices_returns_own_devices_without_tokens(api):
+    from django.test import Client
+
+    r = login(api, device=False)
+    first = device(push_token="SECRET-PUSH-TOKEN-1")
+    api.post("/api/v1/me/devices", first, **bearer(r), **J)
+    second = device(platform="ios", push_token=None, app_version="2.0.1", os_version="17.4")
+    api.post("/api/v1/me/devices", second, **bearer(r), **J)
+    other = Client(headers={"host": "api.mc.test"})
+    r2 = login(other, phone="+256772000066", device=False)
+    other.post("/api/v1/me/devices", device(push_token="OTHERS-TOKEN"), **bearer(r2), **J)
+
+    resp = api.get("/api/v1/me/devices", **bearer(r))
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["next_cursor"] is None and len(body["items"]) == 2
+    by_install = {i["install_id"]: i for i in body["items"]}
+    assert set(by_install) == {first["install_id"], second["install_id"]}
+    assert by_install[first["install_id"]]["push_enabled"] is True
+    assert by_install[second["install_id"]]["push_enabled"] is False
+    assert by_install[second["install_id"]]["platform"] == "ios"
+    raw = resp.content.decode()
+    assert (
+        "SECRET-PUSH-TOKEN-1" not in raw and "OTHERS-TOKEN" not in raw and "push_token" not in raw
+    )
+    assert set(body["items"][0]) == {
+        "id", "install_id", "platform", "app_version", "os_version", "push_enabled", "trusted",
+        "first_seen_at", "last_seen_at",
+    }  # fmt: skip
+
+
+def test_list_devices_is_empty_for_a_member_without_devices_and_newest_seen_first(api):
+    r = login(api, device=False)
+    assert api.get("/api/v1/me/devices", **bearer(r)).json()["items"] == []
+    a, b = device(push_token=None), device(push_token=None)
+    api.post("/api/v1/me/devices", a, **bearer(r), **J)
+    api.post("/api/v1/me/devices", b, **bearer(r), **J)
+    api.post("/api/v1/me/devices", {**a, "app_version": "9"}, **bearer(r), **J)  # a seen last
+    items = api.get("/api/v1/me/devices", **bearer(r)).json()["items"]
+    assert [i["install_id"] for i in items] == [a["install_id"], b["install_id"]]
+
+
+def test_suspended_members_can_still_see_their_devices(api):
+    r = login(api, device=False)
+    api.post("/api/v1/me/devices", device(), **bearer(r), **J)
+    Account.objects.update(status="suspended")
+    assert api.get("/api/v1/me/devices", **bearer(r)).status_code == 200
+
+
+def test_devices_endpoint_rejects_unsupported_methods(api):
+    r = login(api, device=False)
+    assert api.delete("/api/v1/me/devices", **bearer(r)).status_code == 405

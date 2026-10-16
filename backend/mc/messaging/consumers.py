@@ -16,7 +16,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from django.conf import settings
 
-from mc.common import presence
+from mc.common import metrics, presence
 from mc.common.errors import DomainError, TokenExpired, Unauthenticated
 
 CLOSE_UNAUTHENTICATED = 4401
@@ -35,6 +35,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self) -> None:
         self.socket_id = uuid.uuid4().hex
         await self.accept()
+        self._counted = True
+        metrics.WS_CONNECTS.inc()
+        metrics.WS_CONNECTIONS.inc()
         self._auth_task = asyncio.create_task(self._auth_deadline())
 
     async def _auth_deadline(self) -> None:
@@ -43,6 +46,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             await self.close(code=CLOSE_UNAUTHENTICATED)
 
     async def disconnect(self, code: int) -> None:
+        if getattr(self, "_counted", False):
+            self._counted = False
+            metrics.WS_CONNECTIONS.dec()
         for task in ("_auth_task", "_ping_task"):
             t = getattr(self, task, None)
             if t:

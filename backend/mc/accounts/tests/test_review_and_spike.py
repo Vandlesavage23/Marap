@@ -68,3 +68,27 @@ def test_get_consents_returns_current_map_and_requires_auth():
     got = c.get("/api/v1/me/consents", **bearer(r)).json()["consents"]
     assert set(got) == {x["kind"] for x in CONSENTS} and all(v["granted"] for v in got.values())
     assert Client(headers={"host": "api.mc.test"}).get("/api/v1/me/consents").status_code == 401
+
+
+def test_explicit_null_push_token_clears_it_but_omitting_it_keeps_it():
+    from mc.accounts.models import Device
+    from mc.accounts.tests.helpers import bearer
+    from mc.verification.tests.helpers import new_user
+
+    c, r = new_user("+256772888060")
+    body = {"install_id": "11111111-1111-4111-8111-111111111111", "platform": "android"}
+    c.post("/api/v1/me/devices", {**body, "push_token": "tok-1"}, **bearer(r), **J)
+    assert Device.objects.get(install_id=body["install_id"]).push_token == "tok-1"
+    c.post(
+        "/api/v1/me/devices", {**body, "app_version": "1.2"}, **bearer(r), **J
+    )  # omitted → unchanged
+    assert Device.objects.get(install_id=body["install_id"]).push_token == "tok-1"
+    c.post(
+        "/api/v1/me/devices", {**body, "push_token": None}, **bearer(r), **J
+    )  # explicit null → cleared
+    d = Device.objects.get(install_id=body["install_id"])
+    assert d.push_token is None
+    listing = c.get("/api/v1/me/devices", **bearer(r)).json()["items"]
+    assert (
+        next(i for i in listing if i["install_id"] == body["install_id"])["push_enabled"] is False
+    )

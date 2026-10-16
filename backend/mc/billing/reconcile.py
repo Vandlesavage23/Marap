@@ -13,6 +13,7 @@ from typing import Any
 from django.utils import timezone
 
 from mc.audit import services as audit
+from mc.common import metrics
 from mc.common.errors import ProviderError
 from mc.entitlements import selectors as entitlement_selectors
 
@@ -139,6 +140,7 @@ def nightly_report(*, now=None) -> dict[str, Any]:  # type: ignore[no-untyped-de
         "mismatches": mismatches,
     }
     if mismatches:
+        metrics.count_alert("payments_reconciliation_mismatch")
         logger.warning(
             "payments reconciliation found mismatches",
             extra={"alert": "payments_reconciliation_mismatch", "count": len(mismatches)},

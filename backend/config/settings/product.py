@@ -56,6 +56,7 @@ FEATURE_FLAGS_DEFAULT = {
     "phase5_due_diligence": False,
     "voice_notes": True,
     "data_saver_default_on_cellular": True,
+    "ranking_model_v2": False,  # ranking_model_vN: opt in to a newer discovery model once it exists
 }
 
 OTP_SENDS_PER_PREFIX_PER_HOUR = _int("OTP_SENDS_PER_PREFIX_PER_HOUR", 300)  # SMS-pumping guard
@@ -111,6 +112,11 @@ REPORT_EVIDENCE_MESSAGES = _int("REPORT_EVIDENCE_MESSAGES", 20)
 SUSPENSION_DAYS = _int("SUSPENSION_DAYS", 7)
 
 PRIVACY_EXPORT_SLA_HOURS = _int("PRIVACY_EXPORT_SLA_HOURS", 72)
+
+# Admin dashboards (Bible §15). Aggregate cells below this size are never shown (small-cell suppression).
+AGGREGATE_MIN_CELL = _int("AGGREGATE_MIN_CELL", 5)
+# Manual verification review: hours from `needs_review` until a decision is due (A; see OPEN_QUESTIONS Q31).
+VERIFICATION_REVIEW_SLA_HOURS = _int("VERIFICATION_REVIEW_SLA_HOURS", 24)
 PRIVACY_EXPORT_LINK_DAYS = _int("PRIVACY_EXPORT_LINK_DAYS", 7)
 
 # Retention windows in days (Bible §12.2) — (A)

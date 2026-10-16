@@ -135,3 +135,22 @@ def export_for_account(account) -> dict[str, object]:  # type: ignore[no-untyped
             for e in Entitlement.objects.filter(account=account).order_by("starts_at")
         ],
     }
+
+
+def funnel_member_count(*, start: datetime, end: datetime) -> int | None:
+    """Dashboard funnel, last stage: accounts registered in `[start, end)` that have held a paid, un-refunded
+    membership (a purchase-backed entitlement, trial and staff grants excluded)."""
+    from mc.common.aggregates import suppress
+
+    n = (
+        Entitlement.objects.filter(
+            source=Entitlement.Source.PURCHASE,
+            revoked_at__isnull=True,
+            account__created_at__gte=start,
+            account__created_at__lt=end,
+        )
+        .values("account_id")
+        .distinct()
+        .count()
+    )
+    return suppress(n)

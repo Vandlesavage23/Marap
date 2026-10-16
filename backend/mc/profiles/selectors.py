@@ -1,5 +1,5 @@
 import uuid
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from django.utils import timezone
 
@@ -236,3 +236,44 @@ def export_for_account(account) -> dict[str, object]:  # type: ignore[no-untyped
             else None
         ),
     }
+
+
+LIVE_LIKE = (Profile.Status.LIVE, Profile.Status.HIDDEN_BY_USER)
+
+
+def funnel_live_count(*, start: datetime, end: datetime) -> int | None:
+    """Dashboard funnel, stage 3: accounts registered in `[start, end)` whose profile is live (or paused by the
+    member, which only a live profile can be)."""
+    from mc.common.aggregates import suppress
+
+    n = Profile.objects.filter(
+        status__in=LIVE_LIKE, account__created_at__gte=start, account__created_at__lt=end
+    ).count()
+    return suppress(n)
+
+
+def live_density_by_district() -> list[dict[str, object]]:
+    """Dashboard density: live profiles per district (UBOS list + `abroad`), largest first. Cells below the
+    suppression threshold come back with `live=None`; no member data of any kind."""
+    from django.db.models import Count
+
+    from mc.common.aggregates import suppress
+
+    from .districts import ABROAD, UGANDA_DISTRICTS
+
+    counts = {
+        row["district"]: row["n"]
+        for row in Profile.objects.filter(status=Profile.Status.LIVE)
+        .values("district")
+        .annotate(n=Count("id"))
+        .order_by()
+    }
+    names = [*UGANDA_DISTRICTS, ABROAD]
+    other = sum(n for d, n in counts.items() if d not in names)  # legacy/blank values
+    rows: list[dict[str, object]] = [
+        {"district": d, "live": suppress(counts.get(d, 0))} for d in names
+    ]
+    if other:
+        rows.append({"district": "(other)", "live": suppress(other)})
+    rows.sort(key=lambda r: (-(r["live"] or 0), str(r["district"])))  # type: ignore[operator]
+    return rows

@@ -1,10 +1,15 @@
 name: mobile-ci
 on:
   pull_request:
-    paths: ["apps/mobile/**", ".github/workflows/mobile-ci.yml"]
+    paths:
+      - "apps/mobile/**"
+      - "backend/devtools/**"
+      - ".github/workflows/mobile-ci.yml"
   push:
     branches: [main]
     paths: ["apps/mobile/**"]
+  workflow_dispatch: {}
+permissions: {contents: read}
 
 jobs:
   test:
@@ -23,10 +28,67 @@ jobs:
       - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter gen-l10n
       - run: flutter analyze
-      - run: flutter test
+      # Contract tests are skipped here (no MC_CONTRACT_API); they run in the `contract` job.
+      - name: Test with coverage
+        run: flutter test --coverage
+      - name: Coverage summary (lcov)
+        run: |
+          python3 tool/lcov_summary.py coverage/lcov.info
+          python3 tool/lcov_summary.py coverage/lcov.info --markdown >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mobile-lcov
+          path: apps/mobile/coverage/lcov.info
+          if-no-files-found: error
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
       - name: Build dev APK
         run: flutter build apk --debug --flavor dev -t lib/main_dev.dart --dart-define-from-file=env/dev.json
+
+  # OPTIONAL: real Dart repositories against the real Django server (apps/mobile/test/contract).
+  # Runs on main, on manual dispatch, or on a pull request labelled `run-contract`. Not a required check:
+  # it has never run on GitHub (only in the authoring sandbox), so failures here are information first.
+  contract:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
+      contains(github.event.pull_request.labels.*.name, 'run-contract')
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env: {POSTGRES_USER: mc, POSTGRES_PASSWORD: mc, POSTGRES_DB: mc_contract}
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mc" --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: --health-cmd "redis-cli ping" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://mc:mc@localhost:5432/mc_contract
+      TEST_REDIS_URL: redis://localhost:6379/3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with: {enable-cache: true}
+      - name: Backend dependencies
+        working-directory: backend
+        run: uv sync --frozen
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.47.7"
+          channel: stable
+          cache: true
+      - name: Mobile dependencies
+        working-directory: apps/mobile
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+      - name: Contract tests (migrate, fixture, server, flutter test --tags contract)
+        working-directory: apps/mobile
+        run: tool/run_contract_tests.sh

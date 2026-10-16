@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from mc.common import events, ratelimit
+from mc.common import events, metrics, ratelimit
 from mc.common.errors import NotFound, ValidationFailed
 from mc.interests import selectors as interest_selectors
 from mc.messaging import selectors as messaging_selectors
@@ -126,7 +126,9 @@ def report(
         if found is None:
             raise
         return found, False
+    metrics.count_report(sev)
     if sev == "s1":
+        metrics.count_alert("s1_report")
         logger.warning(
             "s1 safety report created", extra={"alert": "s1_report", "report_id": str(rep.id)}
         )

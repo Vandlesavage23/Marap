@@ -83,6 +83,19 @@ class IdempotentMixin(APIView):
 
     idempotency_required = True
 
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        """Views document themselves with `@extend_schema` on `perform_idempotent`; OpenAPI generation looks at the
+        HTTP method (`post`), so give each such subclass a `post` that carries the same schema annotation."""
+        super().__init_subclass__(**kwargs)
+        schema = getattr(cls.__dict__.get("perform_idempotent"), "kwargs", {}).get("schema")
+        if schema is not None:
+
+            def post(self, request, *args, **kw):  # type: ignore[no-untyped-def]
+                return IdempotentMixin.post(self, request, *args, **kw)
+
+            post.kwargs = {"schema": schema}  # type: ignore[attr-defined]
+            cls.post = post  # type: ignore[method-assign]
+
     def idempotency_scope(self, request) -> str:  # type: ignore[no-untyped-def]
         user_id = getattr(getattr(request, "user", None), "id", None) or "anon"
         return f"{self.__class__.__name__}:{user_id}"

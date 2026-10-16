@@ -66,6 +66,25 @@ resource "aws_cloudwatch_metric_alarm" "alb_target_5xx_percent" {
   tags = var.tags
 }
 
+# p95 target response time above the threshold for 10 consecutive 1-minute periods (Bible 15).
+resource "aws_cloudwatch_metric_alarm" "alb_p95_latency" {
+  alarm_name          = "${var.name_prefix}-alb-p95-target-response-time"
+  alarm_description   = "p95 target response time above ${var.alb_p95_response_seconds_threshold}s for 10 minutes. See docs/runbooks/outage.md."
+  namespace           = "AWS/ApplicationELB"
+  metric_name         = "TargetResponseTime"
+  dimensions          = { LoadBalancer = var.alb_arn_suffix }
+  extended_statistic  = "p95"
+  period              = 60
+  evaluation_periods  = 10
+  datapoints_to_alarm = 10
+  threshold           = var.alb_p95_response_seconds_threshold
+  comparison_operator = "GreaterThanThreshold"
+  treat_missing_data  = "notBreaching"
+  alarm_actions       = local.alarm_actions
+  ok_actions          = local.alarm_actions
+  tags                = var.tags
+}
+
 resource "aws_cloudwatch_metric_alarm" "alb_elb_5xx" {
   alarm_name          = "${var.name_prefix}-alb-elb-5xx"
   alarm_description   = "ALB-generated 5xx responses (no healthy targets, gateway errors)."

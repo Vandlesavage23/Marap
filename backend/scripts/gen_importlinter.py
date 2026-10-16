@@ -8,6 +8,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 NOT_DOMAIN = {"common", "phase5", "__pycache__"}
+# Phase 5 stubs (Bible §18) are interfaces only: they may call domain modules like any other module (so they are a
+# *source* in every "internals are private" contract) but nothing may import them (see the extra contract below).
+PHASE5 = "mc.phase5"
 MARK = "# --- generated contracts (scripts/gen_importlinter.py) ---"
 
 
@@ -33,8 +36,15 @@ def main() -> None:
             [f"mc.{m}" for m in mods],
         ),
     ]
+    out.append(
+        contract(
+            "phase5 is unreachable: nothing imports the Phase 5 stubs",
+            ["config", "mc.common", *[f"mc.{m}" for m in mods]],
+            [PHASE5],
+        )
+    )
     for m in mods:
-        others = [f"mc.{o}" for o in mods if o != m]
+        others = [f"mc.{o}" for o in mods if o != m] + [PHASE5]
         if others:
             out.append(
                 contract(
