@@ -14,5 +14,5 @@ RUN useradd -r app && chown -R app /app
 USER app
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod PATH="/app/.venv/bin:$PATH"
 # api: gunicorn config.wsgi:application --worker-class gthread --workers 3 --threads 8 (REST; ASGI would run every sync view on ONE thread per worker — measured in loadtests)
-# ws:  daphne config.asgi:application   worker: celery -A config worker -Q default,media,billing,notify
+# ws:  uvicorn config.asgi:application --host 0.0.0.0 --port 8001 (daphne is a dev-only dependency now: channels.testing imports it, and its Twisted dependency has an unfixed CVE so it stays out of the prod image)   worker: celery -A config worker -Q default,media,billing,notify
 CMD ["gunicorn", "config.wsgi:application", "--worker-class", "gthread", "--workers", "3", "--threads", "8", "--max-requests", "2000", "--max-requests-jitter", "200", "-b", "0.0.0.0:8000"]

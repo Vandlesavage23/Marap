@@ -17,7 +17,7 @@ from mc.audit import selectors as audit_selectors
 from mc.audit import services as audit
 from mc.billing import admin_ops
 from mc.common import aggregates
-from mc.common.errors import DomainError
+from mc.common.errors import DomainError, RateLimited
 from mc.common.net import client_ip
 from mc.entitlements import selectors as entitlement_selectors
 from mc.flags import selectors as flag_selectors
@@ -110,6 +110,7 @@ def mfa(request: HttpRequest) -> HttpResponse:
     if session is None:
         return redirect("admin-login")
     request.staff = session.staff  # type: ignore[attr-defined]
+    status = 200
     enrolling = session.staff.totp_enrolled_at is None
     msg = ""
     if request.method == "POST":
@@ -122,9 +123,10 @@ def mfa(request: HttpRequest) -> HttpResponse:
                 action="admin.login",
                 ip=client_ip(request),
             )
-            return redirect(request.GET.get("next") or "/")
+            return redirect(auth.safe_next(request.GET.get("next")))
         except DomainError as exc:
             msg = exc.title
+            status = exc.status if isinstance(exc, RateLimited) else 200
             audit.record(
                 actor_type="staff",
                 actor_id=session.staff.id,
@@ -136,22 +138,30 @@ def mfa(request: HttpRequest) -> HttpResponse:
         if enrolling
         else ""
     )
-    return _page(request, "mfa.html", enrolling=enrolling, otpauth=uri, msg=msg)
+    resp = _page(request, "mfa.html", enrolling=enrolling, otpauth=uri, msg=msg)
+    resp.status_code = status
+    return resp
 
 
 @staff_required(None)
 def stepup(request: StaffRequest) -> HttpResponse:
     msg = ""
-    nxt = request.GET.get("next", "/")
-    if not nxt.startswith("/") or nxt.startswith("//"):
-        nxt = "/"
+    nxt = auth.safe_next(request.GET.get("next"))
+    status = 200
     if request.method == "POST":
         try:
             auth.step_up(request.staff_session, request.POST.get("code", ""))
             return redirect(nxt)
         except DomainError as exc:
             msg = exc.title
-    return _page(request, "stepup.html", msg=msg, next=nxt)
+            status = exc.status if isinstance(exc, RateLimited) else 200
+            audit.record(
+                actor_type="staff", actor_id=request.staff.id, action="admin.mfa_failed",
+                reason="step-up", ip=client_ip(request),
+            )  # fmt: skip
+    resp = _page(request, "stepup.html", msg=msg, next=nxt)
+    resp.status_code = status
+    return resp
 
 
 @staff_required(None)

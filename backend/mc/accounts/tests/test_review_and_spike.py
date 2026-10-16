@@ -92,3 +92,8 @@ def test_explicit_null_push_token_clears_it_but_omitting_it_keeps_it():
     assert (
         next(i for i in listing if i["install_id"] == body["install_id"])["push_enabled"] is False
     )
+
+
+def test_review_code_with_non_ascii_digits_is_a_clean_422(settings):
+    settings.REVIEW_ACCOUNT_PHONE, settings.REVIEW_ACCOUNT_CODE = PHONE, "424242"
+    assert post("verify", {"phone": PHONE, "code": "٤٢٤٢٤٢"}).status_code == 422

@@ -108,7 +108,7 @@ def _count_global_send() -> None:
 def _check_review_code(e164: str, code: str) -> None:
     """Fixed code for the single store-review account. Tightly rate limited and every use is audited."""
     ratelimit.hit("otp:review", limit=10, window_seconds=HOUR)
-    if not hmac.compare_digest(code, settings.REVIEW_ACCOUNT_CODE):
+    if not hmac.compare_digest(code.encode(), settings.REVIEW_ACCOUNT_CODE.encode()):
         raise ValidationFailed(GENERIC_BAD_CODE)
     audit.record(
         actor_type="system", action="auth.review_account_login", reason="store review sign-in"

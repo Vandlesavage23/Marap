@@ -46,7 +46,6 @@ HOST_URLCONFS = {
 ROOT_URLCONF = "config.urls_api"
 
 INSTALLED_APPS = [
-    "daphne",
     "django.contrib.contenttypes",
     "django.contrib.postgres",
     "rest_framework",

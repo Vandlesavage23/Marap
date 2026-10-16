@@ -1,0 +1,8 @@
+# Test fixtures use `key="..."` for Idempotency-Key values; those are not secrets.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "idempotency keys in tests"
+paths = ['''backend/mc/.*/tests/.*\.py''']
+regexes = ['''(?i)key="[a-z0-9_\-]+"''']

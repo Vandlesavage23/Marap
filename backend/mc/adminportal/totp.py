@@ -36,7 +36,7 @@ def verify(
     secret: str, code: str, *, last_step: int = 0, now: float | None = None, window: int = 1
 ) -> int | None:
     """The matching time step (> `last_step`, so codes can't be replayed), or None."""
-    if not code.isdigit() or len(code) != DIGITS:
+    if not (code.isascii() and code.isdigit()) or len(code) != DIGITS:
         return None
     step = current_step(now)
     for s in range(step - window, step + window + 1):

@@ -48,6 +48,10 @@ def parse_range(raw_from: str, raw_to: str, *, now: datetime) -> DateRange:
         last = date.fromisoformat(raw_to) if raw_to else today
     except ValueError:
         return DateRange(default.first, default.last, "Dates must look like 2026-03-31.")
+    # Snap to whole ISO weeks (Mon-Sun): arbitrary day ranges could be subtracted from each other to recover a single
+    # day's cohort below the small-cell threshold (OPEN_QUESTIONS Q30).
+    first -= timedelta(days=first.weekday())
+    last += timedelta(days=6 - last.weekday())
     last = min(last, today)  # nothing can have happened after today
     if first > last:
         return DateRange(default.first, default.last, "The start date is after the end date.")

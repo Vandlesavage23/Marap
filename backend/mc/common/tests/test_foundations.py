@@ -311,3 +311,24 @@ def test_probe_paths_work_with_any_host_but_nothing_else_does():
     assert c.get("/health").status_code == 200
     assert c.get("/api/v1/me").status_code == 400
     assert Client(headers={"host": "evil.example"}).get("/api/v1/health").status_code == 400
+
+
+def test_prod_rejects_a_short_metrics_token(monkeypatch):
+    import importlib
+
+    from django.core.exceptions import ImproperlyConfigured
+
+    for key, val in {
+        "DJANGO_SECRET_KEY": "x", "SMS_PROVIDER": "a.B", "IDENTITY_PROVIDER": "a.B", "MALWARE_SCANNER": "a.B",
+        "IMAGE_MODERATION_PROVIDER": "a.B", "PUSH_PROVIDER": "a.B", "PAYMENT_GATEWAY": "a.B", "EMAIL_PROVIDER": "a.B",
+        "STAFF_SSO_PROVIDER": "a.B", "METRICS_TOKEN": "short",
+    }.items():  # fmt: skip
+        monkeypatch.setenv(key, val)
+    import config.settings.base as base
+    import config.settings.prod as prod
+
+    importlib.reload(base)  # METRICS_TOKEN is read when base is imported
+    with pytest.raises(ImproperlyConfigured):
+        importlib.reload(prod)
+    monkeypatch.delenv("METRICS_TOKEN")
+    importlib.reload(base)  # leave the module cache clean for other tests

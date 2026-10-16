@@ -1487,7 +1487,6 @@ dependencies = [
     { name = "channels" },
     { name = "channels-redis" },
     { name = "cryptography" },
-    { name = "daphne" },
     { name = "django" },
     { name = "djangorestframework" },
     { name = "drf-spectacular" },
@@ -1512,6 +1511,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "daphne" },
     { name = "django-stubs" },
     { name = "djangorestframework-stubs" },
     { name = "factory-boy" },
@@ -1534,7 +1534,6 @@ requires-dist = [
     { name = "channels", specifier = ">=4.3.2" },
     { name = "channels-redis", specifier = ">=4.3.0" },
     { name = "cryptography", specifier = ">=50.0.2" },
-    { name = "daphne", specifier = ">=4.2.3" },
     { name = "django", specifier = ">=5.1,<5.3" },
     { name = "djangorestframework", specifier = ">=3.18.3" },
     { name = "drf-spectacular", specifier = ">=0.30.0" },
@@ -1559,6 +1558,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "daphne", specifier = ">=4.2.3" },
     { name = "django-stubs", specifier = ">=6.1.2" },
     { name = "djangorestframework-stubs", specifier = ">=3.18.1" },
     { name = "factory-boy", specifier = ">=3.3.3" },

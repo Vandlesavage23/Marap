@@ -97,12 +97,16 @@ def test_parse_range():
     d = p("", "", now=NOW)
     assert (d.first, d.last, d.error) == (TODAY - timedelta(days=29), TODAY, "")
     assert p("2026-06-01", "2026-06-10", now=NOW).first == date(2026, 6, 1)
+    # ranges snap to whole Mon-Sun weeks so overlapping ranges cannot be subtracted to isolate one day
     one = p("2026-06-10", "2026-06-10", now=NOW)
-    assert one.start == datetime(2026, 6, 10, tzinfo=KAMPALA) and one.end == datetime(
-        2026, 6, 11, tzinfo=KAMPALA
-    )
+    assert one.first == date(2026, 6, 8) and one.first.weekday() == 0
+    assert one.last == min(date(2026, 6, 14), TODAY)
+    assert one.start == datetime(2026, 6, 8, tzinfo=KAMPALA)
     assert p("2026-06-01", "", now=NOW).last == TODAY
-    assert p("", "2026-06-05", now=NOW).first == TODAY - timedelta(days=29)
+    default_first = TODAY - timedelta(days=29)
+    assert p("", "2026-06-05", now=NOW).first == default_first - timedelta(
+        days=default_first.weekday()
+    )
     assert p("2026-06-01", "2030-01-01", now=NOW).last == TODAY  # future clamped
     for bad in (
         ("nope", ""),
@@ -244,7 +248,7 @@ def test_funnel_page_shows_totals_hides_small_cells_and_exposes_no_member_data()
 def test_funnel_page_range_validation_and_default():
     c = full_login(staff(["privacy_officer"]))
     ok = c.get("/dashboards/funnel", {"from": "2026-01-01", "to": "2026-01-31"})
-    assert ok.status_code == 200 and ok.context["rng"].first == date(2026, 1, 1)
+    assert ok.status_code == 200 and ok.context["rng"].first == date(2025, 12, 29)
     bad = c.get("/dashboards/funnel", {"from": "garbage", "to": "2026-01-31"})
     assert bad.status_code == 200 and "Dates must look like" in bad.content.decode()
     too_long = c.get("/dashboards/funnel", {"from": "2020-01-01", "to": "2026-01-31"})

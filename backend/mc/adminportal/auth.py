@@ -1,6 +1,7 @@
 """Staff authentication (MC-113): SSO for pre-provisioned staff only → mandatory TOTP → server-side session with a
 signed HttpOnly SameSite=Strict cookie. Sensitive actions need a step-up (fresh TOTP) within STAFF_REAUTH_MINUTES."""
 
+import contextlib
 import hashlib
 import ipaddress
 import secrets
@@ -11,8 +12,9 @@ from django.core import signing
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 
+from mc.common import ratelimit
 from mc.common.crypto import hmac_value
-from mc.common.errors import Forbidden, Unauthenticated, ValidationFailed
+from mc.common.errors import Forbidden, RateLimited, Unauthenticated, ValidationFailed
 
 from . import totp
 from .models import StaffSession, StaffUser
@@ -20,6 +22,18 @@ from .providers.sso import get_sso, new_state
 
 SALT = "mc.adminportal.cookie"
 STATE_COOKIE = "mc_admin_sso"
+MFA_MAX_FAILURES = 5  # wrong TOTP codes per staff member per lock window
+MFA_LOCK_SECONDS = 15 * 60
+
+
+def safe_next(raw: str | None) -> str:
+    """A same-site absolute path, else "/". Rejects scheme/host forms, `//`, and backslash/control-character
+    tricks that browsers normalise into `//host`."""
+    if not raw or not raw.startswith("/") or raw.startswith("//"):
+        return "/"
+    if "\\" in raw or any(ord(ch) < 0x20 or ord(ch) == 0x7F for ch in raw):
+        return "/"
+    return raw
 
 
 def ip_allowed(ip: str) -> bool:
@@ -105,8 +119,14 @@ def verify_mfa(session: StaffSession, code: str) -> None:
     staff = session.staff
     if not staff.totp_secret:
         raise Forbidden("Set up MFA first.")
+    bucket = f"staff:totp:{staff.id}"
+    if not ratelimit.check_only(bucket, limit=MFA_MAX_FAILURES):
+        raise RateLimited(retry_after=MFA_LOCK_SECONDS)
     step = totp.verify(str(staff.totp_secret), code.strip(), last_step=staff.totp_last_step)
     if step is None:
+        # a 6-digit code must not be brute-forceable: lock the staff member out after repeated misses
+        with contextlib.suppress(RateLimited):
+            ratelimit.hit(bucket, limit=MFA_MAX_FAILURES, window_seconds=MFA_LOCK_SECONDS)
         raise ValidationFailed("That code didn't work.")
     now = timezone.now()
     staff.totp_last_step = step

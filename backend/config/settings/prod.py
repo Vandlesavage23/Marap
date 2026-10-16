@@ -19,3 +19,11 @@ PUSH_PROVIDER = env("PUSH_PROVIDER")  # required: never the fake in prod
 PAYMENT_GATEWAY = env("PAYMENT_GATEWAY")  # required: never the fake in prod
 EMAIL_PROVIDER = env("EMAIL_PROVIDER")  # required: never the fake in prod
 STAFF_SSO_PROVIDER = env("STAFF_SSO_PROVIDER")  # required: never the fake in prod
+
+# Fail closed on weak operational secrets (a short bearer token for /metrics is guessable).
+from django.core.exceptions import ImproperlyConfigured
+
+if METRICS_TOKEN and len(METRICS_TOKEN) < 32:
+    raise ImproperlyConfigured(
+        "METRICS_TOKEN must be at least 32 characters (or unset to disable /metrics)."
+    )
