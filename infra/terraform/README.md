@@ -3,20 +3,14 @@
 Tickets: MC-020 (dev cloud environment), MC-124 (staging and production infrastructure). Spec: `docs/BUILD_BIBLE.md`
 sections 2.2 (runtime processes, host routing), 3.3 (cloud), 13.3 (CI pipelines).
 
-## Status: written, NOT applied, NOT validated against AWS
+## Status: validated (schema only), NOT planned, NOT applied
 
-Be clear about what has and has not happened:
-
-- Nothing in this directory has been run against AWS. No `terraform plan`, `apply`, `validate` or `init` has
-  succeeded. The sandbox that produced it could not download the AWS provider.
-- Only these checks were done: `terraform fmt -check -recursive` (which also proves the HCL parses), a script
-  cross-check that every `var.x` is declared, every module argument exists, every required module variable
-  is passed and every `module.x.y` output exists, `bash -n` on the scripts, and a YAML parse of the workflows.
-- The workflows and scripts have never been executed. The GitHub OIDC trust, the IAM policies, the WAF
-  rules and the ECS deploy logic are untested.
-- There is no `.terraform.lock.hcl` yet. Run `terraform init` once per environment and commit the lock files.
-- Expect a first `terraform validate` or `plan` to surface mistakes (provider schema details, argument names,
-  IAM scoping). Treat this as a reviewed first draft, not a tested module set.
+- `terraform validate` passes for dev, staging and prod against the real AWS provider schema (5.100.0, pinned by the
+  committed `.terraform.lock.hcl` files). It caught and fixed one invalid argument. CI re-runs it (`infra-ci.yml`).
+- No `terraform plan` or `apply` has ever run (no AWS account in the authoring sandbox): IAM scoping, the GitHub OIDC
+  trust, WAF rules and the ECS deploy scripts are untested against AWS. Sizing numbers are guesses.
+- Other checks done: `terraform fmt -check -recursive`, an env-parity script, `bash -n` on scripts, YAML parse of workflows.
+- The deploy workflows and scripts have never been executed.
 
 ## Layout
 
