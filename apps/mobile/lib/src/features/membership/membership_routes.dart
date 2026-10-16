@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/features/membership/presentation/membership_screens.dart';
 import 'package:marriage_connect/src/features/safety/presentation/safety_screens.dart';
+import 'package:marriage_connect/src/features/settings/presentation/device_settings_screens.dart';
 import 'package:marriage_connect/src/features/settings/presentation/settings_screens.dart';
 
 /// Routes for membership, safety, settings and beta feedback. Combined into
@@ -25,6 +26,14 @@ List<RouteBase> buildMembershipTrackRoutes() => [
       GoRoute(
         path: '/settings/privacy',
         builder: (_, __) => const PrivacyScreen(),
+      ),
+      GoRoute(
+        path: '/settings/notifications',
+        builder: (_, __) => const NotificationSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/settings/data-saver',
+        builder: (_, __) => const DataSaverScreen(),
       ),
       GoRoute(
         path: '/settings/sessions',

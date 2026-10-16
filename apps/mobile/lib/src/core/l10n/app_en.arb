@@ -963,5 +963,133 @@
   "homeMatches": "Matches",
   "homeSettings": "Settings",
   "homeWelcome": "Welcome back",
-  "homeIntro": "Pick up where you left off."
+  "homeIntro": "Pick up where you left off.",
+  "kitLoading": "Loading",
+  "@kitLoading": {
+    "description": "Spoken and shown while a button or area is busy."
+  },
+  "kitVerified": "Verified",
+  "@kitVerified": {
+    "description": "Short label on the verification badge."
+  },
+  "kitVerifiedSemantics": "Identity verified",
+  "@kitVerifiedSemantics": {
+    "description": "Screen reader label for the verification badge."
+  },
+  "kitSafetyTipLabel": "Safety tip",
+  "@kitSafetyTipLabel": {
+    "description": "Heading on a safety tip card."
+  },
+  "kitCloseSheet": "Close",
+  "@kitCloseSheet": {
+    "description": "Screen reader label for the close button on a bottom sheet."
+  },
+  "kitFieldOptional": "optional",
+  "@kitFieldOptional": {
+    "description": "Appended to a field label when the field is optional."
+  },
+  "kitMembershipTrialTitle": "You're on your free trial",
+  "@kitMembershipTrialTitle": {
+    "description": "Membership banner title during the 24-hour trial."
+  },
+  "kitMembershipTrialBody": "Everything is included until {date}. You haven't given payment details and nothing is charged automatically.",
+  "@kitMembershipTrialBody": {
+    "description": "Membership banner body during the trial. No countdown, no urgency.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "kitMembershipActiveTitle": "Your membership is active",
+  "@kitMembershipActiveTitle": {
+    "description": "Membership banner title for paying members."
+  },
+  "kitMembershipActiveBody": "Active until {date}.",
+  "@kitMembershipActiveBody": {
+    "description": "Membership banner body for paying members.",
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "kitMembershipEndedTitle": "Your membership has ended",
+  "@kitMembershipEndedTitle": {
+    "description": "Membership banner title after membership/trial ended."
+  },
+  "kitMembershipEndedBody": "You can still read your conversations. Join again whenever you're ready.",
+  "@kitMembershipEndedBody": {
+    "description": "Membership banner body after membership ended. Calm, not pushy."
+  },
+  "offlineMediaPhoto": "Photo",
+  "offlineMediaVoice": "Voice note",
+  "offlineMediaQueued": "It hasn't sent yet. We'll keep trying and send it as soon as you're back online.",
+  "dataSaverTile": "Data saver",
+  "dataSaverTitle": "Data saver",
+  "dataSaverIntro": "Data saver uses less mobile data. Photos load small first, extra photos load only when you tap them, and voice notes download only when you press play.",
+  "dataSaverToggle": "Always use data saver",
+  "dataSaverToggleBody": "Applies on Wi-Fi and mobile data.",
+  "dataSaverAutoToggle": "Use data saver on mobile data",
+  "dataSaverAutoBody": "Turns data saver on by itself whenever you're not on Wi-Fi.",
+  "dataSaverActiveNow": "Data saver is on right now.",
+  "dataSaverInactiveNow": "Data saver is off right now.",
+  "pushTile": "Notifications",
+  "pushTitle": "Notifications",
+  "pushIntro": "You choose whether this phone gets notifications. We'll tell you when someone is interested in you, when you match, and when you get a message.",
+  "pushToggle": "Notify me on this phone",
+  "pushToggleBody": "Notifications are generic. They never show names, photos or message text. You can turn them off at any time.",
+  "pushPermissionDenied": "Notifications are blocked for this app in your phone's settings. Turn them on there, then come back to this switch.",
+  "pushUnavailable": "Notifications aren't available in this version of the app.",
+  "pushFailed": "We couldn't change this just now. Please check your connection and try again.",
+  "pushOnConfirmation": "Notifications are on for this phone.",
+  "pushOffConfirmation": "Notifications are off for this phone.",
+  "notifTitle": "Notifications",
+  "notifMarkAllRead": "Mark all as read",
+  "notifEmptyTitle": "Nothing new",
+  "notifEmptyBody": "When something happens on your account, you'll see it here.",
+  "notifLoadMore": "Show older",
+  "notifMarkFailed": "We couldn't update your notifications. Please try again.",
+  "notifUnread": "Unread",
+  "notifTypeInterest": "Someone is interested in you",
+  "notifTypeMatch": "You have a new match",
+  "notifTypeMessage": "You have a new message",
+  "notifTypeTrialEnding": "Your free trial ends soon",
+  "notifTypeTrialEnded": "Your free trial has ended",
+  "notifTypeWarning": "Please review our community guidelines",
+  "notifTypeAppeal": "Your appeal has been reviewed",
+  "notifTypeExport": "Your data export is ready",
+  "notifTypeVerification": "Your verification has been reviewed",
+  "notifTypeDevice": "New sign-in on your account",
+  "notifTypeOther": "You have a new notification",
+  "adoptMembershipSheetTitle": "Membership",
+  "adoptSettingsAccount": "Account",
+  "adoptSignOut": "Sign out",
+  "adoptSignOutTitle": "Sign out of this phone?",
+  "adoptSignOutBody": "You will need your phone number and a new code to sign in again. Saved matches and messages on this phone are removed; your account and conversations stay safe on our servers.",
+  "adoptSignOutUnsent": "{count, plural, =1{You have 1 message that has not been sent yet. If you sign out now it will be lost.} other{You have {count} messages that have not been sent yet. If you sign out now they will be lost.}}",
+  "@adoptSignOutUnsent": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "adoptSignOutConfirm": "Sign out",
+  "adoptSignOutCancel": "Stay signed in",
+  "adoptInviteToggle": "I have an invite code",
+  "adoptInviteLabel": "Invite code",
+  "adoptInviteHelp": "Only needed if you were given one.",
+  "adoptInviteNeeded": "This beta needs a valid invite code. Enter the one you were given and try again.",
+  "adoptMatchPreviewNew": "New message",
+  "adoptMatchPreviewPhoto": "Photo",
+  "adoptMatchPreviewVoice": "Voice note",
+  "adoptMatchUnread": "{count, plural, =1{1 unread message} other{{count} unread messages}}",
+  "@adoptMatchUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

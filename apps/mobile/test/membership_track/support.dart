@@ -303,6 +303,11 @@ class FakeAccount implements AccountRepository {
   AppFailure? failDelete;
   AppFailure? failFeedback;
   int reauthCalls = 0;
+  int logoutCalls = 0;
+  AppFailure? failLogout;
+
+  /// Called when POST /auth/logout is made (lets tests record ordering).
+  void Function()? onLogout;
   final deletes = <String>[];
   int exports = 0;
   ExportRequestInfo exportInfo =
@@ -328,6 +333,13 @@ class FakeAccount implements AccountRepository {
     consentCalls.add('${kind.wire}:$granted');
     return consentState =
         ConsentSnapshot({...consentState.granted, kind: granted});
+  }
+
+  @override
+  Future<void> logout() async {
+    logoutCalls++;
+    onLogout?.call();
+    if (failLogout != null) throw failLogout!;
   }
 
   @override

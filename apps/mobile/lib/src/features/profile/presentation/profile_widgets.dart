@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/profile/presentation/profile_labels.dart';
 
 /// A single-choice question rendered as chips (selected state is announced by
@@ -135,14 +136,10 @@ class SaveButton extends StatelessWidget {
   final bool saving;
 
   @override
-  Widget build(BuildContext context) => FilledButton(
+  Widget build(BuildContext context) => McButton(
+        label: label,
+        loading: saving,
         onPressed: saving ? null : onPressed,
-        child: saving
-            ? const SizedBox.square(
-                dimension: 20,
-                child: CircularProgressIndicator(strokeWidth: 2),
-              )
-            : Text(label),
       );
 }
 

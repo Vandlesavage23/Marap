@@ -12,10 +12,16 @@ import 'package:marriage_connect/src/features/chat/data/outbox_repository.dart';
 import 'package:marriage_connect/src/features/chat/domain/chat_repository.dart';
 import 'package:marriage_connect/src/features/matches/application/matches_controller.dart';
 
+/// Where queued photos / voice notes are kept until they are delivered.
+final mediaStashProvider =
+    Provider<MediaStash>((ref) => const DocumentsMediaStash());
+
 final outboxRepositoryProvider = Provider<OutboxRepository>(
   (ref) => OutboxRepository(
     ref.watch(appDatabaseProvider),
     ref.watch(dioProvider),
+    uploader: ref.watch(mediaUploaderProvider),
+    stash: ref.watch(mediaStashProvider),
   ),
 );
 

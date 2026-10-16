@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
 import 'package:marriage_connect/src/features/interests/presentation/member_avatar.dart';
@@ -85,23 +85,20 @@ class _ReceivedTab extends ConsumerWidget {
         child: ListView(
           children: [
             for (final i in s.items)
-              ListTile(
+              MemberCardTile(
                 key: ValueKey(i.id),
-                leading: MemberAvatar(member: i.sender),
-                title: Text(
-                  memberTitle(l, i.sender),
-                ),
-                subtitle: Text(
-                  i.text,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                member: i.sender,
+                title: memberTitle(l, i.sender),
+                subtitle: i.text,
+                subtitleMaxLines: 2,
                 onTap: () => context.push('/interests/${i.id}'),
               ),
             if (s.nextCursor != null)
-              TextButton(
+              McButton(
+                label: l.interestLoadMore,
                 onPressed: s.loadingMore ? null : ctrl.loadMore,
-                child: Text(l.interestLoadMore),
+                kind: McButtonKind.text,
+                expand: false,
               ),
           ],
         ),
@@ -128,22 +125,22 @@ class _SentTab extends ConsumerWidget {
         child: ListView(
           children: [
             for (final i in s.items)
-              ListTile(
+              MemberCardTile(
                 key: ValueKey(i.id),
-                leading: MemberAvatar(member: i.recipient),
-                title: Text(
-                  memberTitle(l, i.recipient),
-                ),
-                subtitle: Text(_statusText(l, i)),
+                member: i.recipient,
+                title: memberTitle(l, i.recipient),
+                subtitle: _statusText(l, i),
                 onTap: i.recipient.id.isEmpty
                     ? null
                     : () =>
                         context.push('/discovery/profile/${i.recipient.id}'),
               ),
             if (s.nextCursor != null)
-              TextButton(
+              McButton(
+                label: l.interestLoadMore,
                 onPressed: s.loadingMore ? null : ctrl.loadMore,
-                child: Text(l.interestLoadMore),
+                kind: McButtonKind.text,
+                expand: false,
               ),
           ],
         ),

@@ -2025,4 +2025,243 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeIntro => 'Pick up where you left off.';
+
+  @override
+  String get kitLoading => 'Loading';
+
+  @override
+  String get kitVerified => 'Verified';
+
+  @override
+  String get kitVerifiedSemantics => 'Identity verified';
+
+  @override
+  String get kitSafetyTipLabel => 'Safety tip';
+
+  @override
+  String get kitCloseSheet => 'Close';
+
+  @override
+  String get kitFieldOptional => 'optional';
+
+  @override
+  String get kitMembershipTrialTitle => 'You\'re on your free trial';
+
+  @override
+  String kitMembershipTrialBody(String date) {
+    return 'Everything is included until $date. You haven\'t given payment details and nothing is charged automatically.';
+  }
+
+  @override
+  String get kitMembershipActiveTitle => 'Your membership is active';
+
+  @override
+  String kitMembershipActiveBody(String date) {
+    return 'Active until $date.';
+  }
+
+  @override
+  String get kitMembershipEndedTitle => 'Your membership has ended';
+
+  @override
+  String get kitMembershipEndedBody =>
+      'You can still read your conversations. Join again whenever you\'re ready.';
+
+  @override
+  String get offlineMediaPhoto => 'Photo';
+
+  @override
+  String get offlineMediaVoice => 'Voice note';
+
+  @override
+  String get offlineMediaQueued =>
+      'It hasn\'t sent yet. We\'ll keep trying and send it as soon as you\'re back online.';
+
+  @override
+  String get dataSaverTile => 'Data saver';
+
+  @override
+  String get dataSaverTitle => 'Data saver';
+
+  @override
+  String get dataSaverIntro =>
+      'Data saver uses less mobile data. Photos load small first, extra photos load only when you tap them, and voice notes download only when you press play.';
+
+  @override
+  String get dataSaverToggle => 'Always use data saver';
+
+  @override
+  String get dataSaverToggleBody => 'Applies on Wi-Fi and mobile data.';
+
+  @override
+  String get dataSaverAutoToggle => 'Use data saver on mobile data';
+
+  @override
+  String get dataSaverAutoBody =>
+      'Turns data saver on by itself whenever you\'re not on Wi-Fi.';
+
+  @override
+  String get dataSaverActiveNow => 'Data saver is on right now.';
+
+  @override
+  String get dataSaverInactiveNow => 'Data saver is off right now.';
+
+  @override
+  String get pushTile => 'Notifications';
+
+  @override
+  String get pushTitle => 'Notifications';
+
+  @override
+  String get pushIntro =>
+      'You choose whether this phone gets notifications. We\'ll tell you when someone is interested in you, when you match, and when you get a message.';
+
+  @override
+  String get pushToggle => 'Notify me on this phone';
+
+  @override
+  String get pushToggleBody =>
+      'Notifications are generic. They never show names, photos or message text. You can turn them off at any time.';
+
+  @override
+  String get pushPermissionDenied =>
+      'Notifications are blocked for this app in your phone\'s settings. Turn them on there, then come back to this switch.';
+
+  @override
+  String get pushUnavailable =>
+      'Notifications aren\'t available in this version of the app.';
+
+  @override
+  String get pushFailed =>
+      'We couldn\'t change this just now. Please check your connection and try again.';
+
+  @override
+  String get pushOnConfirmation => 'Notifications are on for this phone.';
+
+  @override
+  String get pushOffConfirmation => 'Notifications are off for this phone.';
+
+  @override
+  String get notifTitle => 'Notifications';
+
+  @override
+  String get notifMarkAllRead => 'Mark all as read';
+
+  @override
+  String get notifEmptyTitle => 'Nothing new';
+
+  @override
+  String get notifEmptyBody =>
+      'When something happens on your account, you\'ll see it here.';
+
+  @override
+  String get notifLoadMore => 'Show older';
+
+  @override
+  String get notifMarkFailed =>
+      'We couldn\'t update your notifications. Please try again.';
+
+  @override
+  String get notifUnread => 'Unread';
+
+  @override
+  String get notifTypeInterest => 'Someone is interested in you';
+
+  @override
+  String get notifTypeMatch => 'You have a new match';
+
+  @override
+  String get notifTypeMessage => 'You have a new message';
+
+  @override
+  String get notifTypeTrialEnding => 'Your free trial ends soon';
+
+  @override
+  String get notifTypeTrialEnded => 'Your free trial has ended';
+
+  @override
+  String get notifTypeWarning => 'Please review our community guidelines';
+
+  @override
+  String get notifTypeAppeal => 'Your appeal has been reviewed';
+
+  @override
+  String get notifTypeExport => 'Your data export is ready';
+
+  @override
+  String get notifTypeVerification => 'Your verification has been reviewed';
+
+  @override
+  String get notifTypeDevice => 'New sign-in on your account';
+
+  @override
+  String get notifTypeOther => 'You have a new notification';
+
+  @override
+  String get adoptMembershipSheetTitle => 'Membership';
+
+  @override
+  String get adoptSettingsAccount => 'Account';
+
+  @override
+  String get adoptSignOut => 'Sign out';
+
+  @override
+  String get adoptSignOutTitle => 'Sign out of this phone?';
+
+  @override
+  String get adoptSignOutBody =>
+      'You will need your phone number and a new code to sign in again. Saved matches and messages on this phone are removed; your account and conversations stay safe on our servers.';
+
+  @override
+  String adoptSignOutUnsent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'You have $count messages that have not been sent yet. If you sign out now they will be lost.',
+      one:
+          'You have 1 message that has not been sent yet. If you sign out now it will be lost.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adoptSignOutConfirm => 'Sign out';
+
+  @override
+  String get adoptSignOutCancel => 'Stay signed in';
+
+  @override
+  String get adoptInviteToggle => 'I have an invite code';
+
+  @override
+  String get adoptInviteLabel => 'Invite code';
+
+  @override
+  String get adoptInviteHelp => 'Only needed if you were given one.';
+
+  @override
+  String get adoptInviteNeeded =>
+      'This beta needs a valid invite code. Enter the one you were given and try again.';
+
+  @override
+  String get adoptMatchPreviewNew => 'New message';
+
+  @override
+  String get adoptMatchPreviewPhoto => 'Photo';
+
+  @override
+  String get adoptMatchPreviewVoice => 'Voice note';
+
+  @override
+  String adoptMatchUnread(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unread messages',
+      one: '1 unread message',
+    );
+    return '$_temp0';
+  }
 }

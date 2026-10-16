@@ -191,6 +191,42 @@ void main() {
     await close(t, r);
   });
 
+  testWidgets('unmatch: confirmation dialog, cancel keeps, confirm removes',
+      (t) async {
+    final r = Rig();
+    await open(t, r);
+    Future<void> openDialog() async {
+      await t.tap(find.byType(PopupMenuButton<String>));
+      await t.pumpAndSettle();
+      await t.tap(find.text('Unmatch'));
+      await t.pumpAndSettle();
+      expect(find.textContaining('Unmatch'), findsWidgets);
+      expect(
+        find.text(
+          "You won't be able to message each other. This can't be undone.",
+        ),
+        findsOneWidget,
+      );
+    }
+
+    await openDialog();
+    await t.tap(find.text('Cancel'));
+    await t.pumpAndSettle();
+    expect(r.matches.unmatched, isEmpty);
+    await openDialog();
+    // The confirming action is the destructive one.
+    await t.tap(find.widgetWithText(FilledButton, 'Unmatch'));
+    await t.pump();
+    await t.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 150)),
+    );
+    await t.pump(const Duration(milliseconds: 500));
+    expect(r.matches.unmatched, ['m1']);
+    // opened without a back stack: falls back to the matches list
+    expect(find.text('AT /matches'), findsOneWidget);
+    await close(t, r);
+  });
+
   testWidgets('ended conversation', (t) async {
     final r = Rig();
     await open(t, r);

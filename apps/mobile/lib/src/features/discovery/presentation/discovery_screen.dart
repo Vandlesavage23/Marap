@@ -5,11 +5,12 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/discovery/application/discovery_controller.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/candidate_card.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/filters_sheet.dart';
+import 'package:marriage_connect/src/features/discovery/presentation/next_card_preloader.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/swipe_card.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/why_sheet.dart';
 import 'package:marriage_connect/src/features/interests/presentation/send_interest_sheet.dart';
@@ -119,7 +120,12 @@ class _Deck extends ConsumerWidget {
             EmptyState(title: l.discDoneTitle, body: l.discDoneBody)
           else
             EmptyState(title: l.discEmptyTitle, body: l.discEmptyBody),
-          TextButton(onPressed: ctrl.refresh, child: Text(l.retry)),
+          McButton(
+            label: l.retry,
+            onPressed: ctrl.refresh,
+            kind: McButtonKind.text,
+            expand: false,
+          ),
         ],
       );
     }
@@ -139,9 +145,10 @@ class _Deck extends ConsumerWidget {
     }
 
     return Padding(
-      padding: EdgeInsets.all(context.tokens.spacing),
+      padding: EdgeInsets.all(context.mc.space.md),
       child: Column(
         children: [
+          NextCardPreloader(url: state.next?.photos.firstOrNull?.url),
           Expanded(
             child: Semantics(
               customSemanticsActions: {
@@ -162,7 +169,7 @@ class _Deck extends ConsumerWidget {
               ),
             ),
           ),
-          SizedBox(height: context.tokens.spacing),
+          SizedBox(height: context.mc.space.md),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [

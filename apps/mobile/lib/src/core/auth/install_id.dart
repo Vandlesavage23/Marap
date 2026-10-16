@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,3 +13,7 @@ Future<String> installId() async {
   await storage.write(key: key, value: fresh);
   return fresh;
 }
+
+/// Overridable in tests (secure storage needs the platform plugin).
+final installIdProvider =
+    Provider<Future<String> Function()>((ref) => installId);

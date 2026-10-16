@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
 import 'package:marriage_connect/src/features/interests/presentation/member_avatar.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
@@ -44,9 +45,9 @@ class MatchesScreen extends ConsumerWidget {
                   children: [
                     if (s.stale)
                       Material(
-                        color: Theme.of(context).colorScheme.errorContainer,
+                        color: context.mc.colors.errorContainer,
                         child: Padding(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(context.mc.space.xs),
                           child: Text(
                             l.matchesStaleBanner,
                             textAlign: TextAlign.center,
@@ -71,6 +72,14 @@ class MatchesScreen extends ConsumerWidget {
   }
 }
 
+/// A generic line from the last message's kind only: never the text.
+String? _preview(AppLocalizations l, Match m) => switch (m.lastMessageKind) {
+      'text' => l.adoptMatchPreviewNew,
+      'image' => l.adoptMatchPreviewPhoto,
+      'voice' => l.adoptMatchPreviewVoice,
+      _ => null,
+    };
+
 class _MatchTile extends StatelessWidget {
   const _MatchTile({required this.match});
   final Match match;
@@ -79,15 +88,15 @@ class _MatchTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final m = match.member;
-    return ListTile(
+    return MemberCardTile(
       key: ValueKey(match.id),
-      leading: MemberAvatar(member: m),
-      title: Text(memberTitle(l, m)),
-      subtitle: Text(
-        '${m.district.isEmpty ? '' : '${m.district} · '}'
-        '${l.matchesSince(match.createdAt)}',
-      ),
-      trailing: const Icon(Icons.chevron_right),
+      member: m,
+      title: memberTitle(l, m),
+      subtitle: '${m.district.isEmpty ? '' : '${m.district} · '}'
+          '${l.matchesSince(match.createdAt)}',
+      preview: _preview(l, match),
+      unread: match.unreadCount,
+      trailing: const ExcludeSemantics(child: Icon(Icons.chevron_right)),
       onTap: () => context.push('/matches/${match.id}/chat'),
     );
   }

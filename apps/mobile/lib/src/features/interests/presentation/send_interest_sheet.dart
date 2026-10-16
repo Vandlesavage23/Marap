@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
@@ -16,11 +16,10 @@ Future<SendInterestResult?> showSendInterestSheet(
   required String profileId,
   required String displayName,
 }) =>
-    showModalBottomSheet<SendInterestResult>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (_) => SendInterestSheet(
+    BottomSheetScaffold.show<SendInterestResult>(
+      context,
+      title: AppLocalizations.of(context).interestSendTitle,
+      child: SendInterestSheet(
         profileId: profileId,
         displayName: displayName,
       ),
@@ -40,36 +39,25 @@ class SendInterestSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = sendInterestControllerProvider(profileId);
     final async = ref.watch(provider);
-    final tokens = context.tokens;
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          tokens.spacing,
-          0,
-          tokens.spacing,
-          tokens.spacing + MediaQuery.viewInsetsOf(context).bottom,
-        ),
-        child: async.when(
-          loading: () => const SizedBox(
-            height: 160,
-            child: Center(child: CircularProgressIndicator()),
-          ),
-          error: (e, _) => SizedBox(
-            height: 260,
-            child: _SheetError(
-              error: e,
-              onRetry: () => ref.invalidate(provider),
-            ),
-          ),
-          data: (s) => s.result != null
-              ? _Done(result: s.result!, name: displayName)
-              : _Compose(
-                  state: s,
-                  name: displayName,
-                  onSend: ref.read(provider.notifier).send,
-                ),
+    return async.when(
+      loading: () => const SizedBox(
+        height: 160,
+        child: Center(child: CircularProgressIndicator()),
+      ),
+      error: (e, _) => SizedBox(
+        height: 260,
+        child: _SheetError(
+          error: e,
+          onRetry: () => ref.invalidate(provider),
         ),
       ),
+      data: (s) => s.result != null
+          ? _Done(result: s.result!, name: displayName)
+          : _Compose(
+              state: s,
+              name: displayName,
+              onSend: ref.read(provider.notifier).send,
+            ),
     );
   }
 }
@@ -118,8 +106,6 @@ class _Compose extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(l.interestSendTitle, style: t.textTheme.titleLarge),
-          const SizedBox(height: 8),
           if (state.description == null)
             Text(l.interestNoDescription)
           else ...[
@@ -132,7 +118,7 @@ class _Compose extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: t.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(context.tokens.radius),
+                borderRadius: BorderRadius.circular(context.mc.radii.md),
               ),
               child: Text(state.description!),
             ),
@@ -146,14 +132,10 @@ class _Compose extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 16),
-          FilledButton(
+          McButton(
+            label: l.interestSendButton,
+            loading: state.sending,
             onPressed: state.canSend ? onSend : null,
-            child: state.sending
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l.interestSendButton),
           ),
         ],
       ),
@@ -194,16 +176,18 @@ class _Done extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         if (result.matched)
-          FilledButton(
+          McButton(
+            label: l.interestOpenChat,
             onPressed: () {
               Navigator.of(context).pop(result);
               context.go('/matches/${result.matchId}/chat');
             },
-            child: Text(l.interestOpenChat),
           ),
-        TextButton(
+        McButton(
+          label: l.interestDone,
           onPressed: () => Navigator.of(context).pop(result),
-          child: Text(l.interestDone),
+          kind: McButtonKind.text,
+          expand: false,
         ),
       ],
     );

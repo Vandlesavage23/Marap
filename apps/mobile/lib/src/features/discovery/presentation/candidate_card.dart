@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/labels.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/progressive_image.dart';
@@ -108,15 +109,15 @@ class BadgeChips extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return Wrap(
-      spacing: 6,
-      runSpacing: 4,
+      spacing: context.mc.space.xs,
+      runSpacing: context.mc.space.xxs,
       children: [
         for (final b in badges)
           if (badgeLabel(l, b) case final label?)
-            Chip(
-              avatar: const Icon(Icons.verified_outlined, size: 16),
-              label: Text(label),
-              visualDensity: VisualDensity.compact,
+            StatusChip(
+              label: label,
+              tone: StatusTone.success,
+              icon: Icons.verified_outlined,
             ),
       ],
     );
@@ -153,7 +154,7 @@ class CandidateCardView extends StatelessWidget {
         margin: EdgeInsets.zero,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(context.tokens.radius),
+          borderRadius: BorderRadius.circular(context.mc.radii.md),
           side: BorderSide(color: t.colorScheme.outlineVariant),
         ),
         child: Column(
@@ -161,7 +162,7 @@ class CandidateCardView extends StatelessWidget {
           children: [
             Expanded(flex: 3, child: PhotoStrip(photos: c.photos)),
             Padding(
-              padding: EdgeInsets.all(context.tokens.spacing),
+              padding: EdgeInsets.all(context.mc.space.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -198,13 +199,17 @@ class CandidateCardView extends StatelessWidget {
                   BadgeChips(badges: c.badges),
                   Row(
                     children: [
-                      TextButton(
+                      McButton(
+                        label: l.discWhyButton,
                         onPressed: onWhy,
-                        child: Text(l.discWhyButton),
+                        kind: McButtonKind.text,
+                        expand: false,
                       ),
-                      TextButton(
+                      McButton(
+                        label: l.discViewProfile,
                         onPressed: onProfile,
-                        child: Text(l.discViewProfile),
+                        kind: McButtonKind.text,
+                        expand: false,
                       ),
                     ],
                   ),

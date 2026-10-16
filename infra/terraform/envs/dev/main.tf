@@ -199,7 +199,7 @@ module "api" {
   cluster_name = aws_ecs_cluster.this.name
 
   image             = local.image
-  command           = ["gunicorn", "config.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]
+  command           = ["gunicorn", "config.wsgi:application", "--worker-class", "gthread", "--workers", "3", "--threads", "8", "--max-requests", "2000", "--max-requests-jitter", "200", "-b", "0.0.0.0:8000"]
   container_port    = 8000
   target_group_arn  = module.alb_waf.api_target_group_arn
   health_check_host = local.health_check_host

@@ -91,3 +91,10 @@ def delete_special_answers(*, account_id, consent_kind: str) -> int:  # type: ig
         account_id=account_id, question__is_special=True, question__consent_kind=consent_kind
     ).delete()
     return deleted
+
+
+def invalidate_scoring_cache(*, account_ids) -> None:  # type: ignore[no-untyped-def]
+    """For bulk writers that bypass model signals (`bulk_create`/`update`): drop cached scoring vectors."""
+    from . import scoring_cache
+
+    scoring_cache.bump(account_ids)

@@ -32,11 +32,14 @@ List<Override> ov(
 
 void main() {
   testWidgets('settings home lists every entry', (t) async {
+    tall(t);
     await t.pumpWidget(host(const SettingsHomeScreen()));
     await t.pumpAndSettle();
     for (final s in [
       'Membership',
       'Privacy and consents',
+      'Notifications',
+      'Data saver',
       'Signed-in devices',
       'Safety centre',
       'Blocked people',
@@ -49,6 +52,14 @@ void main() {
   });
 
   group('privacy and consents', () {
+    testWidgets('choices never answered read "Not set"', (t) async {
+      tall(t);
+      final a = FakeAccount()..consentState = const ConsentSnapshot({});
+      await t.pumpWidget(host(const PrivacyScreen(), overrides: ov(a)));
+      await t.pumpAndSettle();
+      expect(find.text('Not set'), findsNWidgets(ConsentKind.values.length));
+    });
+
     testWidgets('lists consents and withdraws one with a tap', (t) async {
       tall(t);
       final a = FakeAccount();

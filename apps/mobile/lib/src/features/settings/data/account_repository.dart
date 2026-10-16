@@ -4,11 +4,13 @@ import 'package:marriage_connect/src/features/onboarding/data/auth_repository.da
 import 'package:marriage_connect/src/features/settings/domain/settings_models.dart';
 
 abstract class AccountRepository {
-  /// Current consents. The backend has no read endpoint yet (see report), so
-  /// the API implementation returns an empty ("not set") snapshot until the
-  /// member changes one; every change returns the full current map.
+  /// Current consent per kind (`GET /me/consents`). A kind the member never
+  /// answered is simply absent ("not set").
   Future<ConsentSnapshot> consents();
   Future<ConsentSnapshot> setConsent(ConsentKind kind, {required bool granted});
+
+  /// `POST /auth/logout`: revokes this device's session on the server.
+  Future<void> logout();
 
   Future<List<SessionInfo>> sessions();
   Future<void> revokeSession(String id);
@@ -30,8 +32,11 @@ abstract class AccountRepository {
 }
 
 class ApiAccountRepository implements AccountRepository {
-  ApiAccountRepository(this._dio);
+  ApiAccountRepository(this._dio, {this.appVersion = ''});
   final Dio _dio;
+
+  /// Sent with beta feedback so reports can be tied to a build.
+  final String appVersion;
 
   Future<T> _guard<T>(Future<T> Function() f) async {
     try {
@@ -42,7 +47,10 @@ class ApiAccountRepository implements AccountRepository {
   }
 
   @override
-  Future<ConsentSnapshot> consents() async => const ConsentSnapshot({});
+  Future<ConsentSnapshot> consents() => _guard(() async {
+        final r = await _dio.get<Map<String, dynamic>>('/me/consents');
+        return ConsentSnapshot.fromJson(r.data ?? const {});
+      });
 
   @override
   Future<ConsentSnapshot> setConsent(
@@ -65,6 +73,9 @@ class ApiAccountRepository implements AccountRepository {
         );
         return ConsentSnapshot.fromJson(r.data!);
       });
+
+  @override
+  Future<void> logout() => _guard(() => _dio.post<void>('/auth/logout'));
 
   @override
   Future<List<SessionInfo>> sessions() => _guard(() async {
@@ -117,6 +128,7 @@ class ApiAccountRepository implements AccountRepository {
             'message': message.trim(),
             if (rating != null) 'rating': rating,
             if (screen.isNotEmpty) 'screen': screen,
+            if (appVersion.isNotEmpty) 'app_version': appVersion,
           },
         ),
       );

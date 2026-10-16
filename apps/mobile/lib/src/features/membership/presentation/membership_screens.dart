@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/membership/application/member_failure_copy.dart';
 import 'package:marriage_connect/src/features/membership/application/membership_providers.dart';
 import 'package:marriage_connect/src/features/membership/application/paywall_controller.dart';
@@ -46,7 +46,7 @@ class TrialExplainerScreen extends ConsumerWidget {
     final ent = ref.watch(entitlementProvider);
     final trial = ref.watch(trialControllerProvider);
     final products = ref.watch(productsProvider);
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
 
     return Scaffold(
       appBar: AppBar(title: Text(l.memberTrialTitle)),
@@ -60,7 +60,7 @@ class TrialExplainerScreen extends ConsumerWidget {
             () => ref.read(entitlementProvider.notifier).refresh(),
           ),
           data: (e) => ListView(
-            padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+            padding: EdgeInsets.all(context.mc.space.md * 1.5),
             children: [
               Text(
                 l.memberTrialTitle,
@@ -76,18 +76,17 @@ class TrialExplainerScreen extends ConsumerWidget {
               ..._plans(context, l, products),
               if (trial.status == TrialStatus.failed && trial.failure != null)
                 Padding(
-                  padding: EdgeInsets.only(bottom: context.tokens.spacing),
+                  padding: EdgeInsets.only(bottom: context.mc.space.md),
                   child: Text(
                     memberFailureMessage(l, trial.failure!),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                    style: TextStyle(color: context.mc.colors.error),
                   ),
                 ),
               if (e.trialUsed)
                 Text(l.memberTrialAlreadyUsed)
               else
-                OutlinedButton(
+                McButton(
+                  label: l.memberTrialStart,
                   onPressed: trial.status == TrialStatus.starting
                       ? null
                       : () async {
@@ -101,12 +100,13 @@ class TrialExplainerScreen extends ConsumerWidget {
                             leaveScreen(context);
                           }
                         },
-                  child: Text(l.memberTrialStart),
+                  kind: McButtonKind.secondary,
                 ),
               gap,
-              OutlinedButton(
+              McButton(
+                label: l.memberTrialNotNow,
                 onPressed: () => leaveScreen(context),
-                child: Text(l.memberTrialNotNow),
+                kind: McButtonKind.secondary,
               ),
             ],
           ),
@@ -134,7 +134,7 @@ class TrialExplainerScreen extends ConsumerWidget {
             priceLabel(context, p),
           ),
         ),
-      SizedBox(height: context.tokens.spacing),
+      SizedBox(height: context.mc.space.md),
     ];
   }
 }
@@ -180,19 +180,24 @@ class _StatusBody extends ConsumerWidget {
       EntitlementState.member => l.memberStateMember,
       EntitlementState.expired => l.memberStateExpired,
     };
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
     return ListView(
-      padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+      padding: EdgeInsets.all(context.mc.space.md * 1.5),
       children: [
         Text(title, style: Theme.of(context).textTheme.headlineSmall),
         gap,
         switch (e.state) {
-          EntitlementState.trial when e.trialEndsAt != null =>
-            Text(l.memberTrialEnds(formatWhen(context, e.trialEndsAt!))),
-          EntitlementState.member when e.membershipEndsAt != null => Text(
-              l.memberMembershipEnds(formatWhen(context, e.membershipEndsAt!)),
+          EntitlementState.trial when e.trialEndsAt != null => MembershipBanner(
+              kind: MembershipBannerKind.trial,
+              date: formatDate(context, e.trialEndsAt!),
             ),
-          EntitlementState.expired => Text(l.memberExpiredBody),
+          EntitlementState.member when e.membershipEndsAt != null =>
+            MembershipBanner(
+              kind: MembershipBannerKind.active,
+              date: formatDate(context, e.membershipEndsAt!),
+            ),
+          EntitlementState.expired =>
+            const MembershipBanner(kind: MembershipBannerKind.ended),
           _ => Text(l.memberNoneBody),
         },
         if (e.isStoreSubscription) ...[
@@ -202,21 +207,24 @@ class _StatusBody extends ConsumerWidget {
         gap,
         if (!e.looksUnverified) ...[
           if (e.trialAvailable) ...[
-            OutlinedButton(
+            McButton(
+              label: l.memberGateStartTrial,
               onPressed: () => context.push(trialRoute),
-              child: Text(l.memberGateStartTrial),
+              kind: McButtonKind.secondary,
             ),
             gap,
           ],
-          OutlinedButton(
+          McButton(
+            label: l.memberViewPlans,
             onPressed: () => context.push(paywallRoute),
-            child: Text(l.memberViewPlans),
+            kind: McButtonKind.secondary,
           ),
           gap,
         ],
-        OutlinedButton(
+        McButton(
+          label: l.memberManage,
           onPressed: () => _manage(context, ref, l, platform),
-          child: Text(l.memberManage),
+          kind: McButtonKind.secondary,
         ),
         const SizedBox(height: 4),
         Text(
@@ -258,7 +266,7 @@ class PaywallScreen extends ConsumerWidget {
     final products = ref.watch(productsProvider);
     final paywall = ref.watch(paywallControllerProvider);
     final platform = ref.watch(storePlatformProvider);
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
     ref.listen(paywallControllerProvider, (_, next) {
       if (next.status == PaywallStatus.success ||
           next.status == PaywallStatus.restored) {
@@ -282,7 +290,7 @@ class PaywallScreen extends ConsumerWidget {
             () => ref.invalidate(productsProvider),
           ),
           data: (list) => ListView(
-            padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+            padding: EdgeInsets.all(context.mc.space.md * 1.5),
             children: [
               Text(l.paywallIntro),
               gap,
@@ -301,17 +309,19 @@ class PaywallScreen extends ConsumerWidget {
                   ),
                   gap,
                 ],
-              OutlinedButton(
+              McButton(
+                label: l.paywallRestore,
                 onPressed: paywall.busy
                     ? null
                     : () =>
                         ref.read(paywallControllerProvider.notifier).restore(),
-                child: Text(l.paywallRestore),
+                kind: McButtonKind.secondary,
               ),
               gap,
-              OutlinedButton(
+              McButton(
+                label: l.paywallNotNow,
                 onPressed: () => leaveScreen(context),
-                child: Text(l.paywallNotNow),
+                kind: McButtonKind.secondary,
               ),
             ],
           ),
@@ -344,28 +354,26 @@ class _PlanCard extends StatelessWidget {
         : l.paywallRenewalAndroid(period, price);
     final cancel =
         platform == 'ios' ? l.paywallCancelIos : l.paywallCancelAndroid;
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(context.tokens.spacing),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l.paywallProductTitle(period),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Text(l.paywallPrice(price, period)),
-            SizedBox(height: context.tokens.spacing / 2),
-            Text(renewal, style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 4),
-            Text(cancel, style: Theme.of(context).textTheme.bodySmall),
-            SizedBox(height: context.tokens.spacing),
-            OutlinedButton(
-              onPressed: busy ? null : onBuy,
-              child: Text(l.paywallSubscribe(price)),
-            ),
-          ],
-        ),
+    return McCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l.paywallProductTitle(period),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          Text(l.paywallPrice(price, period)),
+          SizedBox(height: context.mc.space.md / 2),
+          Text(renewal, style: Theme.of(context).textTheme.bodySmall),
+          const SizedBox(height: 4),
+          Text(cancel, style: Theme.of(context).textTheme.bodySmall),
+          SizedBox(height: context.mc.space.md),
+          McButton(
+            label: l.paywallSubscribe(price),
+            onPressed: busy ? null : onBuy,
+            kind: McButtonKind.secondary,
+          ),
+        ],
       ),
     );
   }
@@ -393,7 +401,7 @@ class _StatusLine extends StatelessWidget {
     };
     if (text == null) return const SizedBox.shrink();
     return Padding(
-      padding: EdgeInsets.only(bottom: context.tokens.spacing),
+      padding: EdgeInsets.only(bottom: context.mc.space.md),
       child: Semantics(liveRegion: true, child: Text(text)),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_controller.dart';
 import 'package:marriage_connect/src/features/profile/data/districts.dart';
 import 'package:marriage_connect/src/features/profile/data/profile_models.dart';
@@ -46,15 +47,12 @@ class _BasicsStepState extends ConsumerState<BasicsStep> with _StepSave {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextField(
+        McTextField(
           controller: _name,
           maxLength: 30,
           textCapitalization: TextCapitalization.words,
-          decoration: InputDecoration(
-            labelText: l.profileNameLabel,
-            helperText: l.profileNameHelp,
-            border: const OutlineInputBorder(),
-          ),
+          label: l.profileNameLabel,
+          helper: l.profileNameHelp,
           onChanged: (_) => setState(() {}),
         ),
         const SizedBox(height: 16),
@@ -160,13 +158,10 @@ class _AboutStepState extends ConsumerState<AboutStep> with _StepSave {
           onChanged: (v) => setState(() => _edu = v),
         ),
         const SizedBox(height: 16),
-        TextField(
+        McTextField(
           controller: _job,
           maxLength: 60,
-          decoration: InputDecoration(
-            labelText: l.profileOccupationLabel,
-            border: const OutlineInputBorder(),
-          ),
+          label: l.profileOccupationLabel,
         ),
         const SizedBox(height: 8),
         MultiChoiceField(
@@ -192,7 +187,12 @@ class _AboutStepState extends ConsumerState<AboutStep> with _StepSave {
             if (ok && mounted) widget.onDone();
           },
         ),
-        TextButton(onPressed: widget.onDone, child: Text(l.profileSkip)),
+        McButton(
+          label: l.profileSkip,
+          onPressed: widget.onDone,
+          kind: McButtonKind.text,
+          expand: false,
+        ),
       ],
     );
   }
@@ -316,14 +316,11 @@ class _LocationStepState extends ConsumerState<LocationStep> with _StepSave {
         ),
         if (_district == abroadDistrict) ...[
           const SizedBox(height: 16),
-          TextField(
+          McTextField(
             controller: _country,
             maxLength: 2,
             textCapitalization: TextCapitalization.characters,
-            decoration: InputDecoration(
-              labelText: l.profileCountryLabel,
-              border: const OutlineInputBorder(),
-            ),
+            label: l.profileCountryLabel,
             onChanged: (_) => setState(() {}),
           ),
         ],
@@ -337,9 +334,11 @@ class _LocationStepState extends ConsumerState<LocationStep> with _StepSave {
           Row(
             children: [
               Expanded(child: Text(l.stateErrorBody)),
-              TextButton(
+              McButton(
+                label: l.retry,
                 onPressed: () => ref.invalidate(preferencesProvider),
-                child: Text(l.retry),
+                kind: McButtonKind.text,
+                expand: false,
               ),
             ],
           )

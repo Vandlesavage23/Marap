@@ -99,7 +99,7 @@ languages other than English (strings must still be externalised); video calls.
 
 | Process | Command | Purpose |
 | --- | --- | --- |
-| `api` | `gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker` | REST API, admin portal, web checkout (host-based routing) |
+| `api` | `gunicorn config.wsgi:application --worker-class gthread --workers 3 --threads 8` (REST is synchronous Django; under ASGI every sync view runs on one thread per worker — measured, see docs/perf/load-local.md) | REST API, admin portal, web checkout (host-based routing) |
 | `ws` | `daphne config.asgi:application` (or uvicorn) | WebSocket chat via Channels |
 | `worker` | `celery -A config worker -Q default,media,billing,notify` | Async jobs |
 | `beat` | `celery -A config beat` | Scheduled jobs (expiries, reconciliation, cleanup) |

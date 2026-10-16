@@ -1,0 +1,4 @@
+// Flavor `staging` (mirrors android/app/build.gradle.kts).
+PRODUCT_BUNDLE_IDENTIFIER = ug.marriageconnect.app.staging
+APP_DISPLAY_NAME = MC Staging
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-staging

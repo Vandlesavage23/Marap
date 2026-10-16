@@ -1,6 +1,7 @@
 """Discovery orchestration (Bible §10.6). Hard filter (profiles.search) → deal-breakers → score →
 re-rank → explain → snapshot; pages are served from a signed, 30-minute cursor."""
 
+import hashlib
 import json
 import uuid
 from dataclasses import dataclass
@@ -89,13 +90,22 @@ def active_model() -> ModelVersion:
     )
 
 
-def build_ranked_pool(
-    viewer: "Account", *, now: datetime | None = None
-) -> tuple[list[RankedEntry], str]:
-    now = now or timezone.now()
-    ctx = profile_selectors.viewer_context_for(viewer)
-    if ctx is None:
-        raise ProfileIncomplete("Finish your profile to start discovering matches.")
+@dataclass(frozen=True)
+class PoolEntry:
+    """A hard-filtered, deal-breaker-checked, scored candidate, BEFORE exposure caps / boost / interleave."""
+
+    account_id: uuid.UUID
+    profile_id: uuid.UUID
+    district: str
+    created_at: datetime
+    score: float
+    why: list[str]
+    discuss: list[str]
+
+
+def _score_pool(viewer: "Account", ctx: Any, *, now: datetime) -> list[PoolEntry]:
+    """Steps 1-2 of §10.6: hard filter (capped at DISCOVERY_POOL_SIZE rows, most recently seen first),
+    deal-breakers both ways, compatibility score + explanation."""
     rows = profile_search.hard_filter_candidates(
         ctx,
         exclude_account_ids=_exclusions(viewer.id, now, include_recent=True),
@@ -113,8 +123,7 @@ def build_ranked_pool(
     answers = questionnaire_selectors.answers_for_scoring([viewer.id, *ids])
     mine = answers.get(viewer.id, {})
 
-    scored: list[ranking.Scored] = []
-    explanations: dict[uuid.UUID, tuple[list[str], list[str]]] = {}
+    pool: list[PoolEntry] = []
     for r in rows:
         theirs = answers.get(r["account_id"], {})
         thr = settings.DEALBREAKER_MIN_SIMILARITY
@@ -124,17 +133,27 @@ def build_ranked_pool(
         ):
             continue
         pair = scoring.pair_score(mine, theirs)
-        scored.append(
-            ranking.Scored(
+        why, discuss = explain.explain(pair.dimensions) if pair else ([], [])
+        pool.append(
+            PoolEntry(
                 r["account_id"],
                 r["id"],
                 r["district"],
                 r["created_at"],
                 pair.score if pair else 0.0,
+                why,
+                discuss,
             )
         )
-        explanations[r["account_id"]] = explain.explain(pair.dimensions) if pair else ([], [])
+    return pool
 
+
+def _rank_pool(pool: list[PoolEntry], *, now: datetime) -> list[RankedEntry]:
+    """Steps 3-4: exposure cap (fresh per call), new-profile boost, district interleave."""
+    scored = [
+        ranking.Scored(e.account_id, e.profile_id, e.district, e.created_at, e.score) for e in pool
+    ]
+    explanations = {e.account_id: (e.why, e.discuss) for e in pool}
     ordered = ranking.rerank(
         scored,
         exposure_today=exposure_today([s.account_id for s in scored], now),
@@ -144,13 +163,89 @@ def build_ranked_pool(
         boost_days=settings.NEW_PROFILE_BOOST_DAYS,
         run_max=settings.DISTRICT_RUN_MAX,
     )
-    entries = [
+    return [
         RankedEntry(
             str(s.profile_id), str(s.account_id), round(final, 4), *explanations[s.account_id]
         )
         for s, final in ordered
     ]
-    return entries, active_model().name
+
+
+def build_ranked_pool(
+    viewer: "Account", *, now: datetime | None = None
+) -> tuple[list[RankedEntry], str]:
+    """Full rebuild (no reuse): the reference behaviour that the cached first page must reproduce."""
+    now = now or timezone.now()
+    ctx = profile_selectors.viewer_context_for(viewer)
+    if ctx is None:
+        raise ProfileIncomplete("Finish your profile to start discovering matches.")
+    return _rank_pool(_score_pool(viewer, ctx, now=now), now=now), active_model().name
+
+
+# ---- first-page scored-pool reuse -------------------------------------------------------------------
+# Same member re-opening discovery within DISCOVERY_SNAPSHOT_REUSE_SECONDS reuses the *scored* pool (the
+# expensive part: answers + pair scores) but everything member-visible and safety-relevant is recomputed:
+# blocks / pending interests / matches / not_relevant / recent impressions are re-applied from the database,
+# and exposure caps + boost + interleave re-run. The key embeds the viewer's search context and answers
+# version, so editing profile, preferences or answers can never see a stale pool.
+def _pool_key(viewer_id: uuid.UUID, ctx: Any) -> str:
+    fingerprint = repr(
+        (
+            ctx,
+            questionnaire_selectors.answers_version(viewer_id),
+            settings.DISCOVERY_POOL_SIZE,
+            settings.DEALBREAKER_MIN_SIMILARITY,
+            settings.MARRIED_PROFILES_ENABLED,
+        )
+    )
+    digest = hashlib.sha1(fingerprint.encode(), usedforsecurity=False).hexdigest()[:20]
+    return f"disc:pool:{viewer_id}:{digest}"
+
+
+def _load_pool(key: str) -> tuple[list[PoolEntry], str] | None:
+    raw = get_redis().get(key)
+    if raw is None:
+        return None
+    data = json.loads(raw)
+    return [
+        PoolEntry(
+            uuid.UUID(e[0]), uuid.UUID(e[1]), e[2], datetime.fromisoformat(e[3]), e[4], e[5], e[6]
+        )
+        for e in data["pool"]
+    ], data["model"]
+
+
+def _save_pool(key: str, pool: list[PoolEntry], model: str) -> None:
+    payload = json.dumps(
+        {
+            "model": model,
+            "pool": [
+                [str(e.account_id), str(e.profile_id), e.district, e.created_at.isoformat(),
+                 e.score, e.why, e.discuss]
+                for e in pool
+            ],
+        }
+    )  # fmt: skip
+    get_redis().set(key, payload, ex=settings.DISCOVERY_SNAPSHOT_REUSE_SECONDS)
+
+
+def first_page_pool(viewer: "Account", *, now: datetime) -> tuple[list[RankedEntry], str]:
+    ctx = profile_selectors.viewer_context_for(viewer)
+    if ctx is None:
+        raise ProfileIncomplete("Finish your profile to start discovering matches.")
+    ttl = settings.DISCOVERY_SNAPSHOT_REUSE_SECONDS
+    key = _pool_key(viewer.id, ctx) if ttl > 0 else ""
+    if key and (cached := _load_pool(key)) is not None:
+        pool, model = cached
+        excluded = _exclusions(viewer.id, now, include_recent=True)
+        pool = [e for e in pool if e.account_id not in excluded]
+        if pool:
+            return _rank_pool(pool, now=now), model
+    pool = _score_pool(viewer, ctx, now=now)
+    model = active_model().name
+    if key:
+        _save_pool(key, pool, model)
+    return _rank_pool(pool, now=now), model
 
 
 def _store_snapshot(viewer_id: uuid.UUID, entries: list[RankedEntry], model: str) -> str:
@@ -210,15 +305,18 @@ def next_candidates(
     if cursor:
         raw_entries, model, offset, token = _read_cursor(viewer.id, cursor)
     else:
-        entries, model = build_ranked_pool(viewer, now=now)
+        entries, model = first_page_pool(viewer, now=now)
         raw_entries = [e.__dict__ for e in entries]
         token, offset = _store_snapshot(viewer.id, entries, model), 0
 
     window = raw_entries[offset : offset + limit]
-    gone = safety_selectors.blocked_either_way_ids(
-        viewer.id
-    ) | interest_selectors.pending_counterpart_ids(viewer.id)
-    window = [e for e in window if uuid.UUID(e["account_id"]) not in gone]  # re-check at serve time
+    if (
+        cursor
+    ):  # a page-1 pool was filtered against blocks/pending milliseconds ago; later pages re-check
+        gone = safety_selectors.blocked_either_way_ids(
+            viewer.id
+        ) | interest_selectors.pending_counterpart_ids(viewer.id)
+        window = [e for e in window if uuid.UUID(e["account_id"]) not in gone]
     cards = profile_selectors.card_data([uuid.UUID(e["profile_id"]) for e in window], viewer)
 
     items: list[dict[str, Any]] = []

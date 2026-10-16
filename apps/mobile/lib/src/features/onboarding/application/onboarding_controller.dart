@@ -24,6 +24,15 @@ class OnboardingState {
 
   bool get loading => status == OnboardingStatus.loading;
 
+  /// The server refused the sign-up for a missing/invalid beta invite code
+  /// (422 `validation_error` carrying an `invite_code` field).
+  bool get inviteRejected {
+    final f = failure;
+    return f != null &&
+        f.code == 'validation_error' &&
+        f.extra.containsKey('invite_code');
+  }
+
   OnboardingState copyWith({
     OnboardingStatus? status,
     String? phone,
@@ -74,9 +83,13 @@ class OnboardingController extends Notifier<OnboardingState> {
     return ok ?? false;
   }
 
-  Future<bool> submitCode(String code) async {
+  Future<bool> submitCode(String code, {String? inviteCode}) async {
     final ok = await _run(() async {
-      await _repo.verifyOtp(phone: state.phone, code: code);
+      await _repo.verifyOtp(
+        phone: state.phone,
+        code: code,
+        inviteCode: inviteCode,
+      );
       return true;
     });
     return ok ?? false;

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/network/api_client.dart';
@@ -13,7 +14,13 @@ abstract class AuthRepository {
   Future<void> startOtp(String phone);
 
   /// Returns normally on success (tokens are stored); throws [AppFailure].
-  Future<void> verifyOtp({required String phone, required String code});
+  ///
+  /// [inviteCode] is only sent when non-empty (closed beta, BETA_INVITE_REQUIRED).
+  Future<void> verifyOtp({
+    required String phone,
+    required String code,
+    String? inviteCode,
+  });
   Future<void> recordConsents({required Map<String, bool> granted});
 }
 
@@ -42,19 +49,26 @@ class ApiAuthRepository implements AuthRepository {
       );
 
   @override
-  Future<void> verifyOtp({required String phone, required String code}) =>
+  Future<void> verifyOtp({
+    required String phone,
+    required String code,
+    String? inviteCode,
+  }) =>
       _guard(() async {
         final r = await _dio.post<Map<String, dynamic>>(
           '/auth/otp/verify',
           data: {
             'phone': phone,
             'code': code,
+            if (inviteCode != null && inviteCode.trim().isNotEmpty)
+              'invite_code': inviteCode.trim(),
             'device': {
               'install_id': await _installId(),
-              'platform': const String.fromEnvironment(
-                'MC_PLATFORM',
-                defaultValue: 'android',
-              ),
+              // The server sells and pushes per store platform; sending
+              // 'android' from an iPhone would register the wrong channel.
+              'platform': defaultTargetPlatform == TargetPlatform.iOS
+                  ? 'ios'
+                  : 'android',
             },
           },
           options: Options(extra: {'skipAuth': true}),

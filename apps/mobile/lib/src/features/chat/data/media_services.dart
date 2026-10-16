@@ -56,6 +56,23 @@ abstract class MediaUploader {
   Future<String> upload({required String purpose, required PickedMedia file});
 }
 
+/// Keeps a queued photo / voice note on durable storage (the recorder and
+/// picker write to the OS cache, which can be cleared at any time) and removes
+/// it once it is delivered or discarded.
+abstract class MediaStash {
+  Future<PickedMedia> keep(PickedMedia file);
+  Future<void> release(String path);
+}
+
+/// For tests: leaves the file where it is.
+class PassthroughMediaStash implements MediaStash {
+  const PassthroughMediaStash();
+  @override
+  Future<PickedMedia> keep(PickedMedia file) async => file;
+  @override
+  Future<void> release(String path) async {}
+}
+
 // ---------------------------------------------------------------- uploader
 
 /// `POST /media/uploads` → S3 presigned POST → `POST /media/<id>/complete` →
@@ -209,4 +226,40 @@ class JustAudioVoicePlayer implements VoicePlayer {
 
   @override
   Future<void> dispose() => _player.dispose();
+}
+
+/// Copies queued media into the app's own documents folder (not the OS cache).
+class DocumentsMediaStash implements MediaStash {
+  const DocumentsMediaStash();
+
+  @override
+  Future<PickedMedia> keep(PickedMedia file) async {
+    try {
+      final docs = await getApplicationDocumentsDirectory();
+      final dir = Directory('${docs.path}/outbox_media');
+      if (!dir.existsSync()) await dir.create(recursive: true);
+      final dot = file.path.lastIndexOf('.');
+      final ext = dot < 0 ? '' : file.path.substring(dot);
+      final copy =
+          await File(file.path).copy('${dir.path}/${const Uuid().v4()}$ext');
+      return PickedMedia(
+        path: copy.path,
+        mime: file.mime,
+        bytes: file.bytes,
+        durationMs: file.durationMs,
+      );
+    } on Object {
+      return file; // keep the original rather than lose the message
+    }
+  }
+
+  @override
+  Future<void> release(String path) async {
+    try {
+      final f = File(path);
+      if (f.existsSync() && path.contains('/outbox_media/')) await f.delete();
+    } on FileSystemException {
+      // best effort
+    }
+  }
 }

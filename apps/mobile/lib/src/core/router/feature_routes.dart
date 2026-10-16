@@ -6,6 +6,7 @@ import 'package:marriage_connect/src/features/interests/presentation/interest_de
 import 'package:marriage_connect/src/features/interests/presentation/interests_screen.dart';
 import 'package:marriage_connect/src/features/matches/presentation/matches_screen.dart';
 import 'package:marriage_connect/src/features/membership/membership_routes.dart';
+import 'package:marriage_connect/src/features/notifications/notifications_routes.dart';
 import 'package:marriage_connect/src/features/profile/presentation/profile_routes.dart';
 import 'package:marriage_connect/src/features/questionnaire/presentation/questionnaire_routes.dart';
 import 'package:marriage_connect/src/features/verification/presentation/verification_routes.dart';
@@ -16,6 +17,7 @@ List<RouteBase> featureRoutes() => [
       ...profileTrackRoutes,
       ...socialTrackRoutes,
       ...membershipTrackRoutes,
+      ...notificationsTrackRoutes,
     ];
 
 /// verification, profile builder, questionnaire — owned by the profile track.
@@ -62,3 +64,6 @@ final List<RouteBase> socialTrackRoutes = [
 
 /// membership, safety, settings, beta feedback — owned by the membership track.
 final List<RouteBase> membershipTrackRoutes = buildMembershipTrackRoutes();
+
+/// notifications inbox — owned by the push/notifications track.
+final List<RouteBase> notificationsTrackRoutes = buildNotificationsRoutes();

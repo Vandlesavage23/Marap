@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
 import 'package:marriage_connect/src/features/interests/presentation/interests_screen.dart';
@@ -95,13 +96,9 @@ class _Detail extends ConsumerWidget {
           style: t.textTheme.labelLarge,
         ),
         const SizedBox(height: 4),
-        Container(
+        McCard(
           key: const Key('interest-text'),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: t.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(12),
-          ),
+          color: context.mc.colors.surfaceVariant,
           child: Text(interest.text),
         ),
         if (interest.expiresAt != null) ...[
@@ -115,18 +112,16 @@ class _Detail extends ConsumerWidget {
           const SizedBox(height: 12),
           Text(
             socialFailureMessage(l, failure),
-            style: TextStyle(color: t.colorScheme.error),
+            style: TextStyle(color: context.mc.colors.error),
           ),
         ],
         const SizedBox(height: 16),
-        FilledButton(
-          onPressed: busy ? null : accept,
-          child: Text(l.interestAccept),
-        ),
+        McButton(label: l.interestAccept, onPressed: busy ? null : accept),
         const SizedBox(height: 8),
-        OutlinedButton(
+        McButton(
+          label: l.interestPass,
           onPressed: busy ? null : pass,
-          child: Text(l.interestPass),
+          kind: McButtonKind.secondary,
         ),
       ],
     );

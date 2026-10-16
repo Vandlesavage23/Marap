@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/profile/application/description_controller.dart';
 import 'package:marriage_connect/src/features/profile/data/profile_models.dart';
 import 'package:marriage_connect/src/features/profile/presentation/profile_widgets.dart';
@@ -51,16 +51,12 @@ class _DescriptionStepState extends ConsumerState<DescriptionStep> {
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 12),
-            TextField(
+            McTextField(
               controller: _text,
               minLines: 6,
               maxLines: 12,
               textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(
-                labelText: l.profileDescLabel,
-                border: const OutlineInputBorder(),
-                alignLabelWithHint: true,
-              ),
+              label: l.profileDescLabel,
               onChanged: (_) => setState(() {}),
             ),
             const SizedBox(height: 8),

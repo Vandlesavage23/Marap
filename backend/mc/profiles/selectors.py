@@ -67,24 +67,44 @@ def viewer_context_for(account):  # type: ignore[no-untyped-def]
 
 def card_data(profile_ids, viewer) -> dict[uuid.UUID, dict[str, object]]:  # type: ignore[no-untyped-def]
     """CandidateCard basics (no numeric score) for profiles that are still live+active, keyed by profile id.
-    Includes signed photo URLs for approved photos only."""
+    Includes signed photo URLs for approved photos only.
+
+    Batched: one query for profiles, one for all their approved photos (+media), and the viewer-side photo
+    policy facts (blocks, gender, `browse`) read once. A photo the batched check does not clear falls back to
+    the full per-media policy (`media.selectors.signed_url`), so interest/match grants still apply."""
+    from collections import defaultdict
+
     from mc.media import selectors as media_selectors
 
     from .constants import MARITAL_LABELS
+    from .models import Photo
+    from .policies import BatchedProfileAccess
 
     out: dict[uuid.UUID, dict[str, object]] = {}
-    qs = Profile.objects.filter(
-        id__in=list(profile_ids), status=Profile.Status.LIVE, account__status="active"
+    profiles = list(
+        Profile.objects.filter(
+            id__in=list(profile_ids), status=Profile.Status.LIVE, account__status="active"
+        )
     )
-    for p in qs:
-        photos = [
-            {
-                "url": media_selectors.signed_url(ph.media, viewer),
-                "w": ph.media.width,
-                "h": ph.media.height,
-            }
-            for ph in approved_photos(p)
-        ]
+    if not profiles:
+        return out
+    photos_by_profile: dict[uuid.UUID, list[Photo]] = defaultdict(list)
+    for ph in (
+        Photo.objects.filter(profile_id__in=[p.id for p in profiles], moderation_status="approved")
+        .select_related("media")
+        .order_by("profile_id", "position")
+    ):
+        photos_by_profile[ph.profile_id].append(ph)
+    access = BatchedProfileAccess(viewer)
+    for p in profiles:
+        photos = []
+        for ph in photos_by_profile.get(p.id, []):
+            url = (
+                media_selectors.signed_url_prechecked(ph.media)
+                if access.can_view(p)
+                else media_selectors.signed_url(ph.media, viewer)
+            )
+            photos.append({"url": url, "w": ph.media.width, "h": ph.media.height})
         out[p.id] = {
             "profile_id": str(p.id),
             "display_name": p.display_name,

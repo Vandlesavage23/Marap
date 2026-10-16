@@ -3657,6 +3657,414 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pick up where you left off.'**
   String get homeIntro;
+
+  /// Spoken and shown while a button or area is busy.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get kitLoading;
+
+  /// Short label on the verification badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get kitVerified;
+
+  /// Screen reader label for the verification badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Identity verified'**
+  String get kitVerifiedSemantics;
+
+  /// Heading on a safety tip card.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety tip'**
+  String get kitSafetyTipLabel;
+
+  /// Screen reader label for the close button on a bottom sheet.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get kitCloseSheet;
+
+  /// Appended to a field label when the field is optional.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get kitFieldOptional;
+
+  /// Membership banner title during the 24-hour trial.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on your free trial'**
+  String get kitMembershipTrialTitle;
+
+  /// Membership banner body during the trial. No countdown, no urgency.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything is included until {date}. You haven\'t given payment details and nothing is charged automatically.'**
+  String kitMembershipTrialBody(String date);
+
+  /// Membership banner title for paying members.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership is active'**
+  String get kitMembershipActiveTitle;
+
+  /// Membership banner body for paying members.
+  ///
+  /// In en, this message translates to:
+  /// **'Active until {date}.'**
+  String kitMembershipActiveBody(String date);
+
+  /// Membership banner title after membership/trial ended.
+  ///
+  /// In en, this message translates to:
+  /// **'Your membership has ended'**
+  String get kitMembershipEndedTitle;
+
+  /// Membership banner body after membership ended. Calm, not pushy.
+  ///
+  /// In en, this message translates to:
+  /// **'You can still read your conversations. Join again whenever you\'re ready.'**
+  String get kitMembershipEndedBody;
+
+  /// No description provided for @offlineMediaPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get offlineMediaPhoto;
+
+  /// No description provided for @offlineMediaVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note'**
+  String get offlineMediaVoice;
+
+  /// No description provided for @offlineMediaQueued.
+  ///
+  /// In en, this message translates to:
+  /// **'It hasn\'t sent yet. We\'ll keep trying and send it as soon as you\'re back online.'**
+  String get offlineMediaQueued;
+
+  /// No description provided for @dataSaverTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver'**
+  String get dataSaverTile;
+
+  /// No description provided for @dataSaverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver'**
+  String get dataSaverTitle;
+
+  /// No description provided for @dataSaverIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver uses less mobile data. Photos load small first, extra photos load only when you tap them, and voice notes download only when you press play.'**
+  String get dataSaverIntro;
+
+  /// No description provided for @dataSaverToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Always use data saver'**
+  String get dataSaverToggle;
+
+  /// No description provided for @dataSaverToggleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies on Wi-Fi and mobile data.'**
+  String get dataSaverToggleBody;
+
+  /// No description provided for @dataSaverAutoToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use data saver on mobile data'**
+  String get dataSaverAutoToggle;
+
+  /// No description provided for @dataSaverAutoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns data saver on by itself whenever you\'re not on Wi-Fi.'**
+  String get dataSaverAutoBody;
+
+  /// No description provided for @dataSaverActiveNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver is on right now.'**
+  String get dataSaverActiveNow;
+
+  /// No description provided for @dataSaverInactiveNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Data saver is off right now.'**
+  String get dataSaverInactiveNow;
+
+  /// No description provided for @pushTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get pushTile;
+
+  /// No description provided for @pushTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get pushTitle;
+
+  /// No description provided for @pushIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'You choose whether this phone gets notifications. We\'ll tell you when someone is interested in you, when you match, and when you get a message.'**
+  String get pushIntro;
+
+  /// No description provided for @pushToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me on this phone'**
+  String get pushToggle;
+
+  /// No description provided for @pushToggleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are generic. They never show names, photos or message text. You can turn them off at any time.'**
+  String get pushToggleBody;
+
+  /// No description provided for @pushPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are blocked for this app in your phone\'s settings. Turn them on there, then come back to this switch.'**
+  String get pushPermissionDenied;
+
+  /// No description provided for @pushUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications aren\'t available in this version of the app.'**
+  String get pushUnavailable;
+
+  /// No description provided for @pushFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t change this just now. Please check your connection and try again.'**
+  String get pushFailed;
+
+  /// No description provided for @pushOnConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are on for this phone.'**
+  String get pushOnConfirmation;
+
+  /// No description provided for @pushOffConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off for this phone.'**
+  String get pushOffConfirmation;
+
+  /// No description provided for @notifTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifTitle;
+
+  /// No description provided for @notifMarkAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all as read'**
+  String get notifMarkAllRead;
+
+  /// No description provided for @notifEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing new'**
+  String get notifEmptyTitle;
+
+  /// No description provided for @notifEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'When something happens on your account, you\'ll see it here.'**
+  String get notifEmptyBody;
+
+  /// No description provided for @notifLoadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show older'**
+  String get notifLoadMore;
+
+  /// No description provided for @notifMarkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t update your notifications. Please try again.'**
+  String get notifMarkFailed;
+
+  /// No description provided for @notifUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get notifUnread;
+
+  /// No description provided for @notifTypeInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Someone is interested in you'**
+  String get notifTypeInterest;
+
+  /// No description provided for @notifTypeMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a new match'**
+  String get notifTypeMatch;
+
+  /// No description provided for @notifTypeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a new message'**
+  String get notifTypeMessage;
+
+  /// No description provided for @notifTypeTrialEnding.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial ends soon'**
+  String get notifTypeTrialEnding;
+
+  /// No description provided for @notifTypeTrialEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Your free trial has ended'**
+  String get notifTypeTrialEnded;
+
+  /// No description provided for @notifTypeWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Please review our community guidelines'**
+  String get notifTypeWarning;
+
+  /// No description provided for @notifTypeAppeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Your appeal has been reviewed'**
+  String get notifTypeAppeal;
+
+  /// No description provided for @notifTypeExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Your data export is ready'**
+  String get notifTypeExport;
+
+  /// No description provided for @notifTypeVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'Your verification has been reviewed'**
+  String get notifTypeVerification;
+
+  /// No description provided for @notifTypeDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'New sign-in on your account'**
+  String get notifTypeDevice;
+
+  /// No description provided for @notifTypeOther.
+  ///
+  /// In en, this message translates to:
+  /// **'You have a new notification'**
+  String get notifTypeOther;
+
+  /// No description provided for @adoptMembershipSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership'**
+  String get adoptMembershipSheetTitle;
+
+  /// No description provided for @adoptSettingsAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get adoptSettingsAccount;
+
+  /// No description provided for @adoptSignOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get adoptSignOut;
+
+  /// No description provided for @adoptSignOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out of this phone?'**
+  String get adoptSignOutTitle;
+
+  /// No description provided for @adoptSignOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need your phone number and a new code to sign in again. Saved matches and messages on this phone are removed; your account and conversations stay safe on our servers.'**
+  String get adoptSignOutBody;
+
+  /// No description provided for @adoptSignOutUnsent.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{You have 1 message that has not been sent yet. If you sign out now it will be lost.} other{You have {count} messages that have not been sent yet. If you sign out now they will be lost.}}'**
+  String adoptSignOutUnsent(int count);
+
+  /// No description provided for @adoptSignOutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get adoptSignOutConfirm;
+
+  /// No description provided for @adoptSignOutCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay signed in'**
+  String get adoptSignOutCancel;
+
+  /// No description provided for @adoptInviteToggle.
+  ///
+  /// In en, this message translates to:
+  /// **'I have an invite code'**
+  String get adoptInviteToggle;
+
+  /// No description provided for @adoptInviteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Invite code'**
+  String get adoptInviteLabel;
+
+  /// No description provided for @adoptInviteHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Only needed if you were given one.'**
+  String get adoptInviteHelp;
+
+  /// No description provided for @adoptInviteNeeded.
+  ///
+  /// In en, this message translates to:
+  /// **'This beta needs a valid invite code. Enter the one you were given and try again.'**
+  String get adoptInviteNeeded;
+
+  /// No description provided for @adoptMatchPreviewNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New message'**
+  String get adoptMatchPreviewNew;
+
+  /// No description provided for @adoptMatchPreviewPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get adoptMatchPreviewPhoto;
+
+  /// No description provided for @adoptMatchPreviewVoice.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice note'**
+  String get adoptMatchPreviewVoice;
+
+  /// No description provided for @adoptMatchUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unread message} other{{count} unread messages}}'**
+  String adoptMatchUnread(int count);
 }
 
 class _AppLocalizationsDelegate

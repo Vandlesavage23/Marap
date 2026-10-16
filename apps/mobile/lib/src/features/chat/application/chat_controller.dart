@@ -316,12 +316,32 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
         cur.copyWith(messages: _merge(cur.messages, [m]), uploading: false),
       );
     } on AppFailure catch (e) {
-      // A definitive refusal ends this action; a transient one can be retried
-      // with the same ids.
-      if (!e.retryable) {
-        _mediaClientId = null;
-        _mediaId = null;
+      if (e.retryable) {
+        // Transient (offline, server busy): hand the action to the durable
+        // outbox with the SAME ids. It resumes after reconnect without
+        // uploading twice or sending a duplicate (MC-081).
+        try {
+          await ref.read(outboxRepositoryProvider).enqueueMedia(
+                matchId: arg,
+                kind: kind,
+                file: file,
+                mediaId: _mediaId,
+                clientMsgId: clientId,
+              );
+          unawaited(ref.read(chatHubProvider).flush());
+        } on Object {
+          // The queue itself failed (disk full): keep the in-memory ids so a
+          // manual retry of the same file is still duplicate-free.
+          if (!_alive) return;
+          final cur = state.valueOrNull ?? s;
+          state = AsyncData(cur.copyWith(uploading: false, mediaFailure: e));
+          return;
+        }
       }
+      // A definitive refusal ends this action; a queued one now belongs to the
+      // outbox.
+      _mediaClientId = null;
+      _mediaId = null;
       if (!_alive) return;
       final cur = state.valueOrNull ?? s;
       state = AsyncData(cur.copyWith(uploading: false, mediaFailure: e));

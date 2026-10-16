@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/membership/application/member_failure_copy.dart';
 import 'package:marriage_connect/src/features/membership/presentation/entitlement_gate.dart';
 import 'package:marriage_connect/src/features/membership/presentation/membership_format.dart';
@@ -73,13 +73,17 @@ Future<bool> confirmAndBlock(
       title: Text(l.safetyBlockTitle),
       content: Text(l.safetyBlockBody),
       actions: [
-        TextButton(
+        McButton(
+          label: l.safetyBlockCancel,
           onPressed: () => Navigator.of(ctx).pop(false),
-          child: Text(l.safetyBlockCancel),
+          kind: McButtonKind.text,
+          expand: false,
         ),
-        TextButton(
+        McButton(
+          label: l.safetyBlockConfirm,
           onPressed: () => Navigator.of(ctx).pop(true),
-          child: Text(l.safetyBlockConfirm),
+          kind: McButtonKind.destructive,
+          expand: false,
         ),
       ],
     ),
@@ -166,7 +170,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
     final l = AppLocalizations.of(context);
     final s = ref.watch(reportControllerProvider);
     final c = ref.read(reportControllerProvider.notifier);
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
 
     if (s.status == SubmitStatus.done) {
       return Scaffold(
@@ -174,7 +178,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
         body: SafeArea(
           child: Center(
             child: Padding(
-              padding: EdgeInsets.all(context.tokens.spacing * 2),
+              padding: EdgeInsets.all(context.mc.space.md * 2),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -188,9 +192,10 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                     ),
                   ),
                   gap,
-                  OutlinedButton(
+                  McButton(
+                    label: l.continueLabel,
                     onPressed: () => leaveScreen(context),
-                    child: Text(l.continueLabel),
+                    kind: McButtonKind.secondary,
                   ),
                 ],
               ),
@@ -204,7 +209,7 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
       appBar: AppBar(title: Text(l.safetyReportTitle)),
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+          padding: EdgeInsets.all(context.mc.space.md * 1.5),
           children: [
             Text(
               l.safetyReportWhy,
@@ -226,32 +231,30 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
               ),
             ),
             gap,
-            TextField(
+            McTextField(
               controller: _text,
               onChanged: c.setText,
               maxLength: 1200,
               maxLines: 4,
-              decoration: InputDecoration(
-                labelText: l.safetyReportDetails,
-                helperText: l.safetyReportDetailsNote,
-                helperMaxLines: 2,
-              ),
+              minLines: 4,
+              label: l.safetyReportDetails,
+              helper: l.safetyReportDetailsNote,
             ),
-            CheckboxListTile(
+            ConsentTile(
               value: s.alsoBlock,
-              onChanged: (v) => c.setAlsoBlock(value: v ?? false),
-              title: Text(l.safetyReportAlsoBlock),
-              controlAffinity: ListTileControlAffinity.leading,
+              onChanged: (v) => c.setAlsoBlock(value: v),
+              title: l.safetyReportAlsoBlock,
             ),
             if (s.status == SubmitStatus.failed && s.failure != null)
               Padding(
-                padding: EdgeInsets.only(bottom: context.tokens.spacing),
+                padding: EdgeInsets.only(bottom: context.mc.space.md),
                 child: Text(
                   memberFailureMessage(l, s.failure!),
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(color: context.mc.colors.error),
                 ),
               ),
-            FilledButton(
+            McButton(
+              label: l.safetyReportSubmit,
               onPressed: s.canSubmit
                   ? () => c.submit(
                         profileId: widget.profileId,
@@ -259,7 +262,6 @@ class _ReportScreenState extends ConsumerState<ReportScreen> {
                         contextId: widget.contextId,
                       )
                   : null,
-              child: Text(l.safetyReportSubmit),
             ),
             gap,
             Text(
@@ -290,18 +292,19 @@ class SafetyCentreScreen extends ConsumerWidget {
           data: (sections) => sections.isEmpty
               ? EmptyState(body: l.safetyCentreEmpty)
               : ListView(
-                  padding: EdgeInsets.all(context.tokens.spacing),
+                  padding: EdgeInsets.all(context.mc.space.md),
                   children: [
                     for (final s in sections)
                       ExpansionTile(
                         title: Text(s.title),
                         subtitle: Text(s.summary),
-                        childrenPadding: EdgeInsets.all(context.tokens.spacing),
+                        childrenPadding: EdgeInsets.all(context.mc.space.md),
                         expandedCrossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           for (final p in s.points)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
+                              padding:
+                                  EdgeInsets.only(bottom: context.mc.space.xs),
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -344,7 +347,8 @@ class BlockedPeopleScreen extends ConsumerWidget {
                     for (final p in list)
                       ListTile(
                         title: Text(p.displayName),
-                        trailing: TextButton(
+                        trailing: McButton(
+                          label: l.safetyUnblock,
                           onPressed: () async {
                             final f = await ref
                                 .read(blockedControllerProvider.notifier)
@@ -360,7 +364,8 @@ class BlockedPeopleScreen extends ConsumerWidget {
                               ),
                             );
                           },
-                          child: Text(l.safetyUnblock),
+                          kind: McButtonKind.text,
+                          expand: false,
                         ),
                       ),
                   ],
@@ -392,7 +397,7 @@ class _AppealScreenState extends ConsumerState<AppealScreen> {
     final l = AppLocalizations.of(context);
     final enforcement = ref.watch(enforcementProvider);
     final appeal = ref.watch(appealControllerProvider);
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
     return Scaffold(
       appBar: AppBar(title: Text(l.safetyAppealTitle)),
       body: SafeArea(
@@ -404,7 +409,7 @@ class _AppealScreenState extends ConsumerState<AppealScreen> {
             if (appeal.status == SubmitStatus.done) {
               return Center(
                 child: Padding(
-                  padding: EdgeInsets.all(context.tokens.spacing * 2),
+                  padding: EdgeInsets.all(context.mc.space.md * 2),
                   child: Semantics(
                     liveRegion: true,
                     child: Text(
@@ -425,7 +430,7 @@ class _AppealScreenState extends ConsumerState<AppealScreen> {
                 (appeal.failure?.code == 'conflict' &&
                     appeal.status == SubmitStatus.failed);
             return ListView(
-              padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+              padding: EdgeInsets.all(context.mc.space.md * 1.5),
               children: [
                 Text(
                   decision,
@@ -437,28 +442,25 @@ class _AppealScreenState extends ConsumerState<AppealScreen> {
                 else ...[
                   Text(l.safetyAppealBody),
                   gap,
-                  TextField(
+                  McTextField(
                     controller: _text,
                     maxLength: 1000,
                     maxLines: 6,
+                    minLines: 3,
                     onChanged: (_) => setState(() {}),
-                    decoration: InputDecoration(
-                      hintText: l.safetyAppealHint,
-                      helperMaxLines: 2,
-                    ),
+                    label: l.safetyAppealHint,
                   ),
                   if (appeal.status == SubmitStatus.failed &&
                       appeal.failure != null)
                     Padding(
-                      padding: EdgeInsets.only(bottom: context.tokens.spacing),
+                      padding: EdgeInsets.only(bottom: context.mc.space.md),
                       child: Text(
                         memberFailureMessage(l, appeal.failure!),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
+                        style: TextStyle(color: context.mc.colors.error),
                       ),
                     ),
-                  FilledButton(
+                  McButton(
+                    label: l.safetyAppealSubmit,
                     onPressed: AppealController.validMessage(_text.text) &&
                             appeal.status != SubmitStatus.submitting
                         ? () =>
@@ -467,7 +469,6 @@ class _AppealScreenState extends ConsumerState<AppealScreen> {
                                   message: _text.text,
                                 )
                         : null,
-                    child: Text(l.safetyAppealSubmit),
                   ),
                 ],
               ],

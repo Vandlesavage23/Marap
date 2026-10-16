@@ -86,7 +86,11 @@ REDIS_URL = env("REDIS_URL", "redis://localhost:6379/0")
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [REDIS_URL]},
+        # channels_redis blocks on BZPOPMIN for up to 5 s per receive; redis-py 8 applies a default socket timeout that
+        # kills the consumer ("Timeout reading from redis") on every idle socket. Give reads head-room explicitly.
+        "CONFIG": {
+            "hosts": [{"address": REDIS_URL, "socket_timeout": 30, "socket_connect_timeout": 5}]
+        },
     }
 }
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
-import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/profile/application/description_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/photos_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_controller.dart';
@@ -45,8 +45,8 @@ class ProfilePreviewCard extends StatelessWidget {
       if (profile.languages.isNotEmpty)
         profile.languages.map((c) => languageLabel(l, c)).join(', '),
     ];
-    return Card(
-      clipBehavior: Clip.antiAlias,
+    return McCard(
+      padding: EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -79,22 +79,19 @@ class ProfilePreviewCard extends StatelessWidget {
                     style: theme.textTheme.titleLarge,
                   ),
                   const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.verified_outlined,
-                        size: 18,
-                        color: context.tokens.success,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(l.profilePreviewBadgeVerified),
-                    ],
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: StatusChip(
+                      label: l.profilePreviewBadgeVerified,
+                      tone: StatusTone.success,
+                      icon: Icons.verified_outlined,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
                     runSpacing: 4,
-                    children: [for (final f in facts) Chip(label: Text(f))],
+                    children: [for (final f in facts) StatusChip(label: f)],
                   ),
                   const SizedBox(height: 12),
                   Text(description ?? l.profilePreviewNoDescription),
@@ -169,9 +166,11 @@ class PreviewStep extends ConsumerWidget {
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.radio_button_unchecked),
               title: Text(missingLabel(l, m)),
-              trailing: TextButton(
+              trailing: McButton(
+                label: l.profileFix,
                 onPressed: () => onFix(stepForMissing(m)),
-                child: Text(l.profileFix),
+                kind: McButtonKind.text,
+                expand: false,
               ),
             ),
         ],

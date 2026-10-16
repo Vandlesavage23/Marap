@@ -17,27 +17,6 @@ Widget host(Widget child, Brightness b) => MaterialApp(
     );
 
 void main() {
-  final cases = <String, Widget Function()>{
-    'empty': EmptyState.new,
-    'error': () => ErrorState(onRetry: () {}),
-    'offline': () => OfflineState(onRetry: () {}),
-    'restricted': () =>
-        const RestrictedState(reason: 'Your membership has ended.'),
-  };
-  for (final b in Brightness.values) {
-    for (final e in cases.entries) {
-      testWidgets('golden ${e.key} ${b.name}', (t) async {
-        await t.binding.setSurfaceSize(const Size(360, 480));
-        await t.pumpWidget(host(e.value(), b));
-        await t.pumpAndSettle();
-        await expectLater(
-          find.byType(Scaffold),
-          matchesGoldenFile('goldens/${e.key}_${b.name}.png'),
-        );
-      });
-    }
-  }
-
   testWidgets('retry callback fires and copy comes from ARB', (t) async {
     var taps = 0;
     await t

@@ -43,3 +43,34 @@ def photo_media_viewer_policy(viewer: "Account", media) -> bool:  # type: ignore
         and photo.moderation_status == Photo.Moderation.APPROVED
         and can_view_profile(viewer, photo.profile)
     )
+
+
+class BatchedProfileAccess:
+    """`can_view_profile(viewer, target)` for MANY targets with the viewer-side facts (blocks, own gender,
+    `browse` capability) read once, lazily, instead of once per target. Same rules as `can_view_profile`;
+    callers must already know each target is a live, active profile (`is_visible_profile`)."""
+
+    def __init__(self, viewer: "Account") -> None:
+        self._viewer = viewer
+        self._blocked: set | None = None
+        self._gender: str | None = None
+        self._browse: bool | None = None
+
+    def can_view(self, target: Profile) -> bool:
+        viewer = self._viewer
+        if target.account_id == viewer.id:
+            return True
+        if self._blocked is None:
+            self._blocked = safety_selectors.blocked_either_way_ids(viewer.id)
+        if target.account_id in self._blocked:
+            return False
+        if self._gender is None:
+            self._gender = (
+                Profile.objects.filter(account=viewer).values_list("gender", flat=True).first()
+                or ""
+            )
+        if not self._gender or self._gender == target.gender:
+            return False
+        if self._browse is None:
+            self._browse = entitlement_selectors.has_capability(viewer, "browse")
+        return self._browse

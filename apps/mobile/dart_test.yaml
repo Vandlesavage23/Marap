@@ -1,0 +1,5 @@
+tags:
+  contract:
+    description: >-
+      Runs the real Api*Repository classes against a live Django server. Skipped unless
+      MC_CONTRACT_API and MC_CONTRACT_FIXTURE are set; see tool/run_contract_tests.sh.

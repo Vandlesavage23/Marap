@@ -1,12 +1,32 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
+import 'package:marriage_connect/src/core/config/app_info.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/providers.dart';
+import 'package:marriage_connect/src/core/storage/app_database.dart';
+import 'package:marriage_connect/src/core/storage/local_prefs.dart';
+import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
+import 'package:marriage_connect/src/features/discovery/application/discovery_controller.dart';
+import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
+import 'package:marriage_connect/src/features/matches/application/matches_controller.dart';
+import 'package:marriage_connect/src/features/me/application/me_controller.dart';
+import 'package:marriage_connect/src/features/membership/application/membership_providers.dart';
+import 'package:marriage_connect/src/features/notifications/application/push_controller.dart';
+import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
+import 'package:marriage_connect/src/features/profile/application/description_controller.dart';
+import 'package:marriage_connect/src/features/profile/application/photos_controller.dart';
+import 'package:marriage_connect/src/features/profile/application/profile_controller.dart';
+import 'package:marriage_connect/src/features/questionnaire/application/questionnaire_controller.dart';
 import 'package:marriage_connect/src/features/settings/data/account_repository.dart';
 import 'package:marriage_connect/src/features/settings/domain/settings_models.dart';
 
 final accountRepositoryProvider = Provider<AccountRepository>(
-  (ref) => ApiAccountRepository(ref.watch(dioProvider)),
+  (ref) => ApiAccountRepository(
+    ref.watch(dioProvider),
+    appVersion: ref.watch(appVersionProvider),
+  ),
 );
 
 /// Consents: list and change (withdraw / allow) with an explicit tap.
@@ -74,6 +94,94 @@ final sessionsControllerProvider =
     AutoDisposeAsyncNotifierProvider<SessionsController, List<SessionInfo>>(
   SessionsController.new,
 );
+
+/// Explicit sign-out (Settings > Account). Local sign-out ALWAYS completes,
+/// even when the server call fails: the member must be able to leave.
+class SignOutController extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  /// True while signing out.
+  bool get busy => state;
+
+  /// Messages still in the outbox (shown as a warning before confirming).
+  Future<int> unsentMessages() =>
+      ref.read(outboxRepositoryProvider).unsentCount();
+
+  /// Returns true when the server confirmed the logout, false when only the
+  /// local sign-out happened (offline / server error).
+  ///
+  /// Order matters: push is unregistered while the access token still works,
+  /// then the server session is revoked, then local state is wiped, and only
+  /// then does the session flip so the router guard goes to onboarding.
+  Future<bool> signOut() async {
+    if (state) return false;
+    state = true;
+    var serverOk = true;
+    // 1. Unregister this device from push (needs the access token).
+    try {
+      await ref.read(pushControllerProvider.notifier).prepareSignOut();
+    } on Object {
+      // best effort
+    }
+    // 2. Revoke the session server-side.
+    try {
+      await ref.read(accountRepositoryProvider).logout();
+    } on Object {
+      serverOk = false;
+    }
+    // 3. Local tokens, push opt-in, caches, outbox.
+    try {
+      await ref.read(tokenStoreProvider).clear();
+    } on Object {
+      // secure storage failure must not trap the member signed in
+    }
+    try {
+      await ref.read(localPrefsProvider).remove(pushEnabledPrefKey);
+    } on Object {
+      // see above
+    }
+    try {
+      await ref.read(outboxRepositoryProvider).clearAll();
+      await ref.read(appDatabaseProvider).clearCaches();
+    } on Object {
+      // see above
+    }
+    // 4. Flip the session: the router guard routes to onboarding.
+    ref.read(sessionProvider.notifier).signedOut();
+    state = false;
+    // 5. Drop in-memory per-member state so the next account starts clean.
+    unawaited(Future<void>.delayed(Duration.zero, _resetMemberState));
+    return serverOk;
+  }
+
+  void _resetMemberState() {
+    try {
+      _invalidateAll();
+    } on Object {
+      // the scope may already be gone (app shutting down)
+    }
+  }
+
+  void _invalidateAll() {
+    ref
+      ..invalidate(meProvider)
+      ..invalidate(matchesControllerProvider)
+      ..invalidate(receivedInterestsControllerProvider)
+      ..invalidate(sentInterestsControllerProvider)
+      ..invalidate(discoveryControllerProvider)
+      ..invalidate(entitlementProvider)
+      ..invalidate(ownProfileProvider)
+      ..invalidate(photosProvider)
+      ..invalidate(descriptionProvider)
+      ..invalidate(preferencesProvider)
+      ..invalidate(questionnaireProvider)
+      ..invalidate(onboardingProvider);
+  }
+}
+
+final signOutControllerProvider =
+    NotifierProvider<SignOutController, bool>(SignOutController.new);
 
 enum DeleteStatus { idle, sendingCode, codeSent, deleting, done, failed }
 

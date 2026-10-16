@@ -17,6 +17,7 @@ from mc.common.ids import uuid7
 from mc.media.models import MediaObject
 from mc.profiles.districts import UGANDA_DISTRICTS
 from mc.profiles.models import Description, Photo, Preference, Profile
+from mc.questionnaire import services as questionnaire_services
 from mc.questionnaire.models import Answer, Question
 from mc.verification.models import VerificationAttempt
 
@@ -190,6 +191,9 @@ def save_answers(
         unique_fields=["account", "question"],
         update_fields=["value", "importance", "is_dealbreaker", "question_version"],
     )
+    questionnaire_services.invalidate_scoring_cache(
+        account_ids=[account.id]
+    )  # bulk_create sends no signals
 
 
 def random_district(rng: random.Random) -> str:

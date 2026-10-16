@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_controller.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
 import 'package:marriage_connect/src/features/chat/data/chat_socket.dart';
@@ -43,7 +44,13 @@ class ChatScreen extends ConsumerWidget {
                   final ok = await _confirmUnmatch(context, name ?? '');
                   if (ok && context.mounted) {
                     await ref.read(provider.notifier).unmatch();
-                    if (context.mounted) context.pop();
+                    if (!context.mounted) return;
+                    // A push deep link has no back stack to pop.
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/matches');
+                    }
                   }
                 }
               },
@@ -87,13 +94,17 @@ class ChatScreen extends ConsumerWidget {
         title: Text(l.matchesUnmatchTitle(name)),
         content: Text(l.matchesUnmatchBody),
         actions: [
-          TextButton(
+          McButton(
+            label: l.matchesCancel,
             onPressed: () => Navigator.pop(c, false),
-            child: Text(l.matchesCancel),
+            kind: McButtonKind.text,
+            expand: false,
           ),
-          FilledButton(
+          McButton(
+            label: l.matchesUnmatch,
             onPressed: () => Navigator.pop(c, true),
-            child: Text(l.matchesUnmatch),
+            kind: McButtonKind.destructive,
+            expand: false,
           ),
         ],
       ),
@@ -113,8 +124,9 @@ Future<void> showMediaFailure(BuildContext context, AppFailure f) {
     final n = needed is int ? needed : ChatRules.photoUnlockMinMessages;
     text = '${l.chatPhotoLocked(n)} '
         '${l.chatPhotoProgress(you is int ? you : 0, they is int ? they : 0, n)}';
-  } else if (f.code == 'offline') {
-    text = l.errorOffline;
+  } else if (f.retryable) {
+    // Not lost: it is in the outbox and goes out when the connection is back.
+    text = l.offlineMediaQueued;
   } else if (f.code == 'entitlement_required') {
     text = l.chatReadOnlyBanner;
   } else {
@@ -125,9 +137,11 @@ Future<void> showMediaFailure(BuildContext context, AppFailure f) {
     builder: (c) => AlertDialog(
       content: Text(text),
       actions: [
-        TextButton(
+        McButton(
+          label: l.interestDone,
           onPressed: () => Navigator.pop(c),
-          child: Text(l.interestDone),
+          kind: McButtonKind.text,
+          expand: false,
         ),
       ],
     ),
@@ -172,10 +186,12 @@ class _ChatBody extends ConsumerWidget {
                 : l.chatReconnecting,
           ),
         if (contactWindowOpen && !state.ended)
-          _Banner(
-            key: const Key('contact-note'),
-            icon: Icons.shield_outlined,
-            text: l.chatContactNote,
+          Padding(
+            padding: EdgeInsets.all(context.mc.space.xs),
+            child: SafetyTip(
+              key: const Key('contact-note'),
+              message: l.chatContactNote,
+            ),
           ),
         Expanded(
           child: count == 0
@@ -186,9 +202,11 @@ class _ChatBody extends ConsumerWidget {
                   itemCount: count + (state.hasMore ? 1 : 0),
                   itemBuilder: (context, i) {
                     if (i == count) {
-                      return TextButton(
+                      return McButton(
+                        label: l.chatLoadOlder,
                         onPressed: state.loadingMore ? null : ctrl.loadMore,
-                        child: Text(l.chatLoadOlder),
+                        kind: McButtonKind.text,
+                        expand: false,
                       );
                     }
                     if (i < pending.length) {
@@ -196,6 +214,7 @@ class _ChatBody extends ConsumerWidget {
                       return PendingBubble(
                         key: ValueKey(p.clientMsgId),
                         body: p.body,
+                        kind: MessageKind.parse(p.kind),
                         failedCode: p.failedCode,
                         onDiscard: () => ctrl.discardFailed(p.clientMsgId),
                       );

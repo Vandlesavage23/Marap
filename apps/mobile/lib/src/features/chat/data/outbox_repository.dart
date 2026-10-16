@@ -1,7 +1,13 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:marriage_connect/src/core/network/api_client.dart';
+import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/network/interceptors.dart';
 import 'package:marriage_connect/src/core/storage/app_database.dart';
+import 'package:marriage_connect/src/features/chat/data/media_services.dart';
+import 'package:marriage_connect/src/features/chat/domain/chat_message.dart';
 import 'package:uuid/uuid.dart';
 
 /// Result of one flush pass.
@@ -32,11 +38,17 @@ class OutboxRepository {
     this._dio, {
     Uuid uuid = const Uuid(),
     DateTime Function()? now,
+    MediaUploader? uploader,
+    MediaStash stash = const PassthroughMediaStash(),
   })  : _uuid = uuid,
-        _now = now ?? DateTime.now;
+        _now = now ?? DateTime.now,
+        _uploader = uploader,
+        _stash = stash;
 
   final AppDatabase _db;
   final Dio _dio;
+  final MediaUploader? _uploader;
+  final MediaStash _stash;
   final Uuid _uuid;
   final DateTime Function() _now;
   bool _flushing = false;
@@ -51,6 +63,8 @@ class OutboxRepository {
     'contact_details_blocked',
     'photo_locked',
     'validation_error',
+    'media_rejected',
+    'media_missing',
   };
 
   Future<String> enqueue({
@@ -69,15 +83,129 @@ class OutboxRepository {
     return id;
   }
 
+  /// Queues a photo / voice note. [mediaId] is passed when the upload already
+  /// finished (the send itself then failed), so it is never uploaded twice.
+  /// [clientMsgId] lets the caller keep the id of an action it already tried.
+  Future<String> enqueueMedia({
+    required String matchId,
+    required MessageKind kind,
+    required PickedMedia file,
+    String? mediaId,
+    String? clientMsgId,
+  }) async {
+    assert(
+      kind == MessageKind.image || kind == MessageKind.voice,
+      'media only',
+    );
+    final id = clientMsgId ?? _uuid.v4();
+    final kept = await _stash.keep(file);
+    await _db.into(_db.outboxMessages).insert(
+          OutboxMessagesCompanion.insert(
+            clientMsgId: id,
+            matchId: matchId,
+            body: '',
+            kind: Value(kind.name),
+            mediaPath: Value(kept.path),
+            mediaMime: Value(kept.mime),
+            mediaBytes: Value(kept.bytes),
+            mediaDurationMs: Value(kept.durationMs),
+            mediaId: Value(mediaId),
+            createdAt: _now(),
+          ),
+        );
+    return id;
+  }
+
   Stream<List<OutboxMessage>> watch(String matchId) =>
       (_db.select(_db.outboxMessages)
             ..where((t) => t.matchId.equals(matchId))
             ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]))
           .watch();
 
-  Future<void> discard(String clientMsgId) => (_db.delete(_db.outboxMessages)
-        ..where((t) => t.clientMsgId.equals(clientMsgId)))
-      .go();
+  Future<void> discard(String clientMsgId) async {
+    final row = await (_db.select(_db.outboxMessages)
+          ..where((t) => t.clientMsgId.equals(clientMsgId)))
+        .getSingleOrNull();
+    await (_db.delete(_db.outboxMessages)
+          ..where((t) => t.clientMsgId.equals(clientMsgId)))
+        .go();
+    final path = row?.mediaPath;
+    if (path != null) await _stash.release(path);
+  }
+
+  /// Messages not delivered yet (queued or refused), for the sign-out warning.
+  Future<int> unsentCount() async {
+    final rows = await _db.select(_db.outboxMessages).get();
+    return rows.length;
+  }
+
+  /// Sign-out: the outbox belongs to the member, so it is dropped (and any
+  /// queued photo / voice file released) rather than sent by the next account.
+  Future<void> clearAll() async {
+    final rows = await _db.select(_db.outboxMessages).get();
+    await _db.delete(_db.outboxMessages).go();
+    for (final r in rows) {
+      final path = r.mediaPath;
+      if (path == null) continue;
+      try {
+        await _stash.release(path);
+      } on Object {
+        // a missing file must not block sign-out
+      }
+    }
+  }
+
+  Future<void> _fail(OutboxMessage m, String code) async {
+    await (_db.update(_db.outboxMessages)
+          ..where((t) => t.clientMsgId.equals(m.clientMsgId)))
+        .write(OutboxMessagesCompanion(failedCode: Value(code)));
+  }
+
+  Future<void> _bump(OutboxMessage m) async {
+    await (_db.update(_db.outboxMessages)
+          ..where((t) => t.clientMsgId.equals(m.clientMsgId)))
+        .write(OutboxMessagesCompanion(attempts: Value(m.attempts + 1)));
+  }
+
+  /// Upload (once) then post the message with the row's `client_msg_id`.
+  Future<Map<String, dynamic>?> _sendMedia(OutboxMessage m) async {
+    var mediaId = m.mediaId;
+    if (mediaId == null) {
+      final uploader = _uploader;
+      final path = m.mediaPath;
+      if (uploader == null || path == null) {
+        throw const _Permanent('media_missing');
+      }
+      try {
+        mediaId = await uploader.upload(
+          purpose: m.kind == 'image' ? 'chat_image' : 'voice_note',
+          file: PickedMedia(
+            path: path,
+            mime: m.mediaMime ?? 'application/octet-stream',
+            bytes: m.mediaBytes ?? 0,
+            durationMs: m.mediaDurationMs,
+          ),
+        );
+      } on FileSystemException {
+        throw const _Permanent('media_missing');
+      }
+      // Remember the upload: if the send below is lost we resume from here.
+      await (_db.update(_db.outboxMessages)
+            ..where((t) => t.clientMsgId.equals(m.clientMsgId)))
+          .write(OutboxMessagesCompanion(mediaId: Value(mediaId)));
+    }
+    final res = await _dio.post<dynamic>(
+      '/matches/${m.matchId}/messages',
+      data: {
+        'client_msg_id': m.clientMsgId,
+        'kind': m.kind,
+        'media_id': mediaId,
+      },
+      options: idempotent(key: m.clientMsgId),
+    );
+    final data = res.data;
+    return data is Map<String, dynamic> ? data : null;
+  }
 
   /// Sends pending messages in order. Stops at the first transient failure so
   /// order is preserved; permanent refusals are marked and skipped.
@@ -94,30 +222,45 @@ class OutboxRepository {
           .get();
       for (final m in rows) {
         try {
-          final res = await _dio.post<dynamic>(
-            '/matches/${m.matchId}/messages',
-            data: {
-              'client_msg_id': m.clientMsgId,
-              'kind': 'text',
-              'body': m.body,
-            },
-          );
+          Map<String, dynamic>? data;
+          if (m.kind == 'text') {
+            final res = await _dio.post<dynamic>(
+              '/matches/${m.matchId}/messages',
+              data: {
+                'client_msg_id': m.clientMsgId,
+                'kind': 'text',
+                'body': m.body,
+              },
+            );
+            final d = res.data;
+            if (d is Map<String, dynamic>) data = d;
+          } else {
+            data = await _sendMedia(m);
+          }
           await discard(m.clientMsgId);
-          final data = res.data;
-          if (data is Map<String, dynamic>) delivered.add(data);
+          if (data != null) delivered.add(data);
           sent++;
-        } on DioException catch (e) {
-          final f = e.failure;
-          if (_permanent.contains(f.code)) {
-            await (_db.update(_db.outboxMessages)
-                  ..where((t) => t.clientMsgId.equals(m.clientMsgId)))
-                .write(OutboxMessagesCompanion(failedCode: Value(f.code)));
+        } on _Permanent catch (e) {
+          await _fail(m, e.code);
+          failed++;
+        } on AppFailure catch (f) {
+          // The uploader reports failures as AppFailure.
+          if (_permanent.contains(f.code) ||
+              (!f.retryable && f.status != null && f.status! < 500)) {
+            await _fail(m, f.code);
             failed++;
             continue;
           }
-          await (_db.update(_db.outboxMessages)
-                ..where((t) => t.clientMsgId.equals(m.clientMsgId)))
-              .write(OutboxMessagesCompanion(attempts: Value(m.attempts + 1)));
+          await _bump(m);
+          break;
+        } on DioException catch (e) {
+          final f = e.failure;
+          if (_permanent.contains(f.code)) {
+            await _fail(m, f.code);
+            failed++;
+            continue;
+          }
+          await _bump(m);
           break; // transient: keep order, try again later
         }
       }
@@ -134,4 +277,9 @@ class OutboxRepository {
       _flushing = false;
     }
   }
+}
+
+class _Permanent implements Exception {
+  const _Permanent(this.code);
+  final String code;
 }

@@ -211,6 +211,54 @@ void main() {
       expect(find.text('AT /matches/m2/chat'), findsOneWidget);
     });
 
+    testWidgets('unread badge and a generic preview, never the text',
+        (t) async {
+      Match withChat(String id, String name, String? kind, int unread) =>
+          Match.fromJson({
+            ...matchJson(id, name),
+            'last_message_at': kind == null ? null : '2026-11-02T09:00:00Z',
+            'last_message_kind': kind,
+            'last_message_sender': kind == null ? null : 'them',
+            'unread_count': unread,
+            // A server that (wrongly) sent text must not get it rendered.
+            'last_message_body': 'SECRET TEXT',
+          });
+      final repo = FakeMatches()
+        ..server = [
+          withChat('m1', 'Amani', 'text', 3),
+          withChat('m2', 'Bea', 'image', 1),
+          withChat('m3', 'Cara', 'voice', 0),
+          withChat('m4', 'Dina', null, 0),
+        ];
+      await t.pumpWidget(
+        routedApp(
+          const MatchesScreen(),
+          overrides: [matchesRepositoryProvider.overrideWithValue(repo)],
+        ),
+      );
+      await t.pumpAndSettle();
+      expect(find.text('New message'), findsOneWidget);
+      expect(find.text('Photo'), findsOneWidget);
+      expect(find.text('Voice note'), findsOneWidget);
+      expect(find.textContaining('SECRET'), findsNothing);
+      // Badges only where unread > 0, and they are labelled for TalkBack.
+      expect(find.text('3'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel(RegExp('3 unread messages')),
+        findsOneWidget,
+      );
+      expect(find.bySemanticsLabel(RegExp('1 unread message')), findsOneWidget);
+      expect(find.text('0'), findsNothing);
+    });
+
+    test('Match.fromJson tolerates the old payload without chat fields', () {
+      final m = match('m1', 'Amani');
+      expect(m.unreadCount, 0);
+      expect(m.lastMessageKind, isNull);
+      expect(m.lastMessageAt, isNull);
+    });
+
     testWidgets('empty state', (t) async {
       await t.pumpWidget(
         routedApp(

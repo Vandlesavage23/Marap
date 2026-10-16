@@ -20,6 +20,14 @@ def signed_url(media: MediaObject, viewer) -> str | None:  # type: ignore[no-unt
     return storage.presign_get(key=media.storage_key, ttl=settings.MEDIA_SIGNED_URL_SECONDS)
 
 
+def signed_url_prechecked(media: MediaObject) -> str | None:
+    """Like `signed_url` for a caller that has ALREADY decided the viewer may see this media (batched policy
+    check, e.g. discovery cards). Still refuses media that isn't ready. Never use without that check."""
+    if media.status != MediaObject.Status.READY or not media.storage_key:
+        return None
+    return storage.presign_get(key=media.storage_key, ttl=settings.MEDIA_SIGNED_URL_SECONDS)
+
+
 def owned_ready_media(account_id: uuid.UUID):  # type: ignore[no-untyped-def]
     return MediaObject.objects.filter(
         owner_id=account_id, status=MediaObject.Status.READY

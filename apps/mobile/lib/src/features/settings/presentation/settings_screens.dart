@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/membership/application/member_failure_copy.dart';
 import 'package:marriage_connect/src/features/membership/application/membership_providers.dart';
 import 'package:marriage_connect/src/features/membership/presentation/membership_format.dart';
@@ -22,11 +22,68 @@ Widget _errorFor(AppLocalizations l, Object e, VoidCallback retry) {
 void _snack(BuildContext context, String text) =>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
-class SettingsHomeScreen extends StatelessWidget {
+class SettingsHomeScreen extends ConsumerWidget {
   const SettingsHomeScreen({super.key});
 
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final l = AppLocalizations.of(context);
+    final ctrl = ref.read(signOutControllerProvider.notifier);
+    var unsent = 0;
+    try {
+      unsent = await ctrl.unsentMessages();
+    } on Object {
+      unsent = 0;
+    }
+    if (!context.mounted) return;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.adoptSignOutTitle),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.adoptSignOutBody),
+              if (unsent > 0) ...[
+                SizedBox(height: ctx.mc.space.sm),
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    l.adoptSignOutUnsent(unsent),
+                    key: const Key('signout-unsent'),
+                    style: TextStyle(
+                      color: ctx.mc.colors.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          McButton(
+            label: l.adoptSignOutCancel,
+            kind: McButtonKind.text,
+            expand: false,
+            onPressed: () => Navigator.of(ctx).pop(false),
+          ),
+          McButton(
+            label: l.adoptSignOutConfirm,
+            kind: McButtonKind.destructive,
+            expand: false,
+            onPressed: () => Navigator.of(ctx).pop(true),
+          ),
+        ],
+      ),
+    );
+    if (yes != true) return;
+    await ctrl.signOut();
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     Widget tile(String title, String route) => ListTile(
           title: Text(title),
@@ -40,12 +97,40 @@ class SettingsHomeScreen extends StatelessWidget {
           children: [
             tile(l.settingsMembership, '/settings/membership'),
             tile(l.settingsPrivacy, '/settings/privacy'),
+            tile(l.pushTile, '/settings/notifications'),
+            tile(l.dataSaverTile, '/settings/data-saver'),
             tile(l.settingsSessions, '/settings/sessions'),
             tile(l.settingsSafety, '/safety/centre'),
             tile(l.settingsBlocked, '/safety/blocked'),
             tile(l.settingsExport, '/settings/export'),
             tile(l.settingsFeedback, '/settings/feedback'),
             const Divider(),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                context.mc.space.md,
+                context.mc.space.xs,
+                context.mc.space.md,
+                0,
+              ),
+              child: Semantics(
+                header: true,
+                child: Text(
+                  l.adoptSettingsAccount,
+                  style: context.mc.text.subtitle,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(context.mc.space.md),
+              child: McButton(
+                key: const Key('sign-out'),
+                label: l.adoptSignOut,
+                kind: McButtonKind.secondary,
+                onPressed: ref.watch(signOutControllerProvider)
+                    ? null
+                    : () => _confirmSignOut(context, ref),
+              ),
+            ),
             tile(l.settingsDelete, '/settings/delete'),
           ],
         ),
@@ -82,10 +167,10 @@ class PrivacyScreen extends ConsumerWidget {
             () => ref.read(consentsControllerProvider.notifier).refresh(),
           ),
           data: (snap) => ListView(
-            padding: EdgeInsets.all(context.tokens.spacing),
+            padding: EdgeInsets.all(context.mc.space.md),
             children: [
               Text(l.settingsConsentsIntro),
-              SizedBox(height: context.tokens.spacing / 2),
+              SizedBox(height: context.mc.space.md / 2),
               Text(
                 l.settingsConsentRequiredNote,
                 style: Theme.of(context).textTheme.bodySmall,
@@ -118,7 +203,8 @@ class _ConsentTile extends ConsumerWidget {
       key: ValueKey('consent_${kind.wire}'),
       title: Text(consentLabel(l, kind)),
       subtitle: Text(status),
-      trailing: OutlinedButton(
+      trailing: McButton(
+        label: allow ? l.settingsConsentAllow : l.settingsConsentWithdraw,
         onPressed: () async {
           final f = await ref
               .read(consentsControllerProvider.notifier)
@@ -129,7 +215,8 @@ class _ConsentTile extends ConsumerWidget {
             f == null ? l.settingsConsentSaved : memberFailureMessage(l, f),
           );
         },
-        child: Text(allow ? l.settingsConsentAllow : l.settingsConsentWithdraw),
+        kind: McButtonKind.secondary,
+        expand: false,
       ),
     );
   }
@@ -177,7 +264,8 @@ class SessionsScreen extends ConsumerWidget {
                     ),
                     trailing: s.current
                         ? null
-                        : OutlinedButton(
+                        : McButton(
+                            label: l.settingsSessionRevoke,
                             onPressed: () async {
                               final f = await ref
                                   .read(sessionsControllerProvider.notifier)
@@ -190,7 +278,8 @@ class SessionsScreen extends ConsumerWidget {
                                     : memberFailureMessage(l, f),
                               );
                             },
-                            child: Text(l.settingsSessionRevoke),
+                            kind: McButtonKind.secondary,
+                            expand: false,
                           ),
                   ),
                 if (others.isEmpty) EmptyState(body: l.settingsSessionsEmpty),
@@ -225,7 +314,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
     final l = AppLocalizations.of(context);
     final s = ref.watch(deleteControllerProvider);
     final c = ref.read(deleteControllerProvider.notifier);
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
 
     if (s.status == DeleteStatus.done) {
       final receipt = s.receipt;
@@ -236,7 +325,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         ),
         body: SafeArea(
           child: ListView(
-            padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+            padding: EdgeInsets.all(context.mc.space.md * 1.5),
             children: [
               Text(
                 receipt?.hardDeleteAfter != null
@@ -249,7 +338,8 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                 gap,
                 Text(l.settingsDeleteSubscription),
                 gap,
-                OutlinedButton(
+                McButton(
+                  label: l.memberManage,
                   onPressed: () async {
                     final platform = ref.read(storePlatformProvider);
                     try {
@@ -262,13 +352,14 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                       }
                     }
                   },
-                  child: Text(l.memberManage),
+                  kind: McButtonKind.secondary,
                 ),
               ],
               gap,
-              OutlinedButton(
+              McButton(
+                label: l.settingsDeleteDone,
                 onPressed: c.finish,
-                child: Text(l.settingsDeleteDone),
+                kind: McButtonKind.secondary,
               ),
             ],
           ),
@@ -287,7 +378,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
       appBar: AppBar(title: Text(l.settingsDeleteTitle)),
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+          padding: EdgeInsets.all(context.mc.space.md * 1.5),
           children: [
             Text(l.settingsDeleteBody),
             gap,
@@ -296,38 +387,38 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
             if (codeStage) ...[
               Text(l.settingsDeleteCodeSent),
               gap,
-              TextField(
+              McTextField(
                 controller: _code,
                 keyboardType: TextInputType.number,
                 maxLength: 6,
                 onChanged: (_) => setState(() {}),
-                decoration:
-                    InputDecoration(labelText: l.settingsDeleteCodeLabel),
+                label: l.settingsDeleteCodeLabel,
               ),
             ],
             if (error != null)
               Padding(
-                padding: EdgeInsets.only(bottom: context.tokens.spacing),
+                padding: EdgeInsets.only(bottom: context.mc.space.md),
                 child: Semantics(
                   liveRegion: true,
                   child: Text(
                     error,
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.error),
+                    style: TextStyle(color: context.mc.colors.error),
                   ),
                 ),
               ),
             if (codeStage)
-              FilledButton(
+              McButton(
+                label: l.settingsDeleteConfirm,
+                kind: McButtonKind.destructive,
                 onPressed: !s.busy && DeleteController.validCode(_code.text)
                     ? () => c.confirm(_code.text)
                     : null,
-                child: Text(l.settingsDeleteConfirm),
               ),
             if (codeStage) gap,
-            OutlinedButton(
+            McButton(
+              label: l.settingsDeleteSendCode,
               onPressed: s.busy ? null : c.sendCode,
-              child: Text(l.settingsDeleteSendCode),
+              kind: McButtonKind.secondary,
             ),
           ],
         ),
@@ -345,32 +436,34 @@ class ExportScreen extends ConsumerWidget {
     final s = ref.watch(exportControllerProvider);
     final c = ref.read(exportControllerProvider.notifier);
     final info = s.info;
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
     return Scaffold(
       appBar: AppBar(title: Text(l.settingsExportTitle)),
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+          padding: EdgeInsets.all(context.mc.space.md * 1.5),
           children: [
             Text(l.settingsExportBody),
             gap,
             if (s.failure != null)
               Padding(
-                padding: EdgeInsets.only(bottom: context.tokens.spacing),
+                padding: EdgeInsets.only(bottom: context.mc.space.md),
                 child: Text(
                   memberFailureMessage(l, s.failure!),
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(color: context.mc.colors.error),
                 ),
               ),
             if (info == null)
-              OutlinedButton(
+              McButton(
+                label: l.settingsExportRequest,
                 onPressed: s.busy ? null : c.request,
-                child: Text(l.settingsExportRequest),
+                kind: McButtonKind.secondary,
               )
             else if (info.ready) ...[
               Text(l.settingsExportReady),
               gap,
-              OutlinedButton(
+              McButton(
+                label: l.settingsExportDownload,
                 onPressed: () async {
                   var ok = false;
                   try {
@@ -383,7 +476,7 @@ class ExportScreen extends ConsumerWidget {
                     _snack(context, l.settingsExportOpenFailed);
                   }
                 },
-                child: Text(l.settingsExportDownload),
+                kind: McButtonKind.secondary,
               ),
             ] else ...[
               Text(
@@ -394,9 +487,10 @@ class ExportScreen extends ConsumerWidget {
                     : l.settingsExportRequestedNoDate,
               ),
               gap,
-              OutlinedButton(
+              McButton(
+                label: l.settingsExportCheck,
                 onPressed: s.busy ? null : c.check,
-                child: Text(l.settingsExportCheck),
+                kind: McButtonKind.secondary,
               ),
             ],
           ],
@@ -427,14 +521,14 @@ class _BetaFeedbackScreenState extends ConsumerState<BetaFeedbackScreen> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final s = ref.watch(feedbackControllerProvider);
-    final gap = SizedBox(height: context.tokens.spacing);
+    final gap = SizedBox(height: context.mc.space.md);
     if (s.status == FeedbackStatus.sent) {
       return Scaffold(
         appBar: AppBar(title: Text(l.betaFeedbackTitle)),
         body: SafeArea(
           child: Center(
             child: Padding(
-              padding: EdgeInsets.all(context.tokens.spacing * 2),
+              padding: EdgeInsets.all(context.mc.space.md * 2),
               child: Semantics(
                 liveRegion: true,
                 child: Text(l.betaFeedbackThanks, textAlign: TextAlign.center),
@@ -448,7 +542,7 @@ class _BetaFeedbackScreenState extends ConsumerState<BetaFeedbackScreen> {
       appBar: AppBar(title: Text(l.betaFeedbackTitle)),
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(context.tokens.spacing * 1.5),
+          padding: EdgeInsets.all(context.mc.space.md * 1.5),
           children: [
             Text(l.betaFeedbackBody),
             gap,
@@ -465,22 +559,24 @@ class _BetaFeedbackScreenState extends ConsumerState<BetaFeedbackScreen> {
               ],
             ),
             gap,
-            TextField(
+            McTextField(
               controller: _text,
               maxLines: 6,
+              minLines: 4,
               maxLength: FeedbackController.maxLength,
               onChanged: (_) => setState(() {}),
-              decoration: InputDecoration(labelText: l.betaFeedbackHint),
+              label: l.betaFeedbackHint,
             ),
             if (s.status == FeedbackStatus.failed && s.failure != null)
               Padding(
-                padding: EdgeInsets.only(bottom: context.tokens.spacing),
+                padding: EdgeInsets.only(bottom: context.mc.space.md),
                 child: Text(
                   memberFailureMessage(l, s.failure!),
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                  style: TextStyle(color: context.mc.colors.error),
                 ),
               ),
-            FilledButton(
+            McButton(
+              label: l.betaFeedbackSend,
               onPressed: FeedbackController.valid(_text.text) &&
                       s.status != FeedbackStatus.sending
                   ? () => ref.read(feedbackControllerProvider.notifier).send(
@@ -488,7 +584,6 @@ class _BetaFeedbackScreenState extends ConsumerState<BetaFeedbackScreen> {
                         rating: _rating,
                       )
                   : null,
-              child: Text(l.betaFeedbackSend),
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/mc_button.dart';
 
 /// Shared, explicit UI states (Bible §5.5): empty / error / restricted / offline.
 class _StateView extends StatelessWidget {
@@ -20,29 +21,41 @@ class _StateView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context);
+    final mc = context.mc;
+    final c = mc.colors;
     return Center(
-      child: Padding(
-        padding: EdgeInsets.all(context.tokens.spacing * 2),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(mc.space.lg),
         child: Semantics(
           container: true,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 48, color: t.colorScheme.primary),
-              SizedBox(height: context.tokens.spacing),
-              Text(
-                title,
-                style: t.textTheme.titleMedium,
-                textAlign: TextAlign.center,
+              ExcludeSemantics(child: Icon(icon, size: 48, color: c.primary)),
+              SizedBox(height: mc.space.md),
+              Semantics(
+                header: true,
+                child: Text(
+                  title,
+                  style: mc.text.title.copyWith(color: c.onSurface),
+                  textAlign: TextAlign.center,
+                ),
               ),
               if (body != null) ...[
-                SizedBox(height: context.tokens.spacing / 2),
-                Text(body!, textAlign: TextAlign.center),
+                SizedBox(height: mc.space.xs),
+                Text(
+                  body!,
+                  style: mc.text.body.copyWith(color: c.onSurfaceMuted),
+                  textAlign: TextAlign.center,
+                ),
               ],
               if (onAction != null) ...[
-                SizedBox(height: context.tokens.spacing),
-                FilledButton(onPressed: onAction, child: Text(actionLabel!)),
+                SizedBox(height: mc.space.md),
+                McButton(
+                  label: actionLabel!,
+                  onPressed: onAction,
+                  expand: false,
+                ),
               ],
             ],
           ),
@@ -119,14 +132,23 @@ class OfflineBanner extends StatelessWidget {
   const OfflineBanner({super.key});
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: Theme.of(context).colorScheme.errorContainer,
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: Material(
+        color: mc.colors.errorContainer,
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(mc.space.xs),
           child: Text(
             AppLocalizations.of(context).offlineBanner,
+            style:
+                mc.text.bodySmall.copyWith(color: mc.colors.onErrorContainer),
             textAlign: TextAlign.center,
           ),
         ),
-      );
+      ),
+    );
+  }
 }

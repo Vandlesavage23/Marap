@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/safety/application/safety_controllers.dart';
 import 'package:marriage_connect/src/features/safety/data/safety_repository.dart';
 import 'package:marriage_connect/src/features/safety/domain/safety_models.dart';
@@ -134,7 +135,7 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text('Block this person?'), findsOneWidget);
       expect(find.textContaining("They aren't told"), findsOneWidget);
-      await t.tap(find.widgetWithText(TextButton, 'Block'));
+      await t.tap(find.widgetWithText(McButton, 'Block'));
       await t.pumpAndSettle();
       expect(s.blocks, ['p1']);
       expect(find.text('Blocked.'), findsOneWidget);
@@ -162,7 +163,7 @@ void main() {
       await t.pumpAndSettle();
       await t.tap(find.text('Block'));
       await t.pumpAndSettle();
-      await t.tap(find.widgetWithText(TextButton, 'Block'));
+      await t.tap(find.widgetWithText(McButton, 'Block'));
       await t.pumpAndSettle();
       expect(
         find.text('Too many attempts. Please wait a moment.'),
@@ -184,6 +185,17 @@ void main() {
       expect(s.unblocks, ['p1']);
       expect(find.text("You haven't blocked anyone."), findsOneWidget);
       expect(find.textContaining("past match isn't restored"), findsOneWidget);
+    });
+
+    testWidgets('offline shows the offline state with a retry', (t) async {
+      final s = FakeSafety()
+        ..failBlocked = const AppFailure(code: 'offline', retryable: true);
+      await t.pumpWidget(
+        host(const BlockedPeopleScreen(), overrides: ov(s)),
+      );
+      await t.pumpAndSettle();
+      expect(find.text("You're offline"), findsOneWidget);
+      expect(find.text('Try again'), findsOneWidget);
     });
 
     testWidgets('error and loading', (t) async {

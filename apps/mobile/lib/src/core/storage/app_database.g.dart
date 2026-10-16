@@ -26,6 +26,43 @@ class $OutboxMessagesTable extends OutboxMessages
   late final GeneratedColumn<String> body = GeneratedColumn<String>(
       'body', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+      'kind', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('text'));
+  static const VerificationMeta _mediaPathMeta =
+      const VerificationMeta('mediaPath');
+  @override
+  late final GeneratedColumn<String> mediaPath = GeneratedColumn<String>(
+      'media_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _mediaMimeMeta =
+      const VerificationMeta('mediaMime');
+  @override
+  late final GeneratedColumn<String> mediaMime = GeneratedColumn<String>(
+      'media_mime', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _mediaBytesMeta =
+      const VerificationMeta('mediaBytes');
+  @override
+  late final GeneratedColumn<int> mediaBytes = GeneratedColumn<int>(
+      'media_bytes', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _mediaDurationMsMeta =
+      const VerificationMeta('mediaDurationMs');
+  @override
+  late final GeneratedColumn<int> mediaDurationMs = GeneratedColumn<int>(
+      'media_duration_ms', aliasedName, true,
+      type: DriftSqlType.int, requiredDuringInsert: false);
+  static const VerificationMeta _mediaIdMeta =
+      const VerificationMeta('mediaId');
+  @override
+  late final GeneratedColumn<String> mediaId = GeneratedColumn<String>(
+      'media_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _attemptsMeta =
       const VerificationMeta('attempts');
   @override
@@ -47,8 +84,20 @@ class $OutboxMessagesTable extends OutboxMessages
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns =>
-      [clientMsgId, matchId, body, attempts, failedCode, createdAt];
+  List<GeneratedColumn> get $columns => [
+        clientMsgId,
+        matchId,
+        body,
+        kind,
+        mediaPath,
+        mediaMime,
+        mediaBytes,
+        mediaDurationMs,
+        mediaId,
+        attempts,
+        failedCode,
+        createdAt
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -78,6 +127,34 @@ class $OutboxMessagesTable extends OutboxMessages
           _bodyMeta, body.isAcceptableOrUnknown(data['body']!, _bodyMeta));
     } else if (isInserting) {
       context.missing(_bodyMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+          _kindMeta, kind.isAcceptableOrUnknown(data['kind']!, _kindMeta));
+    }
+    if (data.containsKey('media_path')) {
+      context.handle(_mediaPathMeta,
+          mediaPath.isAcceptableOrUnknown(data['media_path']!, _mediaPathMeta));
+    }
+    if (data.containsKey('media_mime')) {
+      context.handle(_mediaMimeMeta,
+          mediaMime.isAcceptableOrUnknown(data['media_mime']!, _mediaMimeMeta));
+    }
+    if (data.containsKey('media_bytes')) {
+      context.handle(
+          _mediaBytesMeta,
+          mediaBytes.isAcceptableOrUnknown(
+              data['media_bytes']!, _mediaBytesMeta));
+    }
+    if (data.containsKey('media_duration_ms')) {
+      context.handle(
+          _mediaDurationMsMeta,
+          mediaDurationMs.isAcceptableOrUnknown(
+              data['media_duration_ms']!, _mediaDurationMsMeta));
+    }
+    if (data.containsKey('media_id')) {
+      context.handle(_mediaIdMeta,
+          mediaId.isAcceptableOrUnknown(data['media_id']!, _mediaIdMeta));
     }
     if (data.containsKey('attempts')) {
       context.handle(_attemptsMeta,
@@ -110,6 +187,18 @@ class $OutboxMessagesTable extends OutboxMessages
           .read(DriftSqlType.string, data['${effectivePrefix}match_id'])!,
       body: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}body'])!,
+      kind: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}kind'])!,
+      mediaPath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}media_path']),
+      mediaMime: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}media_mime']),
+      mediaBytes: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}media_bytes']),
+      mediaDurationMs: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}media_duration_ms']),
+      mediaId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}media_id']),
       attempts: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}attempts'])!,
       failedCode: attachedDatabase.typeMapping
@@ -129,6 +218,12 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
   final String clientMsgId;
   final String matchId;
   final String body;
+  final String kind;
+  final String? mediaPath;
+  final String? mediaMime;
+  final int? mediaBytes;
+  final int? mediaDurationMs;
+  final String? mediaId;
   final int attempts;
   final String? failedCode;
   final DateTime createdAt;
@@ -136,6 +231,12 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       {required this.clientMsgId,
       required this.matchId,
       required this.body,
+      required this.kind,
+      this.mediaPath,
+      this.mediaMime,
+      this.mediaBytes,
+      this.mediaDurationMs,
+      this.mediaId,
       required this.attempts,
       this.failedCode,
       required this.createdAt});
@@ -145,6 +246,22 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
     map['client_msg_id'] = Variable<String>(clientMsgId);
     map['match_id'] = Variable<String>(matchId);
     map['body'] = Variable<String>(body);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || mediaPath != null) {
+      map['media_path'] = Variable<String>(mediaPath);
+    }
+    if (!nullToAbsent || mediaMime != null) {
+      map['media_mime'] = Variable<String>(mediaMime);
+    }
+    if (!nullToAbsent || mediaBytes != null) {
+      map['media_bytes'] = Variable<int>(mediaBytes);
+    }
+    if (!nullToAbsent || mediaDurationMs != null) {
+      map['media_duration_ms'] = Variable<int>(mediaDurationMs);
+    }
+    if (!nullToAbsent || mediaId != null) {
+      map['media_id'] = Variable<String>(mediaId);
+    }
     map['attempts'] = Variable<int>(attempts);
     if (!nullToAbsent || failedCode != null) {
       map['failed_code'] = Variable<String>(failedCode);
@@ -158,6 +275,22 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       clientMsgId: Value(clientMsgId),
       matchId: Value(matchId),
       body: Value(body),
+      kind: Value(kind),
+      mediaPath: mediaPath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaPath),
+      mediaMime: mediaMime == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaMime),
+      mediaBytes: mediaBytes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaBytes),
+      mediaDurationMs: mediaDurationMs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaDurationMs),
+      mediaId: mediaId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaId),
       attempts: Value(attempts),
       failedCode: failedCode == null && nullToAbsent
           ? const Value.absent()
@@ -173,6 +306,12 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       clientMsgId: serializer.fromJson<String>(json['clientMsgId']),
       matchId: serializer.fromJson<String>(json['matchId']),
       body: serializer.fromJson<String>(json['body']),
+      kind: serializer.fromJson<String>(json['kind']),
+      mediaPath: serializer.fromJson<String?>(json['mediaPath']),
+      mediaMime: serializer.fromJson<String?>(json['mediaMime']),
+      mediaBytes: serializer.fromJson<int?>(json['mediaBytes']),
+      mediaDurationMs: serializer.fromJson<int?>(json['mediaDurationMs']),
+      mediaId: serializer.fromJson<String?>(json['mediaId']),
       attempts: serializer.fromJson<int>(json['attempts']),
       failedCode: serializer.fromJson<String?>(json['failedCode']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -185,6 +324,12 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
       'clientMsgId': serializer.toJson<String>(clientMsgId),
       'matchId': serializer.toJson<String>(matchId),
       'body': serializer.toJson<String>(body),
+      'kind': serializer.toJson<String>(kind),
+      'mediaPath': serializer.toJson<String?>(mediaPath),
+      'mediaMime': serializer.toJson<String?>(mediaMime),
+      'mediaBytes': serializer.toJson<int?>(mediaBytes),
+      'mediaDurationMs': serializer.toJson<int?>(mediaDurationMs),
+      'mediaId': serializer.toJson<String?>(mediaId),
       'attempts': serializer.toJson<int>(attempts),
       'failedCode': serializer.toJson<String?>(failedCode),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -195,6 +340,12 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
           {String? clientMsgId,
           String? matchId,
           String? body,
+          String? kind,
+          Value<String?> mediaPath = const Value.absent(),
+          Value<String?> mediaMime = const Value.absent(),
+          Value<int?> mediaBytes = const Value.absent(),
+          Value<int?> mediaDurationMs = const Value.absent(),
+          Value<String?> mediaId = const Value.absent(),
           int? attempts,
           Value<String?> failedCode = const Value.absent(),
           DateTime? createdAt}) =>
@@ -202,6 +353,14 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
         clientMsgId: clientMsgId ?? this.clientMsgId,
         matchId: matchId ?? this.matchId,
         body: body ?? this.body,
+        kind: kind ?? this.kind,
+        mediaPath: mediaPath.present ? mediaPath.value : this.mediaPath,
+        mediaMime: mediaMime.present ? mediaMime.value : this.mediaMime,
+        mediaBytes: mediaBytes.present ? mediaBytes.value : this.mediaBytes,
+        mediaDurationMs: mediaDurationMs.present
+            ? mediaDurationMs.value
+            : this.mediaDurationMs,
+        mediaId: mediaId.present ? mediaId.value : this.mediaId,
         attempts: attempts ?? this.attempts,
         failedCode: failedCode.present ? failedCode.value : this.failedCode,
         createdAt: createdAt ?? this.createdAt,
@@ -212,6 +371,15 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
           data.clientMsgId.present ? data.clientMsgId.value : this.clientMsgId,
       matchId: data.matchId.present ? data.matchId.value : this.matchId,
       body: data.body.present ? data.body.value : this.body,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      mediaPath: data.mediaPath.present ? data.mediaPath.value : this.mediaPath,
+      mediaMime: data.mediaMime.present ? data.mediaMime.value : this.mediaMime,
+      mediaBytes:
+          data.mediaBytes.present ? data.mediaBytes.value : this.mediaBytes,
+      mediaDurationMs: data.mediaDurationMs.present
+          ? data.mediaDurationMs.value
+          : this.mediaDurationMs,
+      mediaId: data.mediaId.present ? data.mediaId.value : this.mediaId,
       attempts: data.attempts.present ? data.attempts.value : this.attempts,
       failedCode:
           data.failedCode.present ? data.failedCode.value : this.failedCode,
@@ -225,6 +393,12 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
           ..write('clientMsgId: $clientMsgId, ')
           ..write('matchId: $matchId, ')
           ..write('body: $body, ')
+          ..write('kind: $kind, ')
+          ..write('mediaPath: $mediaPath, ')
+          ..write('mediaMime: $mediaMime, ')
+          ..write('mediaBytes: $mediaBytes, ')
+          ..write('mediaDurationMs: $mediaDurationMs, ')
+          ..write('mediaId: $mediaId, ')
           ..write('attempts: $attempts, ')
           ..write('failedCode: $failedCode, ')
           ..write('createdAt: $createdAt')
@@ -233,8 +407,19 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(clientMsgId, matchId, body, attempts, failedCode, createdAt);
+  int get hashCode => Object.hash(
+      clientMsgId,
+      matchId,
+      body,
+      kind,
+      mediaPath,
+      mediaMime,
+      mediaBytes,
+      mediaDurationMs,
+      mediaId,
+      attempts,
+      failedCode,
+      createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -242,6 +427,12 @@ class OutboxMessage extends DataClass implements Insertable<OutboxMessage> {
           other.clientMsgId == this.clientMsgId &&
           other.matchId == this.matchId &&
           other.body == this.body &&
+          other.kind == this.kind &&
+          other.mediaPath == this.mediaPath &&
+          other.mediaMime == this.mediaMime &&
+          other.mediaBytes == this.mediaBytes &&
+          other.mediaDurationMs == this.mediaDurationMs &&
+          other.mediaId == this.mediaId &&
           other.attempts == this.attempts &&
           other.failedCode == this.failedCode &&
           other.createdAt == this.createdAt);
@@ -251,6 +442,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
   final Value<String> clientMsgId;
   final Value<String> matchId;
   final Value<String> body;
+  final Value<String> kind;
+  final Value<String?> mediaPath;
+  final Value<String?> mediaMime;
+  final Value<int?> mediaBytes;
+  final Value<int?> mediaDurationMs;
+  final Value<String?> mediaId;
   final Value<int> attempts;
   final Value<String?> failedCode;
   final Value<DateTime> createdAt;
@@ -259,6 +456,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     this.clientMsgId = const Value.absent(),
     this.matchId = const Value.absent(),
     this.body = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.mediaPath = const Value.absent(),
+    this.mediaMime = const Value.absent(),
+    this.mediaBytes = const Value.absent(),
+    this.mediaDurationMs = const Value.absent(),
+    this.mediaId = const Value.absent(),
     this.attempts = const Value.absent(),
     this.failedCode = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -268,6 +471,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     required String clientMsgId,
     required String matchId,
     required String body,
+    this.kind = const Value.absent(),
+    this.mediaPath = const Value.absent(),
+    this.mediaMime = const Value.absent(),
+    this.mediaBytes = const Value.absent(),
+    this.mediaDurationMs = const Value.absent(),
+    this.mediaId = const Value.absent(),
     this.attempts = const Value.absent(),
     this.failedCode = const Value.absent(),
     required DateTime createdAt,
@@ -280,6 +489,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     Expression<String>? clientMsgId,
     Expression<String>? matchId,
     Expression<String>? body,
+    Expression<String>? kind,
+    Expression<String>? mediaPath,
+    Expression<String>? mediaMime,
+    Expression<int>? mediaBytes,
+    Expression<int>? mediaDurationMs,
+    Expression<String>? mediaId,
     Expression<int>? attempts,
     Expression<String>? failedCode,
     Expression<DateTime>? createdAt,
@@ -289,6 +504,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
       if (clientMsgId != null) 'client_msg_id': clientMsgId,
       if (matchId != null) 'match_id': matchId,
       if (body != null) 'body': body,
+      if (kind != null) 'kind': kind,
+      if (mediaPath != null) 'media_path': mediaPath,
+      if (mediaMime != null) 'media_mime': mediaMime,
+      if (mediaBytes != null) 'media_bytes': mediaBytes,
+      if (mediaDurationMs != null) 'media_duration_ms': mediaDurationMs,
+      if (mediaId != null) 'media_id': mediaId,
       if (attempts != null) 'attempts': attempts,
       if (failedCode != null) 'failed_code': failedCode,
       if (createdAt != null) 'created_at': createdAt,
@@ -300,6 +521,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
       {Value<String>? clientMsgId,
       Value<String>? matchId,
       Value<String>? body,
+      Value<String>? kind,
+      Value<String?>? mediaPath,
+      Value<String?>? mediaMime,
+      Value<int?>? mediaBytes,
+      Value<int?>? mediaDurationMs,
+      Value<String?>? mediaId,
       Value<int>? attempts,
       Value<String?>? failedCode,
       Value<DateTime>? createdAt,
@@ -308,6 +535,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
       clientMsgId: clientMsgId ?? this.clientMsgId,
       matchId: matchId ?? this.matchId,
       body: body ?? this.body,
+      kind: kind ?? this.kind,
+      mediaPath: mediaPath ?? this.mediaPath,
+      mediaMime: mediaMime ?? this.mediaMime,
+      mediaBytes: mediaBytes ?? this.mediaBytes,
+      mediaDurationMs: mediaDurationMs ?? this.mediaDurationMs,
+      mediaId: mediaId ?? this.mediaId,
       attempts: attempts ?? this.attempts,
       failedCode: failedCode ?? this.failedCode,
       createdAt: createdAt ?? this.createdAt,
@@ -326,6 +559,24 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
     }
     if (body.present) {
       map['body'] = Variable<String>(body.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (mediaPath.present) {
+      map['media_path'] = Variable<String>(mediaPath.value);
+    }
+    if (mediaMime.present) {
+      map['media_mime'] = Variable<String>(mediaMime.value);
+    }
+    if (mediaBytes.present) {
+      map['media_bytes'] = Variable<int>(mediaBytes.value);
+    }
+    if (mediaDurationMs.present) {
+      map['media_duration_ms'] = Variable<int>(mediaDurationMs.value);
+    }
+    if (mediaId.present) {
+      map['media_id'] = Variable<String>(mediaId.value);
     }
     if (attempts.present) {
       map['attempts'] = Variable<int>(attempts.value);
@@ -348,6 +599,12 @@ class OutboxMessagesCompanion extends UpdateCompanion<OutboxMessage> {
           ..write('clientMsgId: $clientMsgId, ')
           ..write('matchId: $matchId, ')
           ..write('body: $body, ')
+          ..write('kind: $kind, ')
+          ..write('mediaPath: $mediaPath, ')
+          ..write('mediaMime: $mediaMime, ')
+          ..write('mediaBytes: $mediaBytes, ')
+          ..write('mediaDurationMs: $mediaDurationMs, ')
+          ..write('mediaId: $mediaId, ')
           ..write('attempts: $attempts, ')
           ..write('failedCode: $failedCode, ')
           ..write('createdAt: $createdAt, ')
@@ -1483,6 +1740,12 @@ typedef $$OutboxMessagesTableCreateCompanionBuilder = OutboxMessagesCompanion
   required String clientMsgId,
   required String matchId,
   required String body,
+  Value<String> kind,
+  Value<String?> mediaPath,
+  Value<String?> mediaMime,
+  Value<int?> mediaBytes,
+  Value<int?> mediaDurationMs,
+  Value<String?> mediaId,
   Value<int> attempts,
   Value<String?> failedCode,
   required DateTime createdAt,
@@ -1493,6 +1756,12 @@ typedef $$OutboxMessagesTableUpdateCompanionBuilder = OutboxMessagesCompanion
   Value<String> clientMsgId,
   Value<String> matchId,
   Value<String> body,
+  Value<String> kind,
+  Value<String?> mediaPath,
+  Value<String?> mediaMime,
+  Value<int?> mediaBytes,
+  Value<int?> mediaDurationMs,
+  Value<String?> mediaId,
   Value<int> attempts,
   Value<String?> failedCode,
   Value<DateTime> createdAt,
@@ -1516,6 +1785,25 @@ class $$OutboxMessagesTableFilterComposer
 
   ColumnFilters<String> get body => $composableBuilder(
       column: $table.body, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mediaPath => $composableBuilder(
+      column: $table.mediaPath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mediaMime => $composableBuilder(
+      column: $table.mediaMime, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get mediaBytes => $composableBuilder(
+      column: $table.mediaBytes, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get mediaDurationMs => $composableBuilder(
+      column: $table.mediaDurationMs,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get mediaId => $composableBuilder(
+      column: $table.mediaId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get attempts => $composableBuilder(
       column: $table.attempts, builder: (column) => ColumnFilters(column));
@@ -1545,6 +1833,25 @@ class $$OutboxMessagesTableOrderingComposer
   ColumnOrderings<String> get body => $composableBuilder(
       column: $table.body, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get kind => $composableBuilder(
+      column: $table.kind, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mediaPath => $composableBuilder(
+      column: $table.mediaPath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mediaMime => $composableBuilder(
+      column: $table.mediaMime, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get mediaBytes => $composableBuilder(
+      column: $table.mediaBytes, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get mediaDurationMs => $composableBuilder(
+      column: $table.mediaDurationMs,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get mediaId => $composableBuilder(
+      column: $table.mediaId, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get attempts => $composableBuilder(
       column: $table.attempts, builder: (column) => ColumnOrderings(column));
 
@@ -1572,6 +1879,24 @@ class $$OutboxMessagesTableAnnotationComposer
 
   GeneratedColumn<String> get body =>
       $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaPath =>
+      $composableBuilder(column: $table.mediaPath, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaMime =>
+      $composableBuilder(column: $table.mediaMime, builder: (column) => column);
+
+  GeneratedColumn<int> get mediaBytes => $composableBuilder(
+      column: $table.mediaBytes, builder: (column) => column);
+
+  GeneratedColumn<int> get mediaDurationMs => $composableBuilder(
+      column: $table.mediaDurationMs, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaId =>
+      $composableBuilder(column: $table.mediaId, builder: (column) => column);
 
   GeneratedColumn<int> get attempts =>
       $composableBuilder(column: $table.attempts, builder: (column) => column);
@@ -1613,6 +1938,12 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             Value<String> clientMsgId = const Value.absent(),
             Value<String> matchId = const Value.absent(),
             Value<String> body = const Value.absent(),
+            Value<String> kind = const Value.absent(),
+            Value<String?> mediaPath = const Value.absent(),
+            Value<String?> mediaMime = const Value.absent(),
+            Value<int?> mediaBytes = const Value.absent(),
+            Value<int?> mediaDurationMs = const Value.absent(),
+            Value<String?> mediaId = const Value.absent(),
             Value<int> attempts = const Value.absent(),
             Value<String?> failedCode = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
@@ -1622,6 +1953,12 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             clientMsgId: clientMsgId,
             matchId: matchId,
             body: body,
+            kind: kind,
+            mediaPath: mediaPath,
+            mediaMime: mediaMime,
+            mediaBytes: mediaBytes,
+            mediaDurationMs: mediaDurationMs,
+            mediaId: mediaId,
             attempts: attempts,
             failedCode: failedCode,
             createdAt: createdAt,
@@ -1631,6 +1968,12 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             required String clientMsgId,
             required String matchId,
             required String body,
+            Value<String> kind = const Value.absent(),
+            Value<String?> mediaPath = const Value.absent(),
+            Value<String?> mediaMime = const Value.absent(),
+            Value<int?> mediaBytes = const Value.absent(),
+            Value<int?> mediaDurationMs = const Value.absent(),
+            Value<String?> mediaId = const Value.absent(),
             Value<int> attempts = const Value.absent(),
             Value<String?> failedCode = const Value.absent(),
             required DateTime createdAt,
@@ -1640,6 +1983,12 @@ class $$OutboxMessagesTableTableManager extends RootTableManager<
             clientMsgId: clientMsgId,
             matchId: matchId,
             body: body,
+            kind: kind,
+            mediaPath: mediaPath,
+            mediaMime: mediaMime,
+            mediaBytes: mediaBytes,
+            mediaDurationMs: mediaDurationMs,
+            mediaId: mediaId,
             attempts: attempts,
             failedCode: failedCode,
             createdAt: createdAt,

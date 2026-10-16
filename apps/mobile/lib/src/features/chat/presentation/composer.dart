@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_controller.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
 import 'package:marriage_connect/src/features/chat/data/media_services.dart';
@@ -65,19 +66,22 @@ class _ComposerState extends ConsumerState<Composer> {
             ),
           ),
           actions: [
-            TextButton(
+            McButton(
+              label: l.interestDone,
               onPressed: () => Navigator.pop(c),
-              child: Text(l.interestDone),
+              kind: McButtonKind.text,
+              expand: false,
             ),
           ],
         ),
       );
       return;
     }
-    final camera = await showModalBottomSheet<bool>(
-      context: context,
-      builder: (c) => SafeArea(
-        child: Column(
+    final camera = await BottomSheetScaffold.show<bool>(
+      context,
+      title: l.chatAttach,
+      child: Builder(
+        builder: (c) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(

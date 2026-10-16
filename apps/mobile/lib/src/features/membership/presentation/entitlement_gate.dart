@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/membership/application/member_failure_copy.dart';
 import 'package:marriage_connect/src/features/membership/application/membership_providers.dart';
 import 'package:marriage_connect/src/features/membership/domain/entitlements.dart';
@@ -86,7 +86,7 @@ class RestrictedPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final gap = SizedBox(height: context.tokens.spacing / 2);
+    final gap = SizedBox(height: context.mc.space.md / 2);
     final verified = !entitlements.looksUnverified;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -97,33 +97,36 @@ class RestrictedPrompt extends StatelessWidget {
         ),
         if (entitlements.trialAvailable) ...[
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.tokens.spacing),
+            padding: EdgeInsets.symmetric(horizontal: context.mc.space.md),
             child: Text(l.memberGateTrialUnused, textAlign: TextAlign.center),
           ),
           gap,
         ],
         if (verified)
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: context.tokens.spacing),
+            padding: EdgeInsets.symmetric(horizontal: context.mc.space.md),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (entitlements.trialAvailable) ...[
-                  OutlinedButton(
+                  McButton(
+                    label: l.memberGateStartTrial,
                     onPressed: () => context.push(trialRoute),
-                    child: Text(l.memberGateStartTrial),
+                    kind: McButtonKind.secondary,
                   ),
                   gap,
                 ],
-                OutlinedButton(
+                McButton(
+                  label: l.memberGateSeePlans,
                   onPressed: () => context.push(paywallRoute),
-                  child: Text(l.memberGateSeePlans),
+                  kind: McButtonKind.secondary,
                 ),
                 if (onDismiss != null) ...[
                   gap,
-                  OutlinedButton(
+                  McButton(
+                    label: l.memberGateNotNow,
                     onPressed: onDismiss,
-                    child: Text(l.memberGateNotNow),
+                    kind: McButtonKind.secondary,
                   ),
                 ],
               ],
@@ -143,22 +146,19 @@ Future<void> showRestrictedSheet(
   Capability capability,
 ) async {
   final ent = ref.read(entitlementProvider).valueOrNull;
-  await showModalBottomSheet<void>(
-    context: context,
-    showDragHandle: true,
-    isScrollControlled: true,
-    builder: (ctx) => SafeArea(
-      child: SingleChildScrollView(
-        child: RestrictedPrompt(
-          capability: capability,
-          entitlements: ent ??
-              const Entitlements(
-                state: EntitlementState.none,
-                trialUsed: true,
-                capabilities: {'browse': true},
-              ),
-          onDismiss: () => Navigator.of(ctx).pop(),
-        ),
+  await BottomSheetScaffold.show<void>(
+    context,
+    title: AppLocalizations.of(context).adoptMembershipSheetTitle,
+    child: Builder(
+      builder: (ctx) => RestrictedPrompt(
+        capability: capability,
+        entitlements: ent ??
+            const Entitlements(
+              state: EntitlementState.none,
+              trialUsed: true,
+              capabilities: {'browse': true},
+            ),
+        onDismiss: () => Navigator.of(ctx).pop(),
       ),
     ),
   );
@@ -177,9 +177,9 @@ class ReadOnlyConversationBanner extends ConsumerWidget {
     }
     final l = AppLocalizations.of(context);
     return Material(
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      color: context.mc.colors.primaryContainer,
       child: Padding(
-        padding: EdgeInsets.all(context.tokens.spacing),
+        padding: EdgeInsets.all(context.mc.space.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -188,10 +188,11 @@ class ReadOnlyConversationBanner extends ConsumerWidget {
               child: Text(l.memberReadOnlyChat),
             ),
             if (!ent.looksUnverified) ...[
-              SizedBox(height: context.tokens.spacing / 2),
-              OutlinedButton(
+              SizedBox(height: context.mc.space.md / 2),
+              McButton(
+                label: l.memberGateSeePlans,
                 onPressed: () => context.push(paywallRoute),
-                child: Text(l.memberGateSeePlans),
+                kind: McButtonKind.secondary,
               ),
             ],
           ],

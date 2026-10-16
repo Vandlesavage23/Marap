@@ -13,6 +13,6 @@ COPY . .
 RUN useradd -r app && chown -R app /app
 USER app
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod PATH="/app/.venv/bin:$PATH"
-# api: gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker
+# api: gunicorn config.wsgi:application --worker-class gthread --workers 3 --threads 8 (REST; ASGI would run every sync view on ONE thread per worker — measured in loadtests)
 # ws:  daphne config.asgi:application   worker: celery -A config worker -Q default,media,billing,notify
-CMD ["gunicorn", "config.asgi:application", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000"]
+CMD ["gunicorn", "config.wsgi:application", "--worker-class", "gthread", "--workers", "3", "--threads", "8", "--max-requests", "2000", "--max-requests-jitter", "200", "-b", "0.0.0.0:8000"]

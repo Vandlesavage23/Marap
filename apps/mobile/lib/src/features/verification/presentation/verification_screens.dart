@@ -7,7 +7,7 @@ import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/verification/application/verification_controller.dart';
 import 'package:marriage_connect/src/features/verification/data/identity_capture.dart';
 import 'package:marriage_connect/src/features/verification/data/screen_security.dart';
@@ -146,12 +146,7 @@ class _PassedView extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.verified_outlined,
-              size: 56,
-              color: context.tokens.success,
-              semanticLabel: l.verifPassedTitle,
-            ),
+            const VerificationBadge(),
             const SizedBox(height: 16),
             Text(
               l.verifPassedTitle,
@@ -161,14 +156,14 @@ class _PassedView extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(l.verifPassedBody, textAlign: TextAlign.center),
             const SizedBox(height: 24),
-            FilledButton(
+            McButton(
+              label: l.verifPassedContinue,
               onPressed: () async {
                 await ref
                     .read(verificationProvider.notifier)
                     .continueAfterPassed();
                 if (context.mounted) context.go('/profile/builder');
               },
-              child: Text(l.verifPassedContinue),
             ),
           ],
         ),
@@ -236,9 +231,10 @@ class _PendingViewState extends ConsumerState<_PendingView> {
           ),
           if (failure != null) _ErrorBanner(failure),
           const SizedBox(height: 24),
-          OutlinedButton(
+          McButton(
+            label: l.verifCheckAgain,
             onPressed: ref.read(verificationProvider.notifier).refresh,
-            child: Text(l.verifCheckAgain),
+            kind: McButtonKind.secondary,
           ),
         ],
       ),
@@ -303,10 +299,10 @@ class _StartViewState extends ConsumerState<_StartView> {
         ],
         const SizedBox(height: 16),
         if (!failed || status.reason != 'underage')
-          FilledButton(
+          McButton(
+            label: failed ? l.verifTryAgain : l.verifStartCapture,
             onPressed: () =>
                 context.push('/verification/capture', extra: _idType),
-            child: Text(failed ? l.verifTryAgain : l.verifStartCapture),
           ),
         if (failed) ...[
           const SizedBox(height: 24),
@@ -364,25 +360,24 @@ class _ConsentsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l.verifConsentsTitle,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 4),
-            Text(l.verifConsentsBody),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => context.go('/onboarding/consents'),
-              child: Text(l.verifConsentsAction),
-            ),
-          ],
-        ),
+    return McCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.verifConsentsTitle,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 4),
+          Text(l.verifConsentsBody),
+          const SizedBox(height: 8),
+          McButton(
+            label: l.verifConsentsAction,
+            onPressed: () => context.go('/onboarding/consents'),
+            kind: McButtonKind.text,
+            expand: false,
+          ),
+        ],
       ),
     );
   }
@@ -395,24 +390,20 @@ class _FailureCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final scheme = Theme.of(context).colorScheme;
-    return Card(
-      color: scheme.errorContainer,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Semantics(
-          container: true,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l.verifFailedTitle,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              const SizedBox(height: 8),
-              Text(reasonMessage(l, status.reason)),
-            ],
-          ),
+    return McCard(
+      color: context.mc.colors.errorContainer,
+      child: Semantics(
+        container: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l.verifFailedTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(reasonMessage(l, status.reason)),
+          ],
         ),
       ),
     );
@@ -438,9 +429,10 @@ class _AppealSection extends StatelessWidget {
         const SizedBox(height: 4),
         Text(l.verifAppealBody),
         const SizedBox(height: 8),
-        OutlinedButton(
+        McButton(
+          label: l.verifAppealAction,
           onPressed: () => context.push('/verification/appeal'),
-          child: Text(l.verifAppealAction),
+          kind: McButtonKind.secondary,
         ),
       ],
     );
@@ -524,11 +516,9 @@ class _VerificationCaptureScreenState
             _ConsentsCard(),
           ],
           const SizedBox(height: 24),
-          FilledButton(
+          McButton(
+            label: failure != null ? l.verifTryAgain : l.verifCaptureOpen,
             onPressed: _run,
-            child: Text(
-              failure != null ? l.verifTryAgain : l.verifCaptureOpen,
-            ),
           ),
         ],
       );
@@ -586,9 +576,9 @@ class _VerificationAppealScreenState
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                FilledButton(
+                McButton(
+                  label: l.verifAppealBack,
                   onPressed: () => context.go('/verification'),
-                  child: Text(l.verifAppealBack),
                 ),
               ],
             ),
@@ -604,16 +594,13 @@ class _VerificationAppealScreenState
         children: [
           Text(l.verifAppealPrompt),
           const SizedBox(height: 12),
-          TextField(
+          McTextField(
             controller: _ctrl,
             minLines: 4,
             maxLines: 8,
             maxLength: 1000,
             textCapitalization: TextCapitalization.sentences,
-            decoration: InputDecoration(
-              labelText: l.verifAppealHint,
-              border: const OutlineInputBorder(),
-            ),
+            label: l.verifAppealHint,
             onChanged: (_) => setState(() {}),
           ),
           if (_ctrl.text.isNotEmpty && _ctrl.text.trim().length < 10)
@@ -623,17 +610,13 @@ class _VerificationAppealScreenState
             ),
           if (failure != null) _ErrorBanner(failure),
           const SizedBox(height: 16),
-          FilledButton(
+          McButton(
+            label: l.verifAppealSubmit,
+            loading: sending,
             onPressed: _valid && !sending
                 ? () =>
                     ref.read(verificationProvider.notifier).appeal(_ctrl.text)
                 : null,
-            child: sending
-                ? const SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l.verifAppealSubmit),
           ),
         ],
       ),

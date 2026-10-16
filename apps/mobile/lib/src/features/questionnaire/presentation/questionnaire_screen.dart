@@ -4,7 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/profile/presentation/profile_widgets.dart';
 import 'package:marriage_connect/src/features/questionnaire/application/questionnaire_controller.dart';
 import 'package:marriage_connect/src/features/questionnaire/data/questionnaire_models.dart';
@@ -167,13 +168,14 @@ class _QuestionList extends ConsumerWidget {
       )
       ..add(const SizedBox(height: 8))
       ..add(
-        OutlinedButton(
+        McButton(
+          label: l.questDone,
           onPressed: state.coreDone && !state.dirty
               ? () => context.canPop()
                   ? context.pop()
                   : context.go('/profile/builder')
               : null,
-          child: Text(l.questDone),
+          kind: McButtonKind.secondary,
         ),
       );
     return ListView(padding: const EdgeInsets.all(24), children: children);
@@ -236,10 +238,9 @@ class _QuestionCard extends ConsumerWidget {
           onChanged: (v) => _pick(context, ref, int.parse(v)),
         );
     }
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: context.mc.space.xxs + 2),
+      child: McCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -302,33 +303,25 @@ Future<bool> showConsentSheet(BuildContext context, String? kind) async {
       ),
     _ => (l.questConsentGenericTitle, l.questConsentGenericBody),
   };
-  final agreed = await showModalBottomSheet<bool>(
-    context: context,
-    isScrollControlled: true,
-    builder: (ctx) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(ctx).textTheme.titleLarge),
-            const SizedBox(height: 12),
-            Text(body),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(l.questConsentAgree),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(l.questConsentSkip),
-            ),
-          ],
+  final agreed = await BottomSheetScaffold.show<bool>(
+    context,
+    title: title,
+    child: Text(body),
+    actions: [
+      Builder(
+        builder: (ctx) => McButton(
+          label: l.questConsentAgree,
+          onPressed: () => Navigator.pop(ctx, true),
         ),
       ),
-    ),
+      Builder(
+        builder: (ctx) => McButton(
+          label: l.questConsentSkip,
+          onPressed: () => Navigator.pop(ctx, false),
+          kind: McButtonKind.secondary,
+        ),
+      ),
+    ],
   );
   return agreed ?? false;
 }

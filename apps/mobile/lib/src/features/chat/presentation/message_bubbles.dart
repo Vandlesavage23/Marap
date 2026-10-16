@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
 import 'package:marriage_connect/src/features/chat/data/media_services.dart';
 import 'package:marriage_connect/src/features/chat/domain/chat_message.dart';
@@ -114,12 +115,16 @@ class MessageBubble extends StatelessWidget {
 class PendingBubble extends StatelessWidget {
   const PendingBubble({
     required this.body,
+    this.kind = MessageKind.text,
     this.failedCode,
     this.onDiscard,
     super.key,
   });
 
   final String body;
+
+  /// Photo / voice rows have no text: they show a labelled placeholder.
+  final MessageKind kind;
   final String? failedCode;
   final VoidCallback? onDiscard;
 
@@ -132,6 +137,7 @@ class PendingBubble extends StatelessWidget {
       'contact_details_blocked' => l.chatContactBlocked,
       'photo_locked' => l.chatPhotoLocked(ChatRules.photoUnlockMinMessages),
       'entitlement_required' => l.errorEntitlementRequired,
+      'media_rejected' || 'media_missing' => l.chatUploadFailed,
       _ => null,
     };
     return Padding(
@@ -139,7 +145,20 @@ class PendingBubble extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          _Bubble(mine: true, child: Text(body)),
+          _Bubble(
+            mine: true,
+            child: switch (kind) {
+              MessageKind.image => _QueuedMedia(
+                  icon: Icons.photo_outlined,
+                  label: l.offlineMediaPhoto,
+                ),
+              MessageKind.voice => _QueuedMedia(
+                  icon: Icons.mic_none,
+                  label: l.offlineMediaVoice,
+                ),
+              _ => Text(body),
+            },
+          ),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -156,12 +175,11 @@ class PendingBubble extends StatelessWidget {
                 ),
               ),
               if (failed && onDiscard != null)
-                TextButton(
+                McButton(
+                  label: l.chatDiscard,
                   onPressed: onDiscard,
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                  ),
-                  child: Text(l.chatDiscard),
+                  kind: McButtonKind.text,
+                  expand: false,
                 ),
             ],
           ),
@@ -176,6 +194,18 @@ class PendingBubble extends StatelessWidget {
       ),
     );
   }
+}
+
+class _QueuedMedia extends StatelessWidget {
+  const _QueuedMedia({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [Icon(icon, size: 18), const SizedBox(width: 6), Text(label)],
+      );
 }
 
 /// Photo in a conversation. With data saver on it stays a placeholder until

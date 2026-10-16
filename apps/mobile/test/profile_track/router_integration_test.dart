@@ -47,7 +47,11 @@ class _NoAuth implements AuthRepository {
   @override
   Future<void> startOtp(String phone) async {}
   @override
-  Future<void> verifyOtp({required String phone, required String code}) async {}
+  Future<void> verifyOtp({
+    required String phone,
+    required String code,
+    String? inviteCode,
+  }) async {}
   @override
   Future<void> recordConsents({required Map<String, bool> granted}) async {}
 }

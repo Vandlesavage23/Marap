@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/discovery/application/discovery_controller.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/candidate_card.dart';
@@ -113,9 +113,9 @@ class _ProfileBody extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.favorite_outline),
-              label: Text(l.discInterested),
+            child: McButton(
+              icon: Icons.favorite_outline,
+              label: l.discInterested,
               onPressed: () => showSendInterestSheet(
                 context,
                 profileId: p.profileId,

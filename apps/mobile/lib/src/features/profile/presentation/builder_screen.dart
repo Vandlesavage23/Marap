@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_controller.dart';
 import 'package:marriage_connect/src/features/profile/data/profile_models.dart';
 import 'package:marriage_connect/src/features/profile/presentation/basic_steps.dart';
@@ -157,16 +157,17 @@ class _QuestionsStep extends ConsumerWidget {
             leading: const Icon(Icons.check_circle_outline),
             title: Text(l.profileQuestionsDone),
           ),
-        OutlinedButton(
+        McButton(
+          label: l.profileQuestionsOpen,
           onPressed: () async {
             await context.push<void>('/questionnaire');
             // Readiness changes once the core answers are saved.
             await ref.read(ownProfileProvider.notifier).reload();
           },
-          child: Text(l.profileQuestionsOpen),
+          kind: McButtonKind.secondary,
         ),
         const SizedBox(height: 16),
-        FilledButton(onPressed: onDone, child: Text(l.profileSaveContinue)),
+        McButton(label: l.profileSaveContinue, onPressed: onDone),
       ],
     );
   }

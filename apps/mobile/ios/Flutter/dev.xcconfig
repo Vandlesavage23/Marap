@@ -1,0 +1,4 @@
+// Flavor `dev` (mirrors android/app/build.gradle.kts).
+PRODUCT_BUNDLE_IDENTIFIER = ug.marriageconnect.app.dev
+APP_DISPLAY_NAME = MC Dev
+ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon-dev

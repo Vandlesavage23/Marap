@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
-import 'package:marriage_connect/src/core/widgets/state_widgets.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/profile/application/photos_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_providers.dart';
 import 'package:marriage_connect/src/features/profile/data/photo_pipeline.dart';
@@ -63,10 +64,11 @@ class PhotosStep extends ConsumerWidget {
             ),
           if (s.failure != null) FailureText(s.failure),
           const SizedBox(height: 16),
-          OutlinedButton.icon(
-            icon: const Icon(Icons.add_a_photo_outlined),
+          McButton(
+            kind: McButtonKind.secondary,
+            icon: Icons.add_a_photo_outlined,
             onPressed: s.full ? null : () => _chooseSource(context, ctrl.add),
-            label: Text(l.profilePhotosAdd),
+            label: l.profilePhotosAdd,
           ),
           if (s.full)
             Padding(
@@ -74,7 +76,7 @@ class PhotosStep extends ConsumerWidget {
               child: Text(l.profilePhotoLimit(maxPhotos)),
             ),
           const SizedBox(height: 24),
-          FilledButton(onPressed: onDone, child: Text(l.profileSaveContinue)),
+          McButton(label: l.profileSaveContinue, onPressed: onDone),
         ],
       ),
     );
@@ -85,10 +87,11 @@ class PhotosStep extends ConsumerWidget {
     Future<void> Function(PhotoSource) add,
   ) async {
     final l = AppLocalizations.of(context);
-    final source = await showModalBottomSheet<PhotoSource>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
+    final source = await BottomSheetScaffold.show<PhotoSource>(
+      context,
+      title: l.profilePhotosAdd,
+      child: Builder(
+        builder: (ctx) => Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
@@ -133,8 +136,8 @@ class _PhotoTile extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final ctrl = ref.read(photosProvider.notifier);
     final status = _statusLabel(l, photo);
-    return Card(
-      clipBehavior: Clip.antiAlias,
+    return McCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           Expanded(
@@ -166,9 +169,16 @@ class _PhotoTile extends ConsumerWidget {
                     Positioned(
                       left: 4,
                       top: 4,
-                      child: Chip(
-                        label: Text(index == 0 ? l.profilePhotoMain : status),
-                        visualDensity: VisualDensity.compact,
+                      // The tile's own label already says status; do not read it twice.
+                      child: ExcludeSemantics(
+                        child: StatusChip(
+                          label: index == 0 ? l.profilePhotoMain : status,
+                          tone: photo.approved
+                              ? StatusTone.success
+                              : photo.rejected
+                                  ? StatusTone.error
+                                  : StatusTone.neutral,
+                        ),
                       ),
                     ),
                   ],
@@ -221,41 +231,43 @@ class _UploadTile extends ConsumerWidget {
     } else {
       text = l.profilePhotoUploading;
     }
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: Semantics(
-          liveRegion: true,
-          container: true,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (!failed)
-                const CircularProgressIndicator()
-              else
-                Icon(
-                  Icons.error_outline,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              const SizedBox(height: 8),
-              Text(text, textAlign: TextAlign.center),
-              if (failed)
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  children: [
-                    if (item.retryable)
-                      TextButton(
-                        onPressed: () => ctrl.retry(item.id),
-                        child: Text(l.retry),
-                      ),
-                    TextButton(
-                      onPressed: () => ctrl.dismiss(item.id),
-                      child: Text(l.profilePhotoDismiss),
+    return McCard(
+      padding: EdgeInsets.all(context.mc.space.xs),
+      child: Semantics(
+        liveRegion: true,
+        container: true,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (!failed)
+              const CircularProgressIndicator()
+            else
+              Icon(
+                Icons.error_outline,
+                color: Theme.of(context).colorScheme.error,
+              ),
+            const SizedBox(height: 8),
+            Text(text, textAlign: TextAlign.center),
+            if (failed)
+              Wrap(
+                alignment: WrapAlignment.center,
+                children: [
+                  if (item.retryable)
+                    McButton(
+                      label: l.retry,
+                      onPressed: () => ctrl.retry(item.id),
+                      kind: McButtonKind.text,
+                      expand: false,
                     ),
-                  ],
-                ),
-            ],
-          ),
+                  McButton(
+                    label: l.profilePhotoDismiss,
+                    onPressed: () => ctrl.dismiss(item.id),
+                    kind: McButtonKind.text,
+                    expand: false,
+                  ),
+                ],
+              ),
+          ],
         ),
       ),
     );

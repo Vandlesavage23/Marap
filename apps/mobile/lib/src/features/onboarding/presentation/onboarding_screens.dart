@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
@@ -17,7 +19,7 @@ class _Page extends StatelessWidget {
         appBar: AppBar(title: Text(title)),
         body: SafeArea(
           child: ListView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(context.mc.space.lg),
             children: children,
           ),
         ),
@@ -33,7 +35,7 @@ class WelcomeScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(context.mc.space.lg),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -45,9 +47,9 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Text(l.welcomeBody),
               const SizedBox(height: 24),
-              FilledButton(
+              McButton(
+                label: l.continueLabel,
                 onPressed: () => context.go('/onboarding/how'),
-                child: Text(l.continueLabel),
               ),
             ],
           ),
@@ -72,9 +74,9 @@ class HowItWorksScreen extends StatelessWidget {
             title: Text(s),
           ),
         const SizedBox(height: 16),
-        FilledButton(
+        McButton(
+          label: l.continueLabel,
           onPressed: () => context.go('/onboarding/phone'),
-          child: Text(l.continueLabel),
         ),
       ],
     );
@@ -95,6 +97,7 @@ class _ErrorText extends StatelessWidget {
     if (f == null) return const SizedBox.shrink();
     final l = AppLocalizations.of(context);
     final text = switch (f.code) {
+      'validation_error' when state.inviteRejected => l.adoptInviteNeeded,
       'validation_error' => validation ?? l.errorValidation,
       _ => failureMessage(l, f),
     };
@@ -102,7 +105,9 @@ class _ErrorText extends StatelessWidget {
       padding: const EdgeInsets.only(top: 12),
       child: Text(
         text,
-        style: TextStyle(color: Theme.of(context).colorScheme.error),
+        style: context.mc.text.bodySmall.copyWith(
+          color: context.mc.colors.error,
+        ),
         semanticsLabel: text,
       ),
     );
@@ -142,27 +147,20 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
       children: [
         Text(l.phoneBody),
         const SizedBox(height: 16),
-        TextField(
+        McTextField(
           controller: _ctrl,
           keyboardType: TextInputType.phone,
           autofillHints: const [AutofillHints.telephoneNumber],
-          decoration: InputDecoration(
-            hintText: l.phoneHint,
-            labelText: l.phoneTitle,
-            border: const OutlineInputBorder(),
-          ),
+          hint: l.phoneHint,
+          label: l.phoneTitle,
           onChanged: (_) => setState(() {}),
         ),
         _ErrorText(s),
         const SizedBox(height: 16),
-        FilledButton(
+        McButton(
+          label: l.phoneSend,
+          loading: s.loading,
           onPressed: valid && !s.loading ? _submit : null,
-          child: s.loading
-              ? const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l.phoneSend),
         ),
       ],
     );
@@ -178,17 +176,20 @@ class OtpScreen extends ConsumerStatefulWidget {
 
 class _OtpScreenState extends ConsumerState<OtpScreen> {
   final _ctrl = TextEditingController();
+  final _invite = TextEditingController();
+  bool _inviteOpen = false;
 
   @override
   void dispose() {
     _ctrl.dispose();
+    _invite.dispose();
     super.dispose();
   }
 
   Future<void> _verify() async {
     final ok = await ref
         .read(onboardingProvider.notifier)
-        .submitCode(_ctrl.text.trim());
+        .submitCode(_ctrl.text.trim(), inviteCode: _invite.text);
     if (ok && mounted) context.go('/onboarding/consents');
   }
 
@@ -201,34 +202,48 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       children: [
         Text(l.otpBody(s.phone)),
         const SizedBox(height: 16),
-        TextField(
+        McTextField(
           controller: _ctrl,
           keyboardType: TextInputType.number,
           maxLength: 6,
           autofillHints: const [AutofillHints.oneTimeCode],
-          decoration: InputDecoration(
-            labelText: l.otpTitle,
-            border: const OutlineInputBorder(),
-          ),
+          label: l.otpTitle,
           onChanged: (_) => setState(() {}),
         ),
+        if (_inviteOpen || s.inviteRejected) ...[
+          const SizedBox(height: 8),
+          McTextField(
+            key: const Key('invite-code'),
+            controller: _invite,
+            label: l.adoptInviteLabel,
+            helper: l.adoptInviteHelp,
+            textCapitalization: TextCapitalization.characters,
+            maxLength: 20,
+            onChanged: (_) => setState(() {}),
+          ),
+        ] else
+          McButton(
+            key: const Key('invite-toggle'),
+            label: l.adoptInviteToggle,
+            kind: McButtonKind.text,
+            expand: false,
+            onPressed: () => setState(() => _inviteOpen = true),
+          ),
         _ErrorText(s, validation: l.otpInvalid),
         const SizedBox(height: 16),
-        FilledButton(
+        McButton(
+          label: l.otpVerify,
+          loading: s.loading,
           onPressed: _ctrl.text.length == 6 && !s.loading ? _verify : null,
-          child: s.loading
-              ? const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : Text(l.otpVerify),
         ),
-        TextButton(
+        McButton(
+          label: l.otpResend,
           onPressed: s.loading
               ? null
               : () =>
                   ref.read(onboardingProvider.notifier).submitPhone(s.phone),
-          child: Text(l.otpResend),
+          kind: McButtonKind.text,
+          expand: false,
         ),
       ],
     );
@@ -252,8 +267,10 @@ class _ConsentsScreenState extends ConsumerState<ConsentsScreen> {
     if (!ok || !mounted) return;
     // The guard routes on server state: re-read /me, then let it pick the
     // next step (verification, builder or home).
-    ref.invalidate(meProvider);
-    context.go('/home');
+    // Wait for the fresh /me before navigating: going to /home on the stale
+    // snapshot makes the guard bounce straight back to consents.
+    await ref.read(meProvider.notifier).reload();
+    if (mounted) context.go('/home');
   }
 
   @override
@@ -269,19 +286,18 @@ class _ConsentsScreenState extends ConsumerState<ConsentsScreen> {
       title: l.consentsTitle,
       children: [
         for (final k in requiredConsentKinds)
-          CheckboxListTile(
-            value: _granted[k],
-            onChanged: (v) => setState(() => _granted[k] = v ?? false),
-            title: Text(labels[k]!),
-            controlAffinity: ListTileControlAffinity.leading,
+          ConsentTile(
+            value: _granted[k] ?? false,
+            onChanged: (v) => setState(() => _granted[k] = v),
+            title: labels[k]!,
           ),
         Text(l.consentsNote),
         _ErrorText(s),
         const SizedBox(height: 16),
-        FilledButton(
+        McButton(
+          label: l.consentsAgree,
           onPressed:
               _granted.values.every((v) => v) && !s.loading ? _submit : null,
-          child: Text(l.consentsAgree),
         ),
       ],
     );

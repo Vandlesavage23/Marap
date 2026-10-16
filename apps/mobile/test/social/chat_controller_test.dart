@@ -32,6 +32,15 @@ void main() {
     return s;
   }
 
+  /// Waits until the outbox is empty (a flush may already be in flight, in
+  /// which case `hub.flush()` only schedules another pass).
+  Future<void> outboxDrained() async {
+    for (var i = 0; i < 300; i++) {
+      if ((await h.db.select(h.db.outboxMessages).get()).isEmpty) return;
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+    }
+  }
+
   ChatController ctrl() =>
       h.container.read(chatControllerProvider('m1').notifier);
   ChatState state() => h.container.read(chatControllerProvider('m1')).value!;
@@ -376,24 +385,47 @@ void main() {
       expect(state().messages, isEmpty);
     });
 
-    test('a transient failure keeps the ids: the retry does not re-upload',
+    test('offline: the send is queued in the outbox, then resumes once',
         () async {
       h = Harness();
       await open(history: []);
       h.server.down = true;
       await ctrl().sendMedia(kind: MessageKind.image, file: photo);
+      // The member is told it is not lost.
       expect(state().mediaFailure?.code, 'offline');
-      final firstClientId = h.server.postBodies.isEmpty
-          ? null
-          : h.server.postBodies.first['client_msg_id'];
+      expect(state().uploading, isFalse);
+      var rows = await h.db.select(h.db.outboxMessages).get();
+      expect(rows.single.kind, 'image');
+      expect(rows.single.mediaPath, '/tmp/p.jpg');
+      final clientId = rows.single.clientMsgId;
+      // Back online: the hub flushes the same row.
       h.server.down = false;
-      await ctrl().sendMedia(kind: MessageKind.image, file: photo);
-      expect(h.uploader.uploads, hasLength(1)); // reused media id
-      expect(state().mediaFailure, isNull);
+      await h.container.read(chatHubProvider).flush();
+      await outboxDrained();
+      await pumpEventQueue();
+      expect(h.uploader.uploads, hasLength(1)); // uploaded exactly once
+      expect(h.server.stored.keys, [clientId]); // same client id, no duplicate
       expect(state().messages, hasLength(1));
-      if (firstClientId != null) {
-        expect(h.server.postBodies.last['client_msg_id'], firstClientId);
-      }
+      expect(state().messages.single.clientMsgId, clientId);
+      rows = await h.db.select(h.db.outboxMessages).get();
+      expect(rows, isEmpty);
+    });
+
+    test('an upload that finished is not repeated when only the send failed',
+        () async {
+      h = Harness();
+      await open(history: []);
+      h.server.down = true;
+      await ctrl().sendMedia(kind: MessageKind.voice, file: voice);
+      expect(h.uploader.uploads, hasLength(1));
+      final rows = await h.db.select(h.db.outboxMessages).get();
+      expect(rows.single.mediaId, 'media-1');
+      h.server.down = false;
+      await h.container.read(chatHubProvider).flush();
+      await outboxDrained();
+      expect(h.uploader.uploads, hasLength(1));
+      expect(h.server.postBodies.last['media_id'], 'media-1');
+      expect(h.server.postBodies.last['kind'], 'voice');
     });
 
     test('an upload rejection ends the action (new action next time)',
