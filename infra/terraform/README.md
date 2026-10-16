@@ -119,8 +119,9 @@ Backend (state) configuration, passed at `terraform init`: `bucket`, `dynamodb_t
 
 ## NOT verified / known gaps
 
-1. Nothing was applied or validated against AWS (see top). Provider argument names and versions (`~> 5.70`) are
-   from memory.
+1. Nothing was ever planned or applied against AWS. `terraform validate` passes for dev, staging and prod against the real
+   AWS provider schema (5.100.0, pinned by the committed `.terraform.lock.hcl` files) — this caught and fixed one invalid
+   argument; CI runs it (`infra-ci.yml`). Sizing numbers and WAF thresholds are still guesses.
 2. ALB health checks carry the target IP as Host; the backend now serves `/ready` and `/health` for any host (probe paths only), so the matcher is a strict `200`.
 3. Not provisioned: ClamAV/clamd (`MALWARE_SCANNER`, `CLAMD_HOST` need a service; Bible 3.2 has it locally), SES identities
    and DKIM, Route 53/ACM, FCM/Play/Apple credentials (only the secret slots exist), CloudFront in front of `static-public`.

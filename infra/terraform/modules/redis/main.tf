@@ -7,7 +7,7 @@ resource "aws_elasticache_subnet_group" "this" {
 # Redis is both the Channels layer and the Celery broker: evicting keys would drop queued jobs, so the
 # policy is noeviction (writes fail loudly and the Redis alarms fire instead).
 resource "aws_elasticache_parameter_group" "this" {
-  name_prefix = "${var.name_prefix}-redis7-"
+  name        = "${var.name_prefix}-redis7"
   family      = "redis7"
   description = "${var.name_prefix} Redis 7 (broker + channel layer)"
 
@@ -18,9 +18,6 @@ resource "aws_elasticache_parameter_group" "this" {
 
   tags = var.tags
 
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 resource "aws_elasticache_replication_group" "this" {
