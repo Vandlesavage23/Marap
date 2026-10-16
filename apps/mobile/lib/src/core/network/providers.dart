@@ -1,6 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marriage_connect/src/core/auth/install_id.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/config/env.dart';
 import 'package:marriage_connect/src/core/network/api_client.dart';
@@ -14,6 +15,7 @@ final dioProvider = Provider<Dio>((ref) {
     baseUrl: env.apiRoot,
     tokens: ref.watch(tokenStoreProvider),
     onSignedOut: () => ref.read(sessionProvider.notifier).signedOut(),
+    installId: ref.read(installIdProvider),
   );
 });
 

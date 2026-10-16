@@ -236,7 +236,7 @@ module "ws" {
   cluster_name = aws_ecs_cluster.this.name
 
   image             = local.image
-  command           = ["daphne", "-b", "0.0.0.0", "-p", "8001", "config.asgi:application"]
+  command           = ["uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "8001", "--workers", "1", "--no-access-log"]
   container_port    = 8001
   target_group_arn  = module.alb_waf.ws_target_group_arn
   health_check_host = local.health_check_host

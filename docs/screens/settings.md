@@ -15,4 +15,4 @@
 | restricted | **GAP** (settings are reachable by suspended accounts; no test asserts it) |  |
 | offline | deletion code request offline; data saver tolerates an unreachable flags endpoint | `settings_screens_test.dart: code request offline error`; `data_saver_test.dart: an unreachable flags endpoint is tolerated` |
 
-**GAP.** Consents screen cannot show the member's current choices (stub), so the "data" state for privacy is partly wrong against the real server; the test uses a fake that returns values.
+**Fixed.** The privacy screen reads `GET /me/consents` (finding C3; contract test asserts it). **GAP:** no empty-state test for consents/sessions; settings are reachable by suspended accounts and by members stuck before verification (guard exception) but no test asserts the suspended case.

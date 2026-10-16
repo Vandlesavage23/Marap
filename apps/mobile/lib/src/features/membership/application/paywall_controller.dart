@@ -74,15 +74,27 @@ class PaywallController extends Notifier<PaywallState> {
     final repo = ref.read(membershipRepositoryProvider);
     try {
       await repo.verifyPurchase(proof, key: _uuid.v4());
-      // Only now is it safe to tell the store the purchase was delivered.
-      await ref.read(purchaseGatewayProvider).complete(proof);
-      await ref.read(entitlementProvider.notifier).refresh();
-      state = PaywallState(
-        status: proof.restored ? PaywallStatus.restored : PaywallStatus.success,
-      );
     } on AppFailure catch (f) {
       state = PaywallState(status: PaywallStatus.verifyFailed, failure: f);
+      return;
+    } on Object {
+      // An answer we could not read is still "not confirmed": never leave the
+      // paywall spinning (and Buy / Restore disabled) because of it.
+      state = const PaywallState(status: PaywallStatus.verifyFailed);
+      return;
     }
+    // Only now is it safe to tell the store the purchase was delivered. If the
+    // store call itself fails the server already has the purchase; the store
+    // redelivers it and the verify is idempotent, so the member is not blocked.
+    try {
+      await ref.read(purchaseGatewayProvider).complete(proof);
+    } on Object {
+      // redelivered (and verified again) on the next launch
+    }
+    await ref.read(entitlementProvider.notifier).refresh();
+    state = PaywallState(
+      status: proof.restored ? PaywallStatus.restored : PaywallStatus.success,
+    );
   }
 
   Future<void> buy(String storeProductId) async {

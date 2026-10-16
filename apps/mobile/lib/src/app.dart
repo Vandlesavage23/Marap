@@ -6,6 +6,7 @@ import 'package:marriage_connect/src/core/router/app_router.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/features/membership/application/paywall_controller.dart';
 import 'package:marriage_connect/src/features/notifications/application/push_controller.dart';
+import 'package:marriage_connect/src/features/settings/application/settings_controllers.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -16,7 +17,9 @@ class App extends ConsumerWidget {
     ref
       ..watch(paywallControllerProvider)
       // Push opt-in sync + tap handling (does nothing until the member opts in).
-      ..watch(pushBootProvider);
+      ..watch(pushBootProvider)
+      // Wipes member data when a session ends outside Settings > Sign out.
+      ..watch(sessionCleanupProvider);
     return MaterialApp.router(
       onGenerateTitle: (c) => AppLocalizations.of(c).appName,
       theme: buildTheme(Brightness.light),

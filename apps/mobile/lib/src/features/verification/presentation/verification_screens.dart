@@ -53,7 +53,18 @@ class _Page extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title)),
+        appBar: AppBar(
+          title: Text(title),
+          actions: [
+            // Sign out / delete account must be reachable before the account
+            // is verified (the guard keeps /settings open at every stage).
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: AppLocalizations.of(context).homeSettings,
+              onPressed: () => context.push('/settings'),
+            ),
+          ],
+        ),
         body: SafeArea(child: child),
       );
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:marriage_connect/src/core/network/api_client.dart';
+import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
 import 'package:marriage_connect/src/features/settings/domain/settings_models.dart';
 
@@ -43,6 +44,12 @@ class ApiAccountRepository implements AccountRepository {
       return await f();
     } on DioException catch (e) {
       throw e.failure;
+    } on AppFailure {
+      rethrow;
+    } on Object {
+      // An answer we could not read (wrong shape, bad JSON) is a failed
+      // call, never an unhandled error that leaves a spinner running.
+      throw const AppFailure(code: 'unknown');
     }
   }
 

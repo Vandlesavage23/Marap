@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/providers.dart';
+import 'package:marriage_connect/src/features/discovery/application/discovery_controller.dart';
+import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
+import 'package:marriage_connect/src/features/matches/application/matches_controller.dart';
 import 'package:marriage_connect/src/features/safety/data/safety_repository.dart';
 import 'package:marriage_connect/src/features/safety/domain/safety_models.dart';
 import 'package:uuid/uuid.dart';
@@ -20,6 +23,18 @@ final safetyCentreProvider = FutureProvider<List<SafetySection>>(
 );
 
 enum SubmitStatus { idle, submitting, done, failed }
+
+/// Blocks are absolute (CLAUDE.md rule 5): the server already removed the pair
+/// from discovery, interests and matches, so drop whatever this device still
+/// shows of them. Takes the `invalidate` of either a `Ref` or a `WidgetRef`.
+void forgetBlockedEverywhere(
+  void Function(ProviderOrFamily provider) invalidate,
+) {
+  invalidate(discoveryControllerProvider);
+  invalidate(matchesControllerProvider);
+  invalidate(receivedInterestsControllerProvider);
+  invalidate(sentInterestsControllerProvider);
+}
 
 class ReportState {
   const ReportState({
@@ -107,6 +122,7 @@ class ReportController extends AutoDisposeNotifier<ReportState> {
             key: _key!,
           );
       state = state.copyWith(status: SubmitStatus.done, receipt: receipt);
+      if (receipt.blocked) forgetBlockedEverywhere(ref.invalidate);
       return true;
     } on AppFailure catch (f) {
       state = state.copyWith(status: SubmitStatus.failed, failure: f);
@@ -156,6 +172,7 @@ Future<AppFailure?> blockProfile(WidgetRef ref, String profileId) async {
   try {
     await ref.read(safetyRepositoryProvider).block(profileId);
     ref.invalidate(blockedControllerProvider);
+    forgetBlockedEverywhere(ref.invalidate);
     return null;
   } on AppFailure catch (f) {
     return f;

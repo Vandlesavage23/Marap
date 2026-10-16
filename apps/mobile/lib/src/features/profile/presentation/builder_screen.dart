@@ -63,7 +63,16 @@ class _ProfileBuilderScreenState extends ConsumerState<ProfileBuilderScreen> {
       },
     );
     return Scaffold(
-      appBar: AppBar(title: Text(l.profileBuilderTitle)),
+      appBar: AppBar(
+        title: Text(l.profileBuilderTitle),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: l.homeSettings,
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
+      ),
       body: SafeArea(child: body),
     );
   }

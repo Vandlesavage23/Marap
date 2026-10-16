@@ -53,6 +53,12 @@ class ConsentsController extends AutoDisposeAsyncNotifier<ConsentSnapshot> {
         kind: granted,
       };
       state = AsyncData(ConsentSnapshot(merged));
+      // What the questionnaire may ask depends on these consents: a withdrawn
+      // special-data consent must make it ask again (and hide the answers the
+      // server no longer holds) instead of trusting its cached copy.
+      ref
+        ..invalidate(meProvider)
+        ..invalidate(questionnaireProvider);
       return null;
     } on AppFailure catch (f) {
       return f;
@@ -157,26 +163,70 @@ class SignOutController extends Notifier<bool> {
 
   void _resetMemberState() {
     try {
-      _invalidateAll();
+      invalidateMemberState(ref);
     } on Object {
       // the scope may already be gone (app shutting down)
     }
   }
+}
 
-  void _invalidateAll() {
-    ref
-      ..invalidate(meProvider)
-      ..invalidate(matchesControllerProvider)
-      ..invalidate(receivedInterestsControllerProvider)
-      ..invalidate(sentInterestsControllerProvider)
-      ..invalidate(discoveryControllerProvider)
-      ..invalidate(entitlementProvider)
-      ..invalidate(ownProfileProvider)
-      ..invalidate(photosProvider)
-      ..invalidate(descriptionProvider)
-      ..invalidate(preferencesProvider)
-      ..invalidate(questionnaireProvider)
-      ..invalidate(onboardingProvider);
+/// Drops the in-memory state that belongs to the member who is leaving.
+void invalidateMemberState(Ref ref) {
+  ref
+    ..invalidate(meProvider)
+    ..invalidate(matchesControllerProvider)
+    ..invalidate(receivedInterestsControllerProvider)
+    ..invalidate(sentInterestsControllerProvider)
+    ..invalidate(discoveryControllerProvider)
+    ..invalidate(entitlementProvider)
+    ..invalidate(ownProfileProvider)
+    ..invalidate(photosProvider)
+    ..invalidate(descriptionProvider)
+    ..invalidate(preferencesProvider)
+    ..invalidate(questionnaireProvider)
+    ..invalidate(onboardingProvider);
+}
+
+/// Ends of a session that did NOT go through Settings > Sign out: the refresh
+/// token was refused (revoked from another device, expired), or the account
+/// was deleted. The previous member's queued messages, queued photo / voice
+/// files, cached conversations and in-memory screens must not survive into
+/// the next account that signs in on this phone. Idempotent with the explicit
+/// sign-out above, which has already wiped by the time it fires.
+///
+/// Also runs once at start-up when there is no session: the app may have been
+/// killed after the tokens were cleared (account deletion, revoked session)
+/// but before the wipe finished.
+final sessionCleanupProvider = Provider<void>((ref) {
+  ref.listen<SessionState>(sessionProvider, (prev, next) {
+    if (prev == SessionState.signedIn && next == SessionState.signedOut) {
+      unawaited(_wipeAfterSessionEnd(ref));
+    }
+  });
+  if (ref.read(sessionProvider) == SessionState.signedOut) {
+    unawaited(_wipeAfterSessionEnd(ref, memberScreens: false));
+  }
+});
+
+Future<void> _wipeAfterSessionEnd(Ref ref, {bool memberScreens = true}) async {
+  try {
+    await ref.read(outboxRepositoryProvider).clearAll();
+    await ref.read(appDatabaseProvider).clearCaches();
+  } on Object {
+    // best effort: the session is already over
+  }
+  try {
+    await ref.read(localPrefsProvider).remove(pushEnabledPrefKey);
+  } on Object {
+    // see above
+  }
+  if (!memberScreens) return;
+  // Let the router leave the member screens before they are torn down.
+  await Future<void>.delayed(Duration.zero);
+  try {
+    invalidateMemberState(ref);
+  } on Object {
+    // the scope may already be gone (app shutting down)
   }
 }
 

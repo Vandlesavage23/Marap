@@ -89,6 +89,7 @@ class ChatSocketClient {
     this.pingEvery = const Duration(seconds: 25),
     this.authTimeout = const Duration(seconds: 5),
     this.idleTimeout = const Duration(seconds: 75),
+    this.stableAfter = const Duration(seconds: 30),
   })  : _url = url,
         _factory = factory,
         _token = token,
@@ -104,6 +105,11 @@ class ChatSocketClient {
   final Duration authTimeout;
   final Duration idleTimeout;
 
+  /// How long a connection must stay up before the backoff starts over. A
+  /// server that accepts the login and then drops us must not get a 1 s
+  /// reconnect loop.
+  final Duration stableAfter;
+
   final _events = StreamController<ChatEvent>.broadcast();
   final _status = StreamController<SocketStatus>.broadcast();
   SocketStatus _current = SocketStatus.idle;
@@ -115,6 +121,7 @@ class ChatSocketClient {
   Timer? _pingTimer;
   Timer? _idleTimer;
   Timer? _retryTimer;
+  Timer? _stableTimer;
   int _attempt = 0;
   int _authFailures = 0;
   bool _stopped = true;
@@ -157,7 +164,8 @@ class ChatSocketClient {
     _pingTimer?.cancel();
     _idleTimer?.cancel();
     _retryTimer?.cancel();
-    _authTimer = _pingTimer = _idleTimer = _retryTimer = null;
+    _stableTimer?.cancel();
+    _authTimer = _pingTimer = _idleTimer = _retryTimer = _stableTimer = null;
   }
 
   Future<void> _teardown() async {
@@ -178,7 +186,9 @@ class ChatSocketClient {
     if (_stopped) return;
     final token = _token();
     if (token == null) {
-      // Not signed in (or token cleared): nothing to authenticate with.
+      // Not signed in (or token cleared): nothing to authenticate with. Marked
+      // stopped so a later start() (the next sign-in) really reconnects.
+      _stopped = true;
       _set(SocketStatus.stopped);
       return;
     }
@@ -219,8 +229,11 @@ class ChatSocketClient {
       case 'auth.ok':
         _authTimer?.cancel();
         _authed = true;
-        _attempt = 0;
-        _authFailures = 0;
+        _stableTimer?.cancel();
+        _stableTimer = Timer(stableAfter, () {
+          _attempt = 0;
+          _authFailures = 0;
+        });
         _pingTimer?.cancel();
         _pingTimer = Timer.periodic(pingEvery, (_) {
           _channel?.send(jsonEncode({'type': 'ping'}));
@@ -263,14 +276,22 @@ class ChatSocketClient {
           await _refreshSession();
           return;
         }
-        if (code == 4401 || (!wasAuthed && force)) {
-          // Token rejected or never acknowledged: get a fresh one first.
+        if (code == 4401) {
+          // Token rejected: get a fresh one first. Only an explicit rejection
+          // counts towards giving up; the server answering 4401 three times
+          // with a freshly refreshed token means the session is unusable.
           _authFailures++;
           if (_authFailures > 2) {
             _stopped = true;
             _set(SocketStatus.stopped);
             return;
           }
+          await _refreshSession();
+        } else if (!wasAuthed && force) {
+          // Never acknowledged within [authTimeout]: on a slow network that
+          // is a slow handshake, not a bad token. Refresh once in case the
+          // token expired, but keep retrying with backoff (it is capped), so
+          // a flaky connection never leaves chat without realtime for good.
           await _refreshSession();
         }
         if (_stopped) return;

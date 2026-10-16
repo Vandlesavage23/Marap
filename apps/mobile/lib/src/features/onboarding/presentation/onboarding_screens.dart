@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,13 +12,18 @@ import 'package:marriage_connect/src/features/onboarding/application/onboarding_
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
 
 class _Page extends StatelessWidget {
-  const _Page({required this.title, required this.children});
+  const _Page({
+    required this.title,
+    required this.children,
+    this.actions = const [],
+  });
   final String title;
   final List<Widget> children;
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title)),
+        appBar: AppBar(title: Text(title), actions: actions),
         body: SafeArea(
           child: ListView(
             padding: EdgeInsets.all(context.mc.space.lg),
@@ -178,9 +185,30 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   final _ctrl = TextEditingController();
   final _invite = TextEditingController();
   bool _inviteOpen = false;
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    // Re-draws the "ask for a new code in Ns" countdown once a second.
+    _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted && ref.read(onboardingProvider).resendAvailableAt != null) {
+        setState(() {});
+      }
+    });
+  }
+
+  /// Whole seconds until a new code may be requested (0 when allowed now).
+  int _remaining(OnboardingState s) {
+    final at = s.resendAvailableAt;
+    if (at == null) return 0;
+    final ms = at.difference(DateTime.now()).inMilliseconds;
+    return ms <= 0 ? 0 : (ms / 1000).ceil();
+  }
 
   @override
   void dispose() {
+    _tick?.cancel();
     _ctrl.dispose();
     _invite.dispose();
     super.dispose();
@@ -236,14 +264,20 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           loading: s.loading,
           onPressed: _ctrl.text.length == 6 && !s.loading ? _verify : null,
         ),
-        McButton(
-          label: l.otpResend,
-          onPressed: s.loading
-              ? null
-              : () =>
-                  ref.read(onboardingProvider.notifier).submitPhone(s.phone),
-          kind: McButtonKind.text,
-          expand: false,
+        Builder(
+          builder: (context) {
+            final wait = _remaining(s);
+            return McButton(
+              label: wait > 0 ? l.otpResendIn(wait) : l.otpResend,
+              onPressed: s.loading || wait > 0
+                  ? null
+                  : () => ref
+                      .read(onboardingProvider.notifier)
+                      .submitPhone(s.phone),
+              kind: McButtonKind.text,
+              expand: false,
+            );
+          },
         ),
       ],
     );
@@ -284,6 +318,15 @@ class _ConsentsScreenState extends ConsumerState<ConsentsScreen> {
     };
     return _Page(
       title: l.consentsTitle,
+      // Someone who does not want to agree can still reach sign out and
+      // account deletion (the guard keeps /settings open).
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          tooltip: l.homeSettings,
+          onPressed: () => context.push('/settings'),
+        ),
+      ],
       children: [
         for (final k in requiredConsentKinds)
           ConsentTile(

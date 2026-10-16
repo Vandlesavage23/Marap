@@ -15,4 +15,4 @@
 | restricted | opt-in off by default; permission refused / blocked in system settings explained; no Firebase config disabled | `device_track/screens_test.dart: NotificationSettingsScreen ...`, `push_test.dart: opt-in` |
 | offline | offline with retry; disable works offline | `notifications_test.dart: offline with retry`, `push_test.dart: disable still works offline` |
 
-**GAP.** Real FCM delivery and token rotation run only on a device. Server-side token clearing on opt-out does not work (finding C1), and its contract test is skipped with that reason until the backend distinguishes omitted from null.
+**GAP.** Real FCM delivery and token rotation run only on a device. Opt-out sends `push_token: null`; the backend now clears the token on an explicit null (finding C1 fixed; contract test enabled).

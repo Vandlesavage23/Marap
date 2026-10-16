@@ -84,7 +84,9 @@ class TrialExplainerScreen extends ConsumerWidget {
                 ),
               if (e.trialUsed)
                 Text(l.memberTrialAlreadyUsed)
-              else
+              else if (e.looksUnverified)
+                Text(l.memberGateNotVerified)
+              else if (e.trialAvailable)
                 McButton(
                   label: l.memberTrialStart,
                   onPressed: trial.status == TrialStatus.starting
@@ -257,11 +259,29 @@ class _StatusBody extends ConsumerWidget {
 
 /// Store products only. Nothing is pre-selected; each plan has its own button,
 /// and "Not now" has the same weight as the purchase buttons.
-class PaywallScreen extends ConsumerWidget {
+class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
+}
+
+class _PaywallScreenState extends ConsumerState<PaywallScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // The controller lives for the whole app: do not show the outcome of an
+    // earlier visit ("cancelled", "could not confirm") as if it were new.
+    // A purchase that is still being confirmed keeps showing.
+    Future.microtask(() {
+      if (!mounted) return;
+      final c = ref.read(paywallControllerProvider.notifier);
+      if (!ref.read(paywallControllerProvider).busy) c.reset();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final products = ref.watch(productsProvider);
     final paywall = ref.watch(paywallControllerProvider);

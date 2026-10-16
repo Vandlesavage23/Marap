@@ -138,11 +138,17 @@ class FakeUploader implements MediaUploader {
   Future<String> upload({
     required String purpose,
     required PickedMedia file,
+    void Function(String mediaId)? onUploaded,
   }) async {
     uploads.add((purpose, file));
     if (failure case final AppFailure f) throw f;
+    onUploaded?.call('media-${uploads.length}');
     return 'media-${uploads.length}';
   }
+
+  final readyChecks = <String>[];
+  @override
+  Future<void> awaitReady(String mediaId) async => readyChecks.add(mediaId);
 }
 
 class Harness {

@@ -249,7 +249,8 @@ class _ChatImageState extends ConsumerState<ChatImage> {
                 ),
               ),
             )
-          : ProgressiveImage(url: media.url, decodeWidth: 480),
+          // Reaching here under data saver means the member tapped to load it.
+          : ProgressiveImage(url: media.url, decodeWidth: 480, requested: true),
     );
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),

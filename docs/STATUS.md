@@ -7,15 +7,23 @@ Infra and release material: Terraform + deploy workflows written; store package,
 checklist, game-day plan and runbooks written as documents.
 
 ## Verified (automated, authoring sandbox)
-* Backend: `uv run pytest` 713 passed / 4 skipped (scenarios 08–11, Phase 5), ruff, mypy, lint-imports, makemigrations --check, data-inventory.
-* Mobile: `flutter analyze` clean; `flutter test` 384 passed (interceptors, goldens, onboarding, profile track, social track, membership track).
-* Terraform: `terraform fmt -check` and an env-parity script only.
+* Backend: `uv run pytest` 917 passed / 6 skipped (Phase 5 scenarios 08–11; 2 clamd tests need a clamd host), 96% coverage,
+  per-module gate ≥ 90% (entitlements 99, billing 96, interests 95, safety 97, accounts 97), ruff, mypy, lint-imports, migrations, inventory,
+  OpenAPI schema up to date, pip-audit clean (prod deps), gitleaks clean.
+* Mobile: `flutter analyze` clean; `flutter test` 843 passed (kit goldens in light/dark/200% text, a11y sweep, review regression tests);
+  62 contract tests pass against the REAL Django server (`apps/mobile/tool/run_contract_tests.sh`).
+* Infra: `terraform validate` passes for dev/staging/prod against the real AWS provider schema; fmt + parity check.
+* Real services verified here: ClamAV (`ClamdScanner` against `clamav/clamav`), PostgreSQL 16, Redis (incl. channel layer), moto S3,
+  a Docker image of the backend (built on Ubuntu 24.04 because Debian mirrors are blocked here) serving `/ready`.
+* Load: local single-box run (docs/perf/load-local.md) — found and fixed idle-WebSocket death, slow discovery, ASGI single-thread REST.
 
 ## NOT verified — needs a human, a device, a vendor, or cloud access
-* **Vendor adapters** written from public docs, never run against the real service: Smile ID, FCM, Apple, Google Play, Flutterwave, OIDC SSO, SES, Rekognition, ClamAV.
-* **Terraform / deploy workflows**: never planned or applied (registry blocked here; provider args from memory). No restore drill. See infra/terraform/README.md.
-* **Docker compose, Dockerfile, GitHub workflows, k6 load test**: never executed.
-* **Mobile on a device**: no Android SDK here, so no APK build, no iOS build, no iOS schemes/icons per flavor. Camera, image picker, mic, audio, real WebSocket, store purchases, FLAG_SECURE (MainActivity.kt) are untested.
-* **Smile ID capture** is a stub (`UnavailableIdentityCaptureLauncher`); the real SDK integration is the MC-030 spike (docs/spikes/smile-id-flutter.md, not executed).
-* **Documents that need human execution/sign-off, not code**: moderation vendor benchmark (MC-061), pen test (MC-123), accessibility audit (MC-122), store submission (MC-125), game-day (MC-126), design polish against approved designs (MC-128), copy review of safety-centre text.
-* Placeholders: product prices, support mailbox, safety-centre copy, legal text versions.
+* **Vendor adapters** written from public docs, never run against the real service: Smile ID, FCM, Apple, Google Play,
+  Flutterwave, OIDC SSO, SES, Rekognition, Twilio (Africa's Talking has a sandbox host switch but no credentials were used).
+* **Terraform plan/apply, deploy workflows, GitHub Actions** (never executed), restore drill, staging-size load/soak.
+* **Mobile on a device or emulator**: no Android SDK (dl.google.com is blocked here) so no APK/AAB, no iOS build; camera, image picker,
+  mic/audio, real FCM/APNs, store purchase sheets, FLAG_SECURE, integration_test on a device are untested. The Smile ID capture is a stub.
+* **The Debian-based production Dockerfile apt step** (mirrors blocked here); the same app was verified on Ubuntu.
+* **Human deliverables**: M0 items, counsel, PDPO, pen test, accessibility audit with screen readers, moderation benchmark, store
+  submission, game-day, final designs/fonts. Briefs and checklists exist for each (docs/prelaunch, docs/release, docs/security ...).
+* Placeholders: product prices, support mailbox, safety-centre copy, legal text versions, app icons.

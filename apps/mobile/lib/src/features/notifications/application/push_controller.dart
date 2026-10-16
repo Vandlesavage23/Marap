@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/auth/install_id.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
@@ -120,6 +121,17 @@ class PushController extends Notifier<PushState> {
   /// and is signed in) refreshes the token registration. Runs at app start and
   /// after sign-in.
   Future<void> sync() async {
+    try {
+      await _sync();
+    } on Object catch (e) {
+      // A platform hiccup (permission query, token read) must not become an
+      // unhandled error from a fire-and-forget call. Type only: never log
+      // tokens or payloads.
+      debugPrint('push sync failed: ${e.runtimeType}');
+    }
+  }
+
+  Future<void> _sync() async {
     if (!_alive) return;
     final available = await _gateway.isAvailable();
     final permission =
@@ -204,6 +216,14 @@ class PushController extends Notifier<PushState> {
   Future<void> prepareSignOut() => _unregister();
 
   Future<void> _onSignedOut() async {
+    try {
+      await _onSignedOutUnsafe();
+    } on Object catch (e) {
+      debugPrint('push sign-out cleanup failed: ${e.runtimeType}');
+    }
+  }
+
+  Future<void> _onSignedOutUnsafe() async {
     await _prefs.remove(pushEnabledPrefKey);
     if (_alive) state = state.copyWith(enabled: false, clearIssue: true);
     // Tokens are gone already (best effort); still invalidate the FCM token.

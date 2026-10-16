@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
@@ -9,6 +10,7 @@ import 'package:marriage_connect/src/features/discovery/presentation/candidate_c
 import 'package:marriage_connect/src/features/discovery/presentation/labels.dart';
 import 'package:marriage_connect/src/features/interests/presentation/send_interest_sheet.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
+import 'package:marriage_connect/src/features/safety/presentation/safety_screens.dart';
 
 /// Full public profile (`GET /profiles/<id>`). A 404 is the same whether the
 /// profile does not exist or may not be seen (no existence oracle).
@@ -21,7 +23,18 @@ class ProfileScreen extends ConsumerWidget {
     final l = AppLocalizations.of(context);
     final async = ref.watch(publicProfileProvider(profileId));
     return Scaffold(
-      appBar: AppBar(title: Text(l.discProfileTitle)),
+      appBar: AppBar(
+        title: Text(l.discProfileTitle),
+        actions: [
+          // Report and Block are always one tap away from another member's
+          // profile (docs/screens/safety.md).
+          SafetyMenuButton(
+            profileId: profileId,
+            onBlocked: () =>
+                context.canPop() ? context.pop() : context.go('/discovery'),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: async.when(
           loading: () => const Center(child: CircularProgressIndicator()),

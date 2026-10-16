@@ -78,6 +78,9 @@ final chatHubProvider = Provider<ChatHub>((ref) {
   ref
     ..listen(sessionProvider, (_, s) {
       if (s == SessionState.signedOut) unawaited(hub.stop());
+      // The next account signing in on this running app needs the socket
+      // again (start() is a no-op while it is already running).
+      if (s == SessionState.signedIn) hub.start();
     })
     ..onDispose(() {
       unawaited(ended.cancel());

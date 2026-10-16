@@ -384,7 +384,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get paywallPurchaseFailed =>
-      'The store couldn\'t complete the purchase. You haven\'t been charged.';
+      'The store couldn\'t complete the purchase. If the store did charge you, tap Restore purchases, or check your store\'s purchase history.';
 
   @override
   String get paywallVerifyFailed =>
@@ -1743,7 +1743,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileDataSaverNote =>
-      'Data saver is on: photos load small until you tap them.';
+      'Data saver is on: photos are shown at a reduced size, and extra photos wait until you tap them.';
 
   @override
   String get profileQuestionsIntro =>
@@ -2085,7 +2085,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get dataSaverIntro =>
-      'Data saver uses less mobile data. Photos load small first, extra photos load only when you tap them, and voice notes download only when you press play.';
+      'Data saver limits the size photos are shown at, and holds back extra photos and voice notes until you tap them or press play, so less is downloaded unless you ask for it. The main photo on each profile is still downloaded in full.';
 
   @override
   String get dataSaverToggle => 'Always use data saver';

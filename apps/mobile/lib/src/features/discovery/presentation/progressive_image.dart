@@ -44,6 +44,7 @@ class ProgressiveImage extends ConsumerStatefulWidget {
     this.primary = true,
     this.decodeWidth = 720,
     this.thumbWidth = 240,
+    this.requested = false,
     super.key,
   });
 
@@ -51,6 +52,10 @@ class ProgressiveImage extends ConsumerStatefulWidget {
   final bool primary;
   final int decodeWidth;
   final int thumbWidth;
+
+  /// The member already asked for this image themselves (their own tap on a
+  /// placeholder elsewhere): load it at the full size even under data saver.
+  final bool requested;
 
   @override
   ConsumerState<ProgressiveImage> createState() => _ProgressiveImageState();
@@ -91,7 +96,9 @@ class _ProgressiveImageState extends ConsumerState<ProgressiveImage> {
         ),
       );
     }
-    final width = saver && !_tapped ? widget.thumbWidth : widget.decodeWidth;
+    final width = saver && !_tapped && !widget.requested
+        ? widget.thumbWidth
+        : widget.decodeWidth;
     return build(context, widget.url, width);
   }
 }

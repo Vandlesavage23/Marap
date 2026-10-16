@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 import 'package:marriage_connect/src/core/auth/token_store.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:uuid/uuid.dart';
@@ -35,16 +37,38 @@ class AuthInterceptor extends Interceptor {
     required this.refreshDio,
     required this.tokens,
     required this.onSignedOut,
+    this.installId,
   });
 
   final Dio dio;
   final Dio refreshDio; // no auth interceptors: avoids recursion
   final TokenStore tokens;
   final void Function() onSignedOut;
+
+  /// This install's id (the backend keys devices on it). When given, a forced
+  /// sign-out first tries to tell the server to forget this device's push
+  /// token, while an access token still exists.
+  final Future<String> Function()? installId;
   Future<bool>? _refreshing;
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+  Future<void> onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    if (options.extra['skipAuth'] != true && tokens.accessToken == null) {
+      // Cold start: the access token is memory-only, so after the app was
+      // killed only the refresh token survived. A request without a bearer is
+      // answered `unauthenticated` (never `token_expired`), which would not
+      // trigger the refresh below and leave the member stuck on every launch.
+      // Get an access token first (one refresh shared by every waiting
+      // request). Signed out (no refresh token) skips this entirely.
+      if (await tokens.readRefreshToken() != null) {
+        await (_refreshing ??= _refresh().whenComplete(() {
+          _refreshing = null;
+        }));
+      }
+    }
     final token = tokens.accessToken;
     if (token != null && options.extra['skipAuth'] != true) {
       options.headers['Authorization'] = 'Bearer $token';
@@ -96,15 +120,59 @@ class AuthInterceptor extends Interceptor {
         refresh: body['refresh'] as String,
       );
       return true;
-    } on DioException {
-      await _signOut();
+    } on DioException catch (e) {
+      // Only a definitive refusal (the server looked at the refresh token and
+      // said no: 400/401/403/409...) ends the session. Being offline, a
+      // timeout, a 5xx or 429 says nothing about the token: signing out (and
+      // deleting the refresh token) on a network blip would lose the session
+      // of someone on a flaky connection. The original failure surfaces and
+      // the next request refreshes again.
+      final status = e.response?.statusCode;
+      final definitive = status != null &&
+          status >= 400 &&
+          status < 500 &&
+          status != 408 &&
+          status != 425 &&
+          status != 429;
+      if (definitive) await _signOut();
+      return false;
+    } on Object {
+      // Unreadable refresh answer: not proof the token is bad.
       return false;
     }
   }
 
   Future<void> _signOut() async {
+    await _dropPushToken();
     await tokens.clear();
     onSignedOut();
+  }
+}
+
+extension on AuthInterceptor {
+  /// Best effort and short: the access token is usually expired by now, so
+  /// this often answers 401 and that is fine (FCM prunes the deleted token).
+  Future<void> _dropPushToken() async {
+    final token = tokens.accessToken;
+    final id = installId;
+    if (token == null || id == null) return;
+    try {
+      await refreshDio
+          .post<void>(
+            '/me/devices',
+            data: {
+              'install_id': await id(),
+              'platform': defaultTargetPlatform == TargetPlatform.iOS
+                  ? 'ios'
+                  : 'android',
+              'push_token': null,
+            },
+            options: Options(headers: {'Authorization': 'Bearer $token'}),
+          )
+          .timeout(const Duration(seconds: 3));
+    } on Object {
+      // nothing more to try
+    }
   }
 }
 

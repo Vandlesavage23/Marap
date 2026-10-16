@@ -37,6 +37,9 @@ class FakeProfileRepository implements ProfileRepository {
   AppFailure? photosFailure;
   AppFailure? addPhotoFailure;
   AppFailure? descriptionFailure;
+
+  /// Makes the history read (after a submit) fail.
+  AppFailure? descriptionsReadFailure;
   AppFailure? preferencesFailure;
   AppFailure? goLiveFailure;
 
@@ -159,11 +162,13 @@ class FakeProfileRepository implements ProfileRepository {
   }
 
   @override
-  Future<DescriptionHistory> descriptions() async =>
-      DescriptionHistory.fromJson({
-        'items': descriptionJson,
-        'current_version': currentDescription,
-      });
+  Future<DescriptionHistory> descriptions() async {
+    if (descriptionsReadFailure != null) throw descriptionsReadFailure!;
+    return DescriptionHistory.fromJson({
+      'items': descriptionJson,
+      'current_version': currentDescription,
+    });
+  }
 
   @override
   Future<DescriptionVersion> submitDescription({

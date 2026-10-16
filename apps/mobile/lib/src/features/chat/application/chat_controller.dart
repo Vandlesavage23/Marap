@@ -117,12 +117,22 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
   // A media send in progress keeps its ids across retries of the same action.
   String? _mediaClientId;
   String? _mediaId;
+  String? _mediaFilePath;
   // Async work can finish after the screen (and this provider) is gone.
   bool _alive = true;
   // Outbox rows seen before `build` finished (the watch stream emits at once).
   List<OutboxMessage> _outboxRows = const [];
-  bool get _sendRefused =>
-      _outboxRows.any((r) => r.failedCode == 'entitlement_required');
+  // Rows already refused for membership when the chat was opened. They stay
+  // in the outbox as "not sent" (the member can discard them) but must not keep
+  // a member who has a membership again locked out of the composer: only a
+  // refusal seen while this chat is open flips it to read-only. (The server's
+  // capabilities, read in `build`, remain the authority either way.)
+  Set<String>? _staleRefusals;
+  bool get _sendRefused => _outboxRows.any(
+        (r) =>
+            r.failedCode == 'entitlement_required' &&
+            !(_staleRefusals?.contains(r.clientMsgId) ?? false),
+      );
 
   @override
   Future<ChatState> build(String arg) async {
@@ -186,6 +196,11 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
 
   void _onOutbox(List<OutboxMessage> rows) {
     _outboxRows = rows;
+    // The first emission is what was already stored when the chat opened.
+    _staleRefusals ??= {
+      for (final r in rows)
+        if (r.failedCode == 'entitlement_required') r.clientMsgId,
+    };
     final s = state.valueOrNull;
     if (s == null) return;
     state = AsyncData(
@@ -295,13 +310,31 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
       kind == MessageKind.image || kind == MessageKind.voice,
       'media only',
     );
+    // The ids belong to ONE file. A different file is a different action, even
+    // if the previous one never finished (e.g. the outbox insert failed): it
+    // must never be sent under the old file's media id.
+    if (_mediaFilePath != file.path) {
+      _mediaClientId = null;
+      _mediaId = null;
+      _mediaFilePath = file.path;
+    }
     final clientId = _mediaClientId ??= _uuid.v4();
     state = AsyncData(s.copyWith(uploading: true, clearMediaFailure: true));
     try {
-      final mediaId = _mediaId ??= await ref.read(mediaUploaderProvider).upload(
-            purpose: kind == MessageKind.image ? 'chat_image' : 'voice_note',
-            file: file,
-          );
+      final uploader = ref.read(mediaUploaderProvider);
+      final String mediaId;
+      if (_mediaId case final known?) {
+        await uploader.awaitReady(known); // uploaded before: no second upload
+        mediaId = known;
+      } else {
+        mediaId = _mediaId = await uploader.upload(
+          purpose: kind == MessageKind.image ? 'chat_image' : 'voice_note',
+          file: file,
+          // Known as soon as the bytes are on the server, so a failure while
+          // waiting for the scan still resumes without uploading again.
+          onUploaded: (id) => _mediaId = id,
+        );
+      }
       final m = await ref.read(chatRepositoryProvider).sendMedia(
             matchId: arg,
             clientMsgId: clientId,
@@ -315,7 +348,11 @@ class ChatController extends AutoDisposeFamilyAsyncNotifier<ChatState, String> {
       state = AsyncData(
         cur.copyWith(messages: _merge(cur.messages, [m]), uploading: false),
       );
-    } on AppFailure catch (e) {
+    } on Object catch (error) {
+      // Anything that is not an AppFailure (the picked file vanished, a
+      // platform error, an unreadable answer) is a definitive failure of this
+      // action: say so instead of leaving the composer "uploading" forever.
+      final e = error is AppFailure ? error : const AppFailure(code: 'unknown');
       if (e.retryable) {
         // Transient (offline, server busy): hand the action to the durable
         // outbox with the SAME ids. It resumes after reconnect without

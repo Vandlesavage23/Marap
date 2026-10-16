@@ -467,8 +467,14 @@ class ExportScreen extends ConsumerWidget {
                 onPressed: () async {
                   var ok = false;
                   try {
-                    ok =
-                        await ref.read(urlOpenerProvider)(Uri.parse(info.url!));
+                    // The link comes from the server but is opened outside the
+                    // app: only a plain https URL is ever launched.
+                    final uri = Uri.tryParse(info.url ?? '');
+                    if (uri != null &&
+                        uri.scheme == 'https' &&
+                        uri.host.isNotEmpty) {
+                      ok = await ref.read(urlOpenerProvider)(uri);
+                    }
                   } on Object {
                     ok = false;
                   }

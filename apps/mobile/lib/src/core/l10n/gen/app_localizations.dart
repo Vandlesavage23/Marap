@@ -703,7 +703,7 @@ abstract class AppLocalizations {
   /// No description provided for @paywallPurchaseFailed.
   ///
   /// In en, this message translates to:
-  /// **'The store couldn\'t complete the purchase. You haven\'t been charged.'**
+  /// **'The store couldn\'t complete the purchase. If the store did charge you, tap Restore purchases, or check your store\'s purchase history.'**
   String get paywallPurchaseFailed;
 
   /// No description provided for @paywallVerifyFailed.
@@ -3151,7 +3151,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileDataSaverNote.
   ///
   /// In en, this message translates to:
-  /// **'Data saver is on: photos load small until you tap them.'**
+  /// **'Data saver is on: photos are shown at a reduced size, and extra photos wait until you tap them.'**
   String get profileDataSaverNote;
 
   /// No description provided for @profileQuestionsIntro.
@@ -3763,7 +3763,7 @@ abstract class AppLocalizations {
   /// No description provided for @dataSaverIntro.
   ///
   /// In en, this message translates to:
-  /// **'Data saver uses less mobile data. Photos load small first, extra photos load only when you tap them, and voice notes download only when you press play.'**
+  /// **'Data saver limits the size photos are shown at, and holds back extra photos and voice notes until you tap them or press play, so less is downloaded unless you ask for it. The main photo on each profile is still downloaded in full.'**
   String get dataSaverIntro;
 
   /// No description provided for @dataSaverToggle.

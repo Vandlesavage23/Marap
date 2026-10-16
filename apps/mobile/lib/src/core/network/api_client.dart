@@ -9,6 +9,7 @@ Dio buildDio({
   required TokenStore tokens,
   required void Function() onSignedOut,
   HttpClientAdapter? adapter,
+  Future<String> Function()? installId,
 }) {
   final options = BaseOptions(
     baseUrl: baseUrl,
@@ -30,6 +31,7 @@ Dio buildDio({
       refreshDio: refreshDio,
       tokens: tokens,
       onSignedOut: onSignedOut,
+      installId: installId,
     ),
     RetryInterceptor(dio: dio),
     ProblemInterceptor(),

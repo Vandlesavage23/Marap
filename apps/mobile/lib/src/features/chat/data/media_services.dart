@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
@@ -53,7 +54,20 @@ abstract class VoicePlayer {
 
 abstract class MediaUploader {
   /// Runs the whole upload flow (Bible §9.3) and returns the READY media id.
-  Future<String> upload({required String purpose, required PickedMedia file});
+  ///
+  /// [onUploaded] is called as soon as the bytes are on the server (`complete`
+  /// accepted) and the id is known, before the wait for the scan. A caller
+  /// that persists the id can then resume with [awaitReady] after a failure
+  /// instead of uploading the file again.
+  Future<String> upload({
+    required String purpose,
+    required PickedMedia file,
+    void Function(String mediaId)? onUploaded,
+  });
+
+  /// Waits until an already uploaded media is `ready` (throws `media_rejected`
+  /// when the scan refuses it, a retryable failure when it is still pending).
+  Future<void> awaitReady(String mediaId);
 }
 
 /// Keeps a queued photo / voice note on durable storage (the recorder and
@@ -86,17 +100,34 @@ class ApiMediaUploader implements MediaUploader {
     Dio? storageDio,
     this.pollEvery = const Duration(seconds: 1),
     this.maxPolls = 30,
-  }) : _storage = storageDio ?? Dio();
+  }) : _storage = storageDio ?? _defaultStorageDio();
 
   final Dio _dio;
   final Dio _storage; // no auth headers: the URL is signed
   final Duration pollEvery;
+
+  /// Plain Dio for the presigned URL. It MUST have timeouts: without them a
+  /// stalled upload on a poor connection never completes or fails, and since
+  /// the outbox sends one message at a time every message behind it waits
+  /// forever too.
+  static Dio _defaultStorageDio() => Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 60),
+          receiveTimeout: const Duration(seconds: 30),
+          validateStatus: (s) => s != null && s >= 200 && s < 300,
+        ),
+      );
+
+  @visibleForTesting
+  Dio get storageDio => _storage;
   final int maxPolls;
 
   @override
   Future<String> upload({
     required String purpose,
     required PickedMedia file,
+    void Function(String mediaId)? onUploaded,
   }) async {
     try {
       final created = await _dio.post<Map<String, dynamic>>(
@@ -120,10 +151,21 @@ class ApiMediaUploader implements MediaUploader {
         options: Options(contentType: 'multipart/form-data'),
       );
       await _dio.post<void>('/media/$id/complete');
+      onUploaded?.call(id);
+      await awaitReady(id);
+      return id;
+    } on DioException catch (e) {
+      throw e.failure;
+    }
+  }
+
+  @override
+  Future<void> awaitReady(String mediaId) async {
+    try {
       for (var i = 0; i < maxPolls; i++) {
-        final r = await _dio.get<Map<String, dynamic>>('/media/$id');
+        final r = await _dio.get<Map<String, dynamic>>('/media/$mediaId');
         final status = (r.data ?? const <String, dynamic>{}).str('status');
-        if (status == 'ready') return id;
+        if (status == 'ready') return;
         if (status == 'rejected') {
           throw const AppFailure(code: 'media_rejected');
         }
@@ -141,28 +183,75 @@ class ApiMediaUploader implements MediaUploader {
 // widget/controller tests use fakes behind the interfaces above.
 
 class DeviceImagePicker implements ImagePickerService {
-  final _picker = ImagePicker();
+  DeviceImagePicker({
+    Future<String?> Function({required bool camera})? pickPath,
+    Future<String> Function()? tempDirPath,
+    Future<String?> Function(String source, String target)? compress,
+    Future<int> Function(String path)? sizeOf,
+    Future<void> Function(String path)? delete,
+  })  : _pickPath = pickPath ?? _defaultPick,
+        _tempDirPath = tempDirPath ?? _defaultTempDir,
+        _compress = compress ?? _defaultCompress,
+        _sizeOf = sizeOf ?? ((p) => File(p).length()),
+        _delete = delete ?? _defaultDelete;
 
+  final Future<String?> Function({required bool camera}) _pickPath;
+  final Future<String> Function() _tempDirPath;
+  final Future<String?> Function(String source, String target) _compress;
+  final Future<int> Function(String path) _sizeOf;
+  final Future<void> Function(String path) _delete;
+
+  static final _picker = ImagePicker();
+
+  static Future<String?> _defaultPick({required bool camera}) async =>
+      (await _picker.pickImage(
+        source: camera ? ImageSource.camera : ImageSource.gallery,
+      ))
+          ?.path;
+
+  static Future<String> _defaultTempDir() async =>
+      (await getTemporaryDirectory()).path;
+
+  // Re-encoding drops the metadata (EXIF, including GPS).
+  static Future<String?> _defaultCompress(String source, String target) async =>
+      (await FlutterImageCompress.compressAndGetFile(
+        source,
+        target,
+        minWidth: 1600,
+        minHeight: 1600,
+      ))
+          ?.path;
+
+  static Future<void> _defaultDelete(String path) async {
+    final f = File(path);
+    if (f.existsSync()) await f.delete();
+  }
+
+  /// The picked original is never kept (it still carries its metadata), and a
+  /// photo that could not be re-encoded is refused rather than sent as the
+  /// raw, EXIF-bearing file.
   @override
   Future<PickedMedia?> pick({required bool camera}) async {
-    final x = await _picker.pickImage(
-      source: camera ? ImageSource.camera : ImageSource.gallery,
-    );
-    if (x == null) return null;
-    final dir = await getTemporaryDirectory();
-    final out = '${dir.path}/${const Uuid().v4()}.jpg';
-    // Strip metadata and cap the size client-side; the server re-encodes anyway.
-    final c = await FlutterImageCompress.compressAndGetFile(
-      x.path,
-      out,
-      minWidth: 1600,
-      minHeight: 1600,
-    );
-    final path = c?.path ?? x.path;
+    final original = await _pickPath(camera: camera);
+    if (original == null) return null;
+    String? out;
+    try {
+      out = await _compress(
+        original,
+        '${await _tempDirPath()}/${const Uuid().v4()}.jpg',
+      );
+    } finally {
+      try {
+        await _delete(original);
+      } on Object {
+        // best effort: the OS clears its picker cache eventually
+      }
+    }
+    if (out == null) throw const AppFailure(code: 'photo_pick_failed');
     return PickedMedia(
-      path: path,
+      path: out,
       mime: 'image/jpeg',
-      bytes: await File(path).length(),
+      bytes: await _sizeOf(out),
     );
   }
 }

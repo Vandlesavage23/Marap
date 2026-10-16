@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:marriage_connect/src/core/network/api_client.dart';
+import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/interceptors.dart';
 import 'package:marriage_connect/src/features/discovery/domain/paged.dart';
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
@@ -15,6 +16,12 @@ class ApiInterestsRepository implements InterestsRepository {
       return await f();
     } on DioException catch (e) {
       throw e.failure;
+    } on AppFailure {
+      rethrow;
+    } on Object {
+      // An answer we could not read (wrong shape, bad JSON) is a failed
+      // call, never an unhandled error that leaves a spinner running.
+      throw const AppFailure(code: 'unknown');
     }
   }
 

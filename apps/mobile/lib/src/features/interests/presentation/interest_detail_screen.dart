@@ -9,6 +9,8 @@ import 'package:marriage_connect/src/features/interests/domain/interest.dart';
 import 'package:marriage_connect/src/features/interests/presentation/interests_screen.dart';
 import 'package:marriage_connect/src/features/interests/presentation/member_avatar.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
+import 'package:marriage_connect/src/features/safety/domain/safety_models.dart';
+import 'package:marriage_connect/src/features/safety/presentation/safety_screens.dart';
 
 /// One received interest: the sender and exactly what they wrote, with
 /// accept / pass. The inbox list is the source (no separate endpoint).
@@ -20,8 +22,27 @@ class InterestDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final ctrl = ref.read(receivedInterestsControllerProvider.notifier);
+    final sender = ref
+        .watch(receivedInterestsControllerProvider)
+        .valueOrNull
+        ?.items
+        .where((i) => i.id == interestId)
+        .firstOrNull
+        ?.sender;
     return Scaffold(
-      appBar: AppBar(title: Text(l.interestDetailTitle)),
+      appBar: AppBar(
+        title: Text(l.interestDetailTitle),
+        actions: [
+          if (sender != null && sender.id.isNotEmpty)
+            SafetyMenuButton(
+              profileId: sender.id,
+              contextType: ReportContext.interest,
+              contextId: interestId,
+              onBlocked: () =>
+                  context.canPop() ? context.pop() : context.go('/interests'),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: interestsAsyncBody<ReceivedInterest>(
           context: context,

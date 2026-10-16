@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_controller.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
@@ -25,6 +26,8 @@ class Composer extends ConsumerStatefulWidget {
 class _ComposerState extends ConsumerState<Composer> {
   final _text = TextEditingController();
   Timer? _tick;
+  // Captured up front: `ref` cannot be used in dispose().
+  late final VoiceRecorder _recorder;
   bool _recording = false;
   int _seconds = 0;
 
@@ -34,12 +37,15 @@ class _ComposerState extends ConsumerState<Composer> {
   @override
   void initState() {
     super.initState();
+    _recorder = ref.read(voiceRecorderProvider);
     _text.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
     _tick?.cancel();
+    // Leaving the chat mid-recording must not leave the microphone open.
+    if (_recording) unawaited(_recorder.cancel());
     _text.dispose();
     super.dispose();
   }
@@ -99,8 +105,18 @@ class _ComposerState extends ConsumerState<Composer> {
       ),
     );
     if (camera == null) return;
-    final file =
-        await ref.read(imagePickerServiceProvider).pick(camera: camera);
+    final PickedMedia? file;
+    try {
+      file = await ref.read(imagePickerServiceProvider).pick(camera: camera);
+    } on AppFailure {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).profilePhotoPickFailed),
+        ),
+      );
+      return;
+    }
     if (file != null) {
       await _ctrl.sendMedia(kind: MessageKind.image, file: file);
     }
@@ -109,7 +125,13 @@ class _ComposerState extends ConsumerState<Composer> {
   Future<void> _startRecording() async {
     final l = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final ok = await ref.read(voiceRecorderProvider).start();
+    final recorder = _recorder;
+    final ok = await recorder.start();
+    if (!mounted) {
+      // Left the chat while the permission prompt / recorder was starting.
+      if (ok) await recorder.cancel();
+      return;
+    }
     if (!ok) {
       messenger.showSnackBar(SnackBar(content: Text(l.chatVoicePermission)));
       return;
@@ -119,6 +141,7 @@ class _ComposerState extends ConsumerState<Composer> {
       _seconds = 0;
     });
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
       setState(() => _seconds++);
       if (_seconds >= ChatRules.maxVoiceSeconds) unawaited(_finishRecording());
     });

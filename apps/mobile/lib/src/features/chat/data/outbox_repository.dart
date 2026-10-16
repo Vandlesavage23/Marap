@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -66,6 +67,18 @@ class OutboxRepository {
     'media_rejected',
     'media_missing',
   };
+
+  /// A refusal retrying cannot fix: a listed code, or any other 4xx the server
+  /// answered definitively (409 `conflict`, 403 `not_eligible`, ...). Without
+  /// this a single refused message would sit at the head of the queue and be
+  /// retried forever, blocking everything behind it. 401 (session), 408 and
+  /// 429 are transient and stay queued.
+  static bool _isPermanent(AppFailure f) {
+    if (_permanent.contains(f.code)) return true;
+    final s = f.status;
+    if (s == null || f.retryable) return false;
+    return s >= 400 && s < 500 && s != 401 && s != 408 && s != 425;
+  }
 
   Future<String> enqueue({
     required String matchId,
@@ -170,6 +183,9 @@ class OutboxRepository {
   /// Upload (once) then post the message with the row's `client_msg_id`.
   Future<Map<String, dynamic>?> _sendMedia(OutboxMessage m) async {
     var mediaId = m.mediaId;
+    Future<void> remember(String id) => (_db.update(_db.outboxMessages)
+          ..where((t) => t.clientMsgId.equals(m.clientMsgId)))
+        .write(OutboxMessagesCompanion(mediaId: Value(id)));
     if (mediaId == null) {
       final uploader = _uploader;
       final path = m.mediaPath;
@@ -185,14 +201,18 @@ class OutboxRepository {
             bytes: m.mediaBytes ?? 0,
             durationMs: m.mediaDurationMs,
           ),
+          // Remembered the moment the bytes are on the server: if the scan
+          // wait or the send fails, the retry resumes from here and never
+          // uploads the file a second time.
+          onUploaded: (id) => unawaited(remember(id)),
         );
       } on FileSystemException {
         throw const _Permanent('media_missing');
       }
-      // Remember the upload: if the send below is lost we resume from here.
-      await (_db.update(_db.outboxMessages)
-            ..where((t) => t.clientMsgId.equals(m.clientMsgId)))
-          .write(OutboxMessagesCompanion(mediaId: Value(mediaId)));
+      await remember(mediaId);
+    } else {
+      // Uploaded on an earlier pass: it may still be waiting for its scan.
+      await _uploader?.awaitReady(mediaId);
     }
     final res = await _dio.post<dynamic>(
       '/matches/${m.matchId}/messages',
@@ -245,8 +265,7 @@ class OutboxRepository {
           failed++;
         } on AppFailure catch (f) {
           // The uploader reports failures as AppFailure.
-          if (_permanent.contains(f.code) ||
-              (!f.retryable && f.status != null && f.status! < 500)) {
+          if (_isPermanent(f)) {
             await _fail(m, f.code);
             failed++;
             continue;
@@ -255,7 +274,7 @@ class OutboxRepository {
           break;
         } on DioException catch (e) {
           final f = e.failure;
-          if (_permanent.contains(f.code)) {
+          if (_isPermanent(f)) {
             await _fail(m, f.code);
             failed++;
             continue;

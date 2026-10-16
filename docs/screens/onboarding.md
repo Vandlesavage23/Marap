@@ -15,4 +15,4 @@
 | restricted | suspended account is sent home, not into verification; unauthenticated 401 | `profile_track/guard_test.dart: a suspended account ...`; contract `account_contract_test.dart: unauthenticated /me` |
 | offline | offline and rate-limit copy; boot offline then retry | `onboarding_test.dart: offline and rate-limit errors`; `profile_track/guard_test.dart: boot: loading, offline then retry` |
 
-**Known defect.** After "Agree and continue" the member stays on the consents screen until the button is pressed a second time (stale `/me` in the guard). Reproduced by `integration_test/app_flows_test.dart`; no unit test pins it (the existing test uses a fake `/me`). **GAP**.
+**Fixed.** The consents screen now waits for the refreshed `/me` before navigating (finding C4; widget test with a gated `/me` fake). Returning members still see the consents screen on every sign-in by design (Q24). The invite-code field (closed beta) appears when the server asks for one; covered by widget and repository tests.

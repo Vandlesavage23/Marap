@@ -11,6 +11,7 @@ ChatSocketClient client(
   Duration pingEvery = const Duration(hours: 1),
   Duration authTimeout = const Duration(hours: 1),
   Duration idleTimeout = const Duration(hours: 1),
+  Duration stableAfter = const Duration(seconds: 30),
 }) =>
     ChatSocketClient(
       url: Uri.parse('ws://x/ws/chat'),
@@ -21,6 +22,7 @@ ChatSocketClient client(
       pingEvery: pingEvery,
       authTimeout: authTimeout,
       idleTimeout: idleTimeout,
+      stableAfter: stableAfter,
     );
 
 void main() {
@@ -93,6 +95,7 @@ void main() {
     final attempts = <int>[];
     final c = client(
       net,
+      stableAfter: const Duration(milliseconds: 40),
       backoff: (a) {
         attempts.add(a);
         return Duration.zero;
@@ -109,7 +112,8 @@ void main() {
     expect(attempts, [0, 1]);
     net.channels[2].authOk();
     await until(() => c.status == SocketStatus.connected);
-    // a successful auth resets the backoff
+    // a connection that STAYED up resets the backoff (auth alone does not)
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     net.channels[2].serverClose(1006);
     await until(() => net.channels.length == 4);
     expect(attempts, [0, 1, 0]);

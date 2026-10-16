@@ -74,9 +74,13 @@ class RecordingUploader implements MediaUploader {
   Object? throwOnce;
 
   @override
+  Future<void> awaitReady(String mediaId) async {}
+
+  @override
   Future<String> upload({
     required String purpose,
     required PickedMedia file,
+    void Function(String mediaId)? onUploaded,
   }) async {
     if (throwOnce != null) {
       final e = throwOnce!;

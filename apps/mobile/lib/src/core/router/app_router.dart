@@ -35,6 +35,12 @@ String? appRedirect(
         ? null
         : '/splash';
   }
+  // Account controls (sign out, sessions, export, delete, consents) are never
+  // gated: someone stuck in verification or the builder must still be able to
+  // leave, withdraw consent or delete their account.
+  if (location == '/settings' || location.startsWith('/settings/')) {
+    return null;
+  }
   final inOnboarding =
       location == '/splash' || location.startsWith('/onboarding');
   // A restricted account sees the restricted states elsewhere; it must not be

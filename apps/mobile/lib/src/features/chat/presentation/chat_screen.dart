@@ -14,6 +14,7 @@ import 'package:marriage_connect/src/features/chat/domain/chat_message.dart';
 import 'package:marriage_connect/src/features/chat/presentation/composer.dart';
 import 'package:marriage_connect/src/features/chat/presentation/message_bubbles.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
+import 'package:marriage_connect/src/features/safety/presentation/safety_screens.dart';
 
 class ChatScreen extends ConsumerWidget {
   const ChatScreen({required this.matchId, super.key});
@@ -25,6 +26,9 @@ class ChatScreen extends ConsumerWidget {
     final provider = chatControllerProvider(matchId);
     final async = ref.watch(provider);
     final name = async.valueOrNull?.match?.member.displayName;
+    // The other member's PUBLIC profile id (null while the match is unknown).
+    final otherId = async.valueOrNull?.match?.member.id;
+    final other = otherId == null || otherId.isEmpty ? null : otherId;
     ref.listen(provider, (prev, next) {
       final f = next.valueOrNull?.mediaFailure;
       if (f != null && f != prev?.valueOrNull?.mediaFailure) {
@@ -40,7 +44,14 @@ class ChatScreen extends ConsumerWidget {
             PopupMenuButton<String>(
               tooltip: l.chatMore,
               onSelected: (v) async {
-                if (v == 'unmatch') {
+                if (v == 'report' && other != null) {
+                  await openReport(context, profileId: other);
+                } else if (v == 'block' && other != null) {
+                  final blocked = await confirmAndBlock(context, ref, other);
+                  if (blocked && context.mounted) {
+                    context.canPop() ? context.pop() : context.go('/matches');
+                  }
+                } else if (v == 'unmatch') {
                   final ok = await _confirmUnmatch(context, name ?? '');
                   if (ok && context.mounted) {
                     await ref.read(provider.notifier).unmatch();
@@ -55,6 +66,16 @@ class ChatScreen extends ConsumerWidget {
                 }
               },
               itemBuilder: (_) => [
+                if (other != null) ...[
+                  PopupMenuItem(
+                    value: 'report',
+                    child: Text(l.safetyReportAction),
+                  ),
+                  PopupMenuItem(
+                    value: 'block',
+                    child: Text(l.safetyBlockAction),
+                  ),
+                ],
                 PopupMenuItem(value: 'unmatch', child: Text(l.matchesUnmatch)),
               ],
             ),

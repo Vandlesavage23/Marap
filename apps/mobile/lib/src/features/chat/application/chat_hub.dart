@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:marriage_connect/src/features/chat/data/chat_socket.dart';
 import 'package:marriage_connect/src/features/chat/data/outbox_repository.dart';
 import 'package:marriage_connect/src/features/chat/domain/chat_message.dart';
@@ -79,6 +80,12 @@ class ChatHub {
           _retry = Timer(retryDelay, () => unawaited(flush()));
         }
       } while (_again && !_disposed);
+    } on Object catch (e) {
+      // Callers fire and forget this. A failure (database, unreadable answer)
+      // leaves the rows in the outbox for the next pass instead of becoming an
+      // unhandled error. Type only: never log message content.
+      debugPrint('chat flush failed: ${e.runtimeType}');
+      if (!_disposed) _retry = Timer(retryDelay, () => unawaited(flush()));
     } finally {
       _flushing = false;
     }

@@ -94,9 +94,12 @@ class DescriptionController extends AsyncNotifier<DescriptionState> {
     final repo = ref.read(profileRepositoryProvider);
     try {
       final v = await repo.submitDescription(text: trimmed, key: _key!);
+      // The key is kept until the follow-up read also worked: if that read
+      // fails the member sees an error and retries, and the retry must replay
+      // THIS submit (same key) rather than create a second version.
+      final history = await repo.descriptions();
       _key = null;
       _keyText = null;
-      final history = await repo.descriptions();
       state = AsyncData(DescriptionState(history: history, justSubmitted: v));
       await ref.read(ownProfileProvider.notifier).reload();
       return v;
