@@ -9,8 +9,8 @@ import 'package:marriage_connect/src/features/discovery/application/discovery_co
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/candidate_card.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/labels.dart';
-import 'package:marriage_connect/src/features/interests/presentation/send_interest_sheet.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
+import 'package:marriage_connect/src/features/membership/presentation/interest_gate.dart';
 import 'package:marriage_connect/src/features/safety/presentation/safety_screens.dart';
 
 /// Full public profile (`GET /profiles/<id>`). A 404 is the same whether the
@@ -260,7 +260,7 @@ class _ProfileBodyState extends State<_ProfileBody> {
               large: true,
               icon: Icons.favorite,
               label: l.discInterested,
-              onPressed: () => showSendInterestSheet(
+              onPressed: () => sendInterestFlow(
                 context,
                 profileId: p.profileId,
                 displayName: p.displayName,

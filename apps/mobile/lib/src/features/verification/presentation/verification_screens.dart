@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
@@ -12,6 +13,8 @@ import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
 import 'package:marriage_connect/src/features/onboarding/presentation/consents_panel.dart';
+import 'package:marriage_connect/src/features/profile/presentation/make_steps.dart'
+    show ChoiceCards;
 import 'package:marriage_connect/src/features/verification/application/verification_controller.dart';
 import 'package:marriage_connect/src/features/verification/data/identity_capture.dart';
 import 'package:marriage_connect/src/features/verification/data/screen_security.dart';
@@ -178,7 +181,7 @@ class _PassedView extends ConsumerWidget {
       children: [
         const VerifyStepper(step: 4),
         SizedBox(height: mc.space.xl),
-        const Center(child: VerificationBadge()),
+        const Center(child: VerifiedBadgeArt(size: 96, decorative: true)),
         SizedBox(height: mc.space.md),
         Text(
           l.verifPassedTitle,
@@ -263,11 +266,21 @@ class _PendingViewState extends ConsumerState<_PendingView> {
         children: [
           const VerifyStepper(step: 4),
           SizedBox(height: mc.space.xl),
-          Icon(
-            Icons.hourglass_top,
-            size: 56,
-            color: mc.colors.primary,
-            semanticLabel: l.verifPendingTitle,
+          Center(
+            child: Container(
+              width: 88,
+              height: 88,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: mc.colors.primaryContainer,
+              ),
+              child: Icon(
+                Icons.hourglass_top,
+                size: 44,
+                color: mc.colors.onPrimaryContainer,
+                semanticLabel: l.verifPendingTitle,
+              ),
+            ),
           ),
           SizedBox(height: mc.space.md),
           Text(
@@ -401,8 +414,8 @@ class _StartViewState extends ConsumerState<_StartView> {
           SizedBox(height: mc.space.md),
         ],
         if (canRetry)
-          RadioGroupLike(
-            heading: l.verifIdTypeHeading,
+          ChoiceCards(
+            label: l.verifIdTypeHeading,
             value: _idType,
             options: {
               for (final t in verificationIdTypes) t: idTypeLabel(l, t),
@@ -434,49 +447,6 @@ class _StartViewState extends ConsumerState<_StartView> {
       ],
     );
   }
-}
-
-/// Radio list with a heading; groups its [RadioListTile]s for screen readers.
-class RadioGroupLike extends StatelessWidget {
-  const RadioGroupLike({
-    required this.heading,
-    required this.value,
-    required this.options,
-    required this.onChanged,
-    super.key,
-  });
-
-  final String heading;
-  final String value;
-  final Map<String, String> options;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-        container: true,
-        label: heading,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(heading, style: Theme.of(context).textTheme.titleSmall),
-            for (final e in options.entries)
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  e.key == value
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
-                  color: e.key == value
-                      ? Theme.of(context).colorScheme.primary
-                      : null,
-                ),
-                title: Text(e.value),
-                selected: e.key == value,
-                onTap: () => onChanged(e.key),
-              ),
-          ],
-        ),
-      );
 }
 
 /// Accounts created before the agreements moved to "About you" may still lack

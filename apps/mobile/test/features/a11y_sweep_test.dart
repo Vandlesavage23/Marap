@@ -32,7 +32,8 @@ void main() {
     'welcome': () => app(FakeAuth()),
     'phone': () => app(FakeAuth(), start: '/onboarding/phone'),
     'otp': () => app(FakeAuth(), start: '/onboarding/otp'),
-    'consents': () => app(FakeAuth(), start: '/onboarding/consents'),
+    'about-you': () => app(FakeAuth(), start: '/onboarding/about'),
+    'look-around': () => app(FakeAuth(), start: '/onboarding/look-around'),
     'matches': () => routedApp(
           const MatchesScreen(),
           overrides: [

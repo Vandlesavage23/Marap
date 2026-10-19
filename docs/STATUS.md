@@ -6,6 +6,13 @@ outbox/photos/voice, membership + IAP, safety, settings, beta feedback) behind f
 Infra and release material: Terraform + deploy workflows written; store package, evaluations, spike, pen-test scope, accessibility
 checklist, game-day plan and runbooks written as documents.
 
+## v2 user flow (2026-10-19)
+After the owner's hands-on test (bad UI; users forced to verify/start a trial before seeing the app) the flow was redesigned per
+docs/design/user-flow-v2.md / ADR-0009: free sign-up and browsing (limited fields for unverified viewers, server-enforced), verification at the first
+Send interest, a 4-step go-live, a useful free tier (3 interests/week, receive/accept/chat free), the 24 h no-card trial offered at the quota moment, a new visual
+design with an app shell. Backend: 988 tests; mobile: 1027 tests + 68 contract tests against the real server, all green. Evidence limits: the research is search-based
+(see docs/research/SYNTHESIS.md); no real-user test and no on-device run yet.
+
 ## Verified (automated, authoring sandbox)
 * Backend: `uv run pytest` 917 passed / 6 skipped (Phase 5 scenarios 08–11; 2 clamd tests need a clamd host), 96% coverage,
   per-module gate ≥ 90% (entitlements 99, billing 96, interests 95, safety 97, accounts 97), ruff, mypy, lint-imports, migrations, inventory,

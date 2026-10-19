@@ -167,7 +167,6 @@ class _MakeProfileScreenState extends ConsumerState<MakeProfileScreen> {
     final large = isLargeText(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(l.v2bMakeTitle),
         leading: IconButton(
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
           icon: const Icon(Icons.close),

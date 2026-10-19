@@ -135,26 +135,41 @@ class _VerifySheetBody extends ConsumerWidget {
         ],
       );
     }
+    final points = [
+      point(Icons.badge_outlined, l.v2bVerifyPoint1),
+      point(Icons.lock_outline, l.v2bVerifyPoint2),
+      point(Icons.explore_outlined, l.v2bVerifyPoint3),
+    ];
+    final actions = [
+      McButton(
+        label: l.verifStartCapture,
+        onPressed: () => Navigator.of(context).pop(true),
+      ),
+      SizedBox(height: mc.space.xs),
+      McButton(
+        label: l.v2bNotNow,
+        kind: McButtonKind.secondary,
+        onPressed: () => Navigator.of(context).pop(false),
+      ),
+      SizedBox(height: mc.space.xs),
+    ];
+    // At very large text the choices come first, so they are on screen
+    // without scrolling.
+    final large = MediaQuery.textScalerOf(context).scale(10) >= 15;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(verifyWhy(l, reason), style: mc.text.body),
         SizedBox(height: mc.space.md),
-        point(Icons.badge_outlined, l.v2bVerifyPoint1),
-        point(Icons.lock_outline, l.v2bVerifyPoint2),
-        point(Icons.explore_outlined, l.v2bVerifyPoint3),
-        SizedBox(height: mc.space.xs),
-        McButton(
-          label: l.verifStartCapture,
-          onPressed: () => Navigator.of(context).pop(true),
-        ),
-        SizedBox(height: mc.space.xs),
-        McButton(
-          label: l.v2bNotNow,
-          kind: McButtonKind.secondary,
-          onPressed: () => Navigator.of(context).pop(false),
-        ),
-        SizedBox(height: mc.space.xs),
+        if (large) ...[
+          ...actions,
+          SizedBox(height: mc.space.sm),
+          ...points,
+        ] else ...[
+          ...points,
+          SizedBox(height: mc.space.xs),
+          ...actions,
+        ],
       ],
     );
   }

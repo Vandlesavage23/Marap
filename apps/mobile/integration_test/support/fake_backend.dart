@@ -24,6 +24,12 @@ class FakeBackend implements HttpClientAdapter {
   final consentsGranted = <String>{};
   bool signedIn = false;
 
+  /// "About you" saved: the account has its basic profile (v2: the only thing
+  /// the app insists on).
+  bool profileCreated = false;
+  final patches = <Map<String, dynamic>>[];
+  final events = <String>[];
+
   /// Server-side message log for [matchId], newest first.
   final messages = <Map<String, dynamic>>[];
   final seenClientIds = <String, Map<String, dynamic>>{};
@@ -41,13 +47,14 @@ class FakeBackend implements HttpClientAdapter {
         'status': signedUpVerified ? 'active' : 'pending_verification',
         'locale': 'en',
         'verification_status': signedUpVerified ? 'passed' : 'not_started',
-        'profile_status': signedUpVerified ? 'live' : 'none',
+        'profile_status':
+            signedUpVerified ? 'live' : (profileCreated ? 'draft' : 'none'),
         'enforcement': null,
       };
 
   Map<String, dynamic> get _entitlements => {
         'state': 'member',
-        'trial': {'used': false, 'ends_at': null},
+        'trial': {'used': false, 'available': false, 'ends_at': null},
         'membership': {'ends_at': '2030-01-01T00:00:00Z', 'source': 'grant'},
         'capabilities': {
           'browse': true,
@@ -56,7 +63,9 @@ class FakeBackend implements HttpClientAdapter {
           'accept_interest': true,
           'send_message': true,
           'read_conversations': true,
+          'view_full_profile': true,
         },
+        'verification': {'status': 'passed', 'verified': true},
         'server_time': DateTime.now().toUtc().toIso8601String(),
       };
 
@@ -160,6 +169,18 @@ class FakeBackend implements HttpClientAdapter {
               k: {'version': '2026-01', 'granted': true},
           },
         });
+      case 'PATCH /me/profile':
+        profileCreated = true;
+        patches.add(Map<String, dynamic>.from(data as Map));
+        return _json(200, {
+          'id': 'p1',
+          'status': 'draft',
+          'readiness': {'ready': false, 'missing': <String>[]},
+          ...patches.last,
+        });
+      case 'POST /events':
+        events.add((data as Map)['name'] as String);
+        return _json(202, {'status': 'accepted'});
       case 'GET /me/entitlements':
         return _json(200, _entitlements);
       case 'GET /matches':

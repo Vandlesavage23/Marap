@@ -18,6 +18,9 @@ Future<void> maybePrimeNotifications(BuildContext context) async {
   final ref = ProviderScope.containerOf(context, listen: false);
   final prefs = ref.read(localPrefsProvider);
   if (prefs.getBool(pushPrimedKey) ?? false) return;
+  // Availability and the phone's answer are read asynchronously.
+  await ref.read(pushControllerProvider.notifier).sync();
+  if (!context.mounted) return;
   final push = ref.read(pushControllerProvider);
   if (!push.available || push.enabled) return;
   if (push.permission == PushPermission.denied) return;

@@ -51,10 +51,13 @@ class MakePhotoStep extends ConsumerStatefulWidget {
 }
 
 class _MakePhotoStepState extends ConsumerState<MakePhotoStep> {
-  PhotoStateSnapshot _last = const PhotoStateSnapshot(0, false);
+  PhotoStateSnapshot _last = const PhotoStateSnapshot(0, uploading: false);
 
   void _publish(PhotosState s) {
-    final snap = PhotoStateSnapshot(s.photos.length, s.uploads.isNotEmpty);
+    final snap = PhotoStateSnapshot(
+      s.photos.length,
+      uploading: s.uploads.isNotEmpty,
+    );
     if (snap == _last) return;
     _last = snap;
     // After the frame: never set the shell's state during this build.
@@ -159,7 +162,7 @@ class _MakePhotoStepState extends ConsumerState<MakePhotoStep> {
 /// Just enough of the photo state to know when to re-publish the action.
 @immutable
 class PhotoStateSnapshot {
-  const PhotoStateSnapshot(this.count, this.uploading);
+  const PhotoStateSnapshot(this.count, {required this.uploading});
   final int count;
   final bool uploading;
 
@@ -650,6 +653,7 @@ class ChoiceCards extends StatelessWidget {
     required this.options,
     required this.value,
     required this.onChanged,
+    this.showLabel = true,
     super.key,
   });
 
@@ -657,6 +661,9 @@ class ChoiceCards extends StatelessWidget {
   final Map<String, String> options;
   final String? value;
   final ValueChanged<String> onChanged;
+
+  /// Draw [label] above the cards (it is always the accessible name).
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -668,8 +675,10 @@ class ChoiceCards extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(label, style: mc.text.subtitle),
-          SizedBox(height: mc.space.xs),
+          if (showLabel) ...[
+            Text(label, style: mc.text.subtitle),
+            SizedBox(height: mc.space.xs),
+          ],
           for (final e in options.entries) ...[
             Semantics(
               inMutuallyExclusiveGroup: true,
@@ -1115,6 +1124,12 @@ class _MakeQuestionsStepState extends ConsumerState<MakeQuestionsStep> {
                   total,
                 ),
               ),
+            SizedBox(height: mc.space.xs),
+            Text(
+              l.v2bMakeStepQuestionsSub,
+              style:
+                  mc.text.bodySmall.copyWith(color: mc.colors.onSurfaceMuted),
+            ),
             if (s.failure != null && !s.saving) ...[
               SizedBox(height: mc.space.sm),
               InlineFailure(
@@ -1198,6 +1213,7 @@ class _Answers extends StatelessWidget {
       case QuestionType.single:
         return ChoiceCards(
           label: question.prompt,
+          showLabel: false,
           options: {for (final o in question.options) o.value: o.label},
           value: current as String?,
           onChanged: onPick.call,
@@ -1205,6 +1221,7 @@ class _Answers extends StatelessWidget {
       case QuestionType.scale:
         return ChoiceCards(
           label: question.prompt,
+          showLabel: false,
           options: {
             for (final v in question.scaleValues)
               '$v': [

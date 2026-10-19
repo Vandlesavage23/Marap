@@ -1,15 +1,12 @@
 @Tags(['contract'])
 library;
 
-import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:marriage_connect/src/core/network/api_client.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/features/chat/data/api_chat_repository.dart';
 import 'package:marriage_connect/src/features/chat/data/outbox_repository.dart';
 import 'package:marriage_connect/src/features/chat/domain/chat_message.dart';
 import 'package:marriage_connect/src/features/discovery/data/api_discovery_repository.dart';
-import 'package:marriage_connect/src/features/interests/data/api_interests_repository.dart';
 import 'package:marriage_connect/src/features/matches/data/api_matches_repository.dart';
 import 'package:marriage_connect/src/features/membership/data/membership_repository.dart';
 import 'package:marriage_connect/src/features/membership/domain/entitlements.dart';
@@ -25,33 +22,33 @@ Future<AppFailure> failureOf(Future<Object?> Function() f) async {
   fail('expected an AppFailure');
 }
 
-/// The "restricted" UI states are driven by real server answers: a member whose
-/// membership ended keeps reading but cannot browse, send interests or reply
-/// (scenario 06: read-only, no data loss).
+/// v2: a member whose membership ended falls back to the FREE tier, which is
+/// still useful: they keep reading, browsing, chatting inside a match and a
+/// weekly interest quota. What ends is reach (priority, higher caps, filters).
 void main() {
-  group('restricted (expired membership) contract', skip: contractSkip, () {
+  group('expired membership contract (v2 free tier)', skip: contractSkip, () {
     late Fixture fx;
     setUpAll(() => fx = Fixture.load());
 
-    test('entitlements say expired; capabilities split read from write',
-        () async {
+    test('entitlements say expired; the free tier stays on', () async {
       final c = ContractClient(fx.member('lapsed'));
       addTearDown(c.close);
       final e = await ApiMembershipRepository(c.dio).entitlements();
       expect(e.state, EntitlementState.expired);
       expect(e.can(Capability.readConversations), isTrue);
-      expect(e.can(Capability.sendMessage), isFalse);
-      expect(e.can(Capability.browse), isFalse);
-      expect(e.can(Capability.sendInterest), isFalse);
-      expect(e.trialAvailable, isFalse);
+      expect(e.can(Capability.sendMessage), isTrue);
+      expect(e.can(Capability.browse), isTrue);
+      expect(e.can(Capability.sendInterest), isTrue);
+      expect(e.onFreeQuota, isTrue);
+      expect(e.interests?.limit, 3);
 
       final caps = await ApiChatRepository(c.dio, c.db).capabilities();
       expect(caps.state, 'expired');
       expect(caps.readConversations, isTrue);
-      expect(caps.sendMessage, isFalse);
+      expect(caps.sendMessage, isTrue);
     });
 
-    test('conversation stays readable, matches list stays, sending is refused',
+    test('conversation stays readable, the match stays, sending works',
         () async {
       final c = ContractClient(fx.member('lapsed'));
       addTearDown(c.close);
@@ -66,29 +63,19 @@ void main() {
       final matches = await ApiMatchesRepository(c.dio, c.db).sync();
       expect(matches.map((m) => m.id), contains(fx.lapsedMatchId));
 
-      final sendRefused = await failureOf(() async {
-        try {
-          await c.dio.post<void>(
-            '/matches/${fx.lapsedMatchId}/messages',
-            data: {
-              'client_msg_id': '6f0f4a52-0000-4000-8000-000000000c01',
-              'kind': 'text',
-              'body': 'Still there?',
-            },
-          );
-        } on DioException catch (e) {
-          throw e.failure;
-        }
-        return null;
-      });
-      expect(sendRefused.code, 'entitlement_required');
-      expect(sendRefused.status, 403);
-      expect(sendRefused.extra['capability'], 'send_message');
+      final r = await c.dio.post<Map<String, dynamic>>(
+        '/matches/${fx.lapsedMatchId}/messages',
+        data: {
+          'client_msg_id': '6f0f4a52-0000-4000-8000-000000000c01',
+          'kind': 'text',
+          'body': 'Still there?',
+        },
+      );
+      expect(r.statusCode, anyOf(200, 201));
     });
 
-    test(
-        'outbox: entitlement_required is permanent (marked failed, no retry '
-        'loop)', () async {
+    test('outbox: a queued message is delivered (sending stays free)',
+        () async {
       final c = ContractClient(fx.member('lapsed'));
       addTearDown(c.close);
       final outbox = OutboxRepository(c.db, c.dio);
@@ -97,29 +84,15 @@ void main() {
         body: 'Can I still send?',
       );
       final r = await outbox.flush();
-      expect(r.sent, 0);
-      expect(r.failed, 1);
-      expect(r.pending, 0);
+      expect(r.sent, 1);
+      expect(r.failed, 0);
     });
 
-    test('discovery and interests are restricted with the capability named',
-        () async {
+    test('discovery and interests are open (quota-limited)', () async {
       final c = ContractClient(fx.member('lapsed'));
       addTearDown(c.close);
-      final discovery = await failureOf(
-        () => ApiDiscoveryRepository(c.dio).page(),
-      );
-      expect(discovery.code, 'entitlement_required');
-      expect(discovery.extra['capability'], 'browse');
-
-      final send = await failureOf(
-        () => ApiInterestsRepository(c.dio).send(
-          recipientProfileId: fx.member('grace').profileId,
-          idempotencyKey: 'contract-lapsed-int-1',
-        ),
-      );
-      expect(send.code, 'entitlement_required');
-      expect(send.extra['capability'], 'send_interest');
+      final page = await ApiDiscoveryRepository(c.dio).page();
+      expect(page, isNotNull);
     });
 
     test('the peer (still a member) sees the conversation normally', () async {

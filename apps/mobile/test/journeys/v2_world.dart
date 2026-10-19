@@ -9,19 +9,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
 import 'package:marriage_connect/src/core/auth/install_id.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
+import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/router/app_router.dart';
+import 'package:marriage_connect/src/core/storage/local_prefs.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/features/discovery/application/discovery_controller.dart';
 import 'package:marriage_connect/src/features/discovery/application/verify_prompt.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
+import 'package:marriage_connect/src/features/discovery/presentation/next_card_preloader.dart';
+import 'package:marriage_connect/src/features/discovery/presentation/progressive_image.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
 import 'package:marriage_connect/src/features/matches/application/matches_controller.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
 import 'package:marriage_connect/src/features/me/data/me_repository.dart';
 import 'package:marriage_connect/src/features/membership/application/membership_providers.dart';
+import 'package:marriage_connect/src/features/membership/data/membership_repository.dart';
+import 'package:marriage_connect/src/features/membership/data/purchase_gateway.dart';
 import 'package:marriage_connect/src/features/membership/domain/entitlements.dart';
 import 'package:marriage_connect/src/features/notifications/application/push_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
@@ -30,6 +36,7 @@ import 'package:marriage_connect/src/features/onboarding/data/sms_autofill.dart'
 import 'package:marriage_connect/src/features/onboarding/presentation/onboarding_screens.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_providers.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_tab_overrides.dart';
+import 'package:marriage_connect/src/features/profile/data/profile_models.dart';
 import 'package:marriage_connect/src/features/questionnaire/application/questionnaire_controller.dart';
 import 'package:marriage_connect/src/features/questionnaire/data/questionnaire_models.dart';
 import 'package:marriage_connect/src/features/questionnaire/data/questionnaire_repository.dart';
@@ -39,10 +46,6 @@ import 'package:marriage_connect/src/features/verification/data/screen_security.
 import 'package:marriage_connect/src/features/verification/data/verification_models.dart';
 import 'package:marriage_connect/src/features/verification/data/verification_repository.dart';
 import 'package:marriage_connect/src/features/verification/presentation/verify_widgets.dart';
-import 'package:marriage_connect/src/features/membership/data/membership_repository.dart';
-import 'package:marriage_connect/src/features/membership/data/purchase_gateway.dart';
-import 'package:marriage_connect/src/features/profile/data/profile_models.dart';
-import 'package:marriage_connect/src/core/storage/local_prefs.dart';
 
 import '../device_track/support.dart' show FakeDevices, FakePushGateway;
 import '../membership_track/support.dart' show FakeGateway;
@@ -70,44 +73,76 @@ Map<String, Object?> _q(
     };
 
 final worldQuestions = <Map<String, Object?>>[
-  _q('q1', 'When would you like to marry?',
-      ['Within a year', 'In 1 to 2 years', 'No fixed time']),
-  _q('q2', 'Do you want children?', ['Yes', 'No', 'Not sure'],
-      dimension: 'children'),
-  _q('q3', 'How many children would you like?',
-      ['1 to 2', '3 to 4', 'More than 4'],
-      dimension: 'children'),
-  _q('q4', 'Where would you like to live after marriage?',
-      ['In town', 'In the village', 'Anywhere'],
-      dimension: 'location'),
-  _q('q5', 'How close are you to your family?',
-      ['Very close', 'Close', 'Independent'],
-      dimension: 'family'),
-  _q('q6', 'Who should manage the household money?',
-      ['Both of us', 'Husband', 'Wife'],
-      dimension: 'roles'),
-  _q('q7', 'After a disagreement you usually...',
-      ['Talk it out at once', 'Take time first', 'Ask family to help'],
-      dimension: 'communication'),
-  _q('q8', 'Your ideal weekend is...',
-      ['At home', 'With family', 'Out and about'],
-      dimension: 'lifestyle'),
-  _q('q9', 'Would you move town for your partner?', ['Yes', 'Maybe', 'No'],
-      dimension: 'location'),
-  _q('q10', 'How often do you want to visit family?',
-      ['Weekly', 'Monthly', 'Rarely'],
-      dimension: 'family'),
+  _q(
+    'q1',
+    'When would you like to marry?',
+    ['Within a year', 'In 1 to 2 years', 'No fixed time'],
+  ),
+  _q(
+    'q2',
+    'Do you want children?',
+    ['Yes', 'No', 'Not sure'],
+    dimension: 'children',
+  ),
+  _q(
+    'q3',
+    'How many children would you like?',
+    ['1 to 2', '3 to 4', 'More than 4'],
+    dimension: 'children',
+  ),
+  _q(
+    'q4',
+    'Where would you like to live after marriage?',
+    ['In town', 'In the village', 'Anywhere'],
+    dimension: 'location',
+  ),
+  _q(
+    'q5',
+    'How close are you to your family?',
+    ['Very close', 'Close', 'Independent'],
+    dimension: 'family',
+  ),
+  _q(
+    'q6',
+    'Who should manage the household money?',
+    ['Both of us', 'Husband', 'Wife'],
+    dimension: 'roles',
+  ),
+  _q(
+    'q7',
+    'After a disagreement you usually...',
+    ['Talk it out at once', 'Take time first', 'Ask family to help'],
+    dimension: 'communication',
+  ),
+  _q(
+    'q8',
+    'Your ideal weekend is...',
+    ['At home', 'With family', 'Out and about'],
+    dimension: 'lifestyle',
+  ),
+  _q(
+    'q9',
+    'Would you move town for your partner?',
+    ['Yes', 'Maybe', 'No'],
+    dimension: 'location',
+  ),
+  _q(
+    'q10',
+    'How often do you want to visit family?',
+    ['Weekly', 'Monthly', 'Rarely'],
+    dimension: 'family',
+  ),
 ];
 
 /// The whole fake server.
 class World {
   World() {
-    profile = _WorldProfile(this);
-    verificationRepo = _WorldVerification(this);
-    membership = _WorldMembership(this);
-    interests = _WorldInterests(this);
-    questionnaire = _WorldQuestions();
-    auth = _WorldAuth();
+    profile = WorldProfile(this);
+    verificationRepo = WorldVerification(this);
+    membership = WorldMembership(this);
+    interests = WorldInterests(this);
+    questionnaire = WorldQuestions(this);
+    auth = WorldAuth();
   }
 
   bool profileCreated = false;
@@ -118,12 +153,12 @@ class World {
   bool trialActive = false;
   final resetsAt = DateTime.utc(2026, 10, 26); // a Monday
 
-  late final _WorldProfile profile;
-  late final _WorldVerification verificationRepo;
-  late final _WorldMembership membership;
-  late final _WorldInterests interests;
-  late final _WorldQuestions questionnaire;
-  late final _WorldAuth auth;
+  late final WorldProfile profile;
+  late final WorldVerification verificationRepo;
+  late final WorldMembership membership;
+  late final WorldInterests interests;
+  late final WorldQuestions questionnaire;
+  late final WorldAuth auth;
   final media = FakeMediaRepository();
   final pipeline = FakePhotoPipeline();
   final capture = FakeIdentityCaptureLauncher();
@@ -210,7 +245,8 @@ class World {
         'status': 'live',
       })
       ..photoJson.add(photo('p1'))
-      ..seedIntro('I am a nurse who loves music, cooking and long walks.');
+      ..seedIntro('I am a nurse who loves music, cooking and long walks.')
+      ..questionnaireDone = true;
     for (final q in worldQuestions.take(8)) {
       questionnaire.stored[q['key']! as String] = Answer(
         question: q['key']! as String,
@@ -220,7 +256,7 @@ class World {
   }
 }
 
-class _WorldAuth implements AuthRepository {
+class WorldAuth implements AuthRepository {
   final calls = <String>[];
   Map<String, bool>? consents;
   late World world;
@@ -254,8 +290,8 @@ class _WorldMe implements MeRepository {
   Future<MeSnapshot> me() async => world.me();
 }
 
-class _WorldProfile extends FakeProfileRepository {
-  _WorldProfile(this.world) : super() {
+class WorldProfile extends FakeProfileRepository {
+  WorldProfile(this.world) : super() {
     minPhotos = 1;
   }
   final World world;
@@ -299,8 +335,8 @@ class _WorldProfile extends FakeProfileRepository {
   }
 }
 
-class _WorldVerification extends _FakeVerification {
-  _WorldVerification(this.world);
+class WorldVerification extends _FakeVerification {
+  WorldVerification(this.world);
   final World world;
 
   @override
@@ -351,8 +387,8 @@ class _FakeVerification implements VerificationRepository {
   }) async {}
 }
 
-class _WorldMembership implements MembershipRepository {
-  _WorldMembership(this.world);
+class WorldMembership implements MembershipRepository {
+  WorldMembership(this.world);
   final World world;
   final trialKeys = <String>[];
 
@@ -420,8 +456,8 @@ class _WorldMembership implements MembershipRepository {
   Future<String?> accountId() async => 'acct-1';
 }
 
-class _WorldInterests extends FakeInterests {
-  _WorldInterests(this.world);
+class WorldInterests extends FakeInterests {
+  WorldInterests(this.world);
   final World world;
 
   @override
@@ -457,7 +493,16 @@ class _WorldInterests extends FakeInterests {
       'I am a nurse who loves music.';
 }
 
-class _WorldQuestions implements QuestionnaireRepository {
+/// An answer to one of [worldQuestions] (the first option).
+Answer answerOf(Map<String, Object?> q) => Answer(
+      question: q['key']! as String,
+      value: ((q['options']! as List).first as Map)['value'],
+    );
+
+class WorldQuestions implements QuestionnaireRepository {
+  WorldQuestions(this.world);
+  bool failNext = false;
+  final World world;
   final stored = <String, Answer>{};
 
   AnswerSet _set() => AnswerSet(
@@ -474,9 +519,15 @@ class _WorldQuestions implements QuestionnaireRepository {
 
   @override
   Future<AnswerSet> save(List<Answer> answers) async {
+    if (failNext) {
+      failNext = false;
+      throw const AppFailure(code: 'offline', retryable: true);
+    }
     for (final a in answers) {
       stored[a.question] = a;
     }
+    // Go-live needs 8 core answers (GO_LIVE_MIN_CORE_ANSWERS).
+    world.profile.questionnaireDone = stored.length >= 8;
     return _set();
   }
 
@@ -494,6 +545,8 @@ class _SessionAt extends SessionController {
 /// Picks a fixed birth date instead of driving the calendar dialog.
 BirthDatePicker fixedBirthDate(DateTime d) =>
     (context, {required initial, required first, required last}) async => d;
+
+/// The current entitlements as the app reads them.
 
 /// Everything a v2 screen or the whole app needs, wired to [world].
 List<Override> worldOverrides(
@@ -534,6 +587,11 @@ List<Override> worldOverrides(
     installIdProvider.overrideWithValue(() async => 'install-test'),
     ...profileTabOverrides(),
     ...social.baseOverrides(),
+    // Illustrated stand-ins for photos; never the network or the disk cache.
+    networkImageBuilderProvider.overrideWithValue(
+      (context, url, w) => SampleAvatar(seed: url),
+    ),
+    imagePreloaderProvider.overrideWithValue((context, url, width) async {}),
   ];
 }
 
@@ -543,26 +601,26 @@ Future<void> pumpWorld(
   World world, {
   SessionState session = SessionState.signedOut,
   DateTime? birthDate,
+  Widget Function(Widget app)? wrap,
 }) async {
   late ProviderContainer container;
   world.signIn = () => container.read(sessionProvider.notifier).signedIn();
-  await t.pumpWidget(
-    ProviderScope(
-      overrides: worldOverrides(world, session: session, birthDate: birthDate),
-      child: Consumer(
-        builder: (context, ref, _) {
-          container = ProviderScope.containerOf(context);
-          return MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            theme: buildTheme(Brightness.light),
-            darkTheme: buildTheme(Brightness.dark),
-            routerConfig: ref.watch(routerProvider),
-            localizationsDelegates: social.localizationsDelegatesForTests,
-            supportedLocales: AppLocalizations.supportedLocales,
-          );
-        },
-      ),
+  final app = ProviderScope(
+    overrides: worldOverrides(world, session: session, birthDate: birthDate),
+    child: Consumer(
+      builder: (context, ref, _) {
+        container = ProviderScope.containerOf(context);
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          theme: buildTheme(Brightness.light),
+          darkTheme: buildTheme(Brightness.dark),
+          routerConfig: ref.watch(routerProvider),
+          localizationsDelegates: social.localizationsDelegatesForTests,
+          supportedLocales: AppLocalizations.supportedLocales,
+        );
+      },
     ),
   );
+  await t.pumpWidget(wrap == null ? app : wrap(app));
   await t.pumpAndSettle();
 }

@@ -1616,5 +1616,16 @@
   "v2bPrimeTitle": "Want a nudge when someone replies?",
   "v2bPrimeBody": "We'll tell you when someone is interested in you, when you match and when you get a message. Notifications never show names or message text.",
   "v2bPrimeYes": "Turn on notifications",
-  "v2bPrimeNo": "Not now"
+  "v2bPrimeNo": "Not now",
+  "v2bQuotaLeftThisWeek": "{left} of {limit} free introductions left this week",
+  "@v2bQuotaLeftThisWeek": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  }
 }

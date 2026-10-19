@@ -5847,6 +5847,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not now'**
   String get v2bPrimeNo;
+
+  /// No description provided for @v2bQuotaLeftThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} of {limit} free introductions left this week'**
+  String v2bQuotaLeftThisWeek(int left, int limit);
 }
 
 class _AppLocalizationsDelegate

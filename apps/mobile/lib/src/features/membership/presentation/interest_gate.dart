@@ -29,6 +29,8 @@ String? quotaLineText(
       ? ''
       : DateFormat.EEEE(Localizations.localeOf(context).toString())
           .format(q.resetsAt!.toLocal());
+  // Before the first interest of the window there is no renewal date yet.
+  if (q.resetsAt == null) return l.v2bQuotaLeftThisWeek(q.left, q.limit);
   return q.left == 0
       ? l.v2bQuotaNone(day)
       : l.v2bQuotaLeft(q.left, q.limit, day);

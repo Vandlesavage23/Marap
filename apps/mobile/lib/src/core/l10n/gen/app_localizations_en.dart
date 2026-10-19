@@ -3286,4 +3286,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get v2bPrimeNo => 'Not now';
+
+  @override
+  String v2bQuotaLeftThisWeek(int left, int limit) {
+    return '$left of $limit free introductions left this week';
+  }
 }

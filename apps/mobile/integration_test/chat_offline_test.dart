@@ -22,8 +22,8 @@ void main() {
       ..consentsGranted.addAll(['terms', 'privacy', 'data_transfer'])
       ..seedIncoming('Hello Ben, good to meet you.');
     await pumpApp(tester, backend, signedIn: true);
-    await pumpUntil(tester, find.text(l.homeWelcome));
-    await tester.tap(find.text(l.homeMatches));
+    await pumpUntil(tester, find.text(l.v2aNavMatches));
+    await tester.tap(find.text(l.v2aNavMatches));
     await tester.pumpAndSettle();
     await pumpUntil(tester, find.textContaining('Amina'));
     await tester.tap(find.textContaining('Amina'));

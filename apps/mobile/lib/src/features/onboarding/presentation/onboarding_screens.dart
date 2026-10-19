@@ -827,7 +827,10 @@ class _CodeBoxes extends StatelessWidget {
                 ],
                 style: const TextStyle(color: Colors.transparent),
                 cursorColor: Colors.transparent,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
+                  // The accessible name; invisible (the boxes are the label).
+                  hintText: semanticLabel,
+                  hintStyle: const TextStyle(color: Colors.transparent),
                   border: InputBorder.none,
                   counterText: '',
                   fillColor: Colors.transparent,

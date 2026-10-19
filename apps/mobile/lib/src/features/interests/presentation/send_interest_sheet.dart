@@ -8,6 +8,7 @@ import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
+import 'package:marriage_connect/src/features/membership/presentation/interest_gate.dart';
 
 /// Opens the send-interest sheet. Completes with the result when an interest
 /// was sent (or turned into a match), or null if the member closed it.
@@ -39,6 +40,18 @@ class SendInterestSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final provider = sendInterestControllerProvider(profileId);
     final async = ref.watch(provider);
+    // A refusal the app could not predict (stale entitlement data): close the sheet and show the right next step.
+    ref.listen(provider, (prev, next) {
+      final f = next.valueOrNull?.failure;
+      if (f != null &&
+          f != prev?.valueOrNull?.failure &&
+          (f.code == 'verification_required' ||
+              f.code == 'interest_quota_reached')) {
+        final root = Navigator.of(context, rootNavigator: true).context;
+        Navigator.of(context).pop();
+        handleInterestRefusal(root, f);
+      }
+    });
     return async.when(
       loading: () => const SizedBox(
         height: 160,
@@ -131,7 +144,9 @@ class _Compose extends StatelessWidget {
               semanticsLabel: socialFailureMessage(l, failure),
             ),
           ],
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          const InterestQuotaLine(),
+          const SizedBox(height: 8),
           McButton(
             label: l.interestSendButton,
             loading: state.sending,

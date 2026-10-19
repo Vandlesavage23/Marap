@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_controller.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
 import 'package:marriage_connect/src/features/chat/presentation/composer.dart';
@@ -15,10 +16,11 @@ void main() {
     await t.pumpWidget(
       ProviderScope(
         overrides: [voiceRecorderProvider.overrideWithValue(recorder)],
-        child: const MaterialApp(
+        child: MaterialApp(
+          theme: buildTheme(Brightness.light),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
+          home: const Scaffold(
             body: Composer(matchId: 'm1', state: ChatState()),
           ),
         ),

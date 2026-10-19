@@ -4,7 +4,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
@@ -45,8 +44,9 @@ Future<void> _reveal(WidgetTester t, Finder f) async {
 Future<void> _tapText(WidgetTester t, String text) async {
   final f = find.text(text);
   await _reveal(t, f);
+  await t.pumpAndSettle();
   expect(f, findsWidgets, reason: 'looking for "$text"');
-  await t.tap(f.first, warnIfMissed: false);
+  await t.tap(f.first);
   await _settle(t);
 }
 
@@ -64,7 +64,7 @@ Future<void> main() async {
   }
 
   testWidgets(
-      "Grace: first launch to first card in 5 screens, then the "
+      'Grace: first launch to first card in 5 screens, then the '
       'whole free-first journey', (t) async {
     phone(t);
     final world = World()..seedCards();
@@ -95,8 +95,10 @@ Future<void> main() async {
     await _settle(t);
     taps++;
     trail.note(t);
-    expect(world.auth.calls,
-        ['start:+256772000111', 'verify:+256772000111:123456']);
+    expect(
+      world.auth.calls,
+      ['start:+256772000111', 'verify:+256772000111:123456'],
+    );
 
     // Screen 4: About you. Nothing is pre-ticked; consents on the same screen.
     expect(find.text(l.v2bAboutTitle), findsOneWidget);
@@ -113,8 +115,10 @@ Future<void> main() async {
     await _tapButton(t, l.v2bAboutCta);
     taps++;
     trail.note(t);
-    expect(world.auth.consents,
-        {'terms': true, 'privacy': true, 'data_transfer': true});
+    expect(
+      world.auth.consents,
+      {'terms': true, 'privacy': true, 'data_transfer': true},
+    );
     expect(world.profile.patches.last['gender'], 'female');
     expect(world.profile.patches.last['birth_date'], '1998-04-12');
 
@@ -154,6 +158,8 @@ Future<void> main() async {
     final world = World()
       ..profileCreated = true
       ..seedCards();
+    // What About you already saved.
+    world.profile.fields.addAll({'display_name': 'Grace', 'gender': 'female'});
     final trail = Trail();
     await pumpWorld(t, world, session: SessionState.signedIn);
     trail.note(t);
@@ -193,14 +199,18 @@ Future<void> main() async {
     expect(find.text(l.verifPassedTitle), findsOneWidget);
     expect(world.analytics.count(AnalyticsEvent.verifyPassed), 1);
     await _tapText(t, l.verifPassedContinue);
-    expect(find.text(l.v2bStepOf(1, 4)), findsWidgets);
+    expect(find.textContaining(l.v2bStepOf(1, 4)), findsWidgets);
 
     // 1/4 photo
     await _tapText(t, l.v2bPhotoPick);
     await _tapText(t, l.v2bContinue);
     // 2/4 district + what you are looking for (+ what the server still needs)
     await _tapText(t, l.v2bDistrictChoose);
-    await _tapText(t, 'Kampala');
+    await t.enterText(find.byType(TextField).last, 'Kampala');
+    await t.pump();
+    await t.tap(find.widgetWithText(ListTile, 'Kampala'));
+    await _settle(t);
+    await _tapText(t, l.profileTimelineWithin1y);
     await _tapText(t, l.profileIntentionSoon);
     await _tapText(t, l.profileMaritalNever);
     await _tapText(t, l.v2bContinue);
@@ -211,6 +221,7 @@ Future<void> main() async {
       'My family is close and I value honesty and kindness. I am looking for '
       'a faithful, hardworking man who wants a peaceful home.',
     );
+    await t.pump();
     await t.pump();
     await _tapText(t, l.v2bContinue);
     // 4/4 eight quick questions, one tap each
@@ -233,7 +244,13 @@ Future<void> main() async {
         sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
       );
       await _settle(t);
-      await _tapText(t, l.interestSendButton);
+      await t.tap(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text(l.interestSendButton),
+        ),
+      );
+      await _settle(t);
       await _tapText(t, l.interestDone);
       if (n == 1) {
         expect(find.text(l.v2bPrimeTitle), findsOneWidget);
@@ -255,7 +272,8 @@ Future<void> main() async {
     expect(find.text(l.v2bOfferTitle(3)), findsNothing);
     expect(world.trialUsed, isFalse);
     expect(world.analytics.count(AnalyticsEvent.trialStarted), 0);
-    expect(find.textContaining('Amani'), findsWidgets);
+    // Still in the app, still free: the Discover tab is on screen.
+    expect(find.text(l.v2aNavDiscover), findsWidgets);
   });
 
   testWidgets('Brian: the 24 h trial is explicit and only from the offer',

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/storage/local_prefs.dart';
 import 'package:marriage_connect/src/features/me/data/me_repository.dart';
+import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
+import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
 import 'package:marriage_connect/src/features/verification/application/verification_controller.dart';
 import 'package:marriage_connect/src/features/verification/data/identity_capture.dart';
 import 'package:marriage_connect/src/features/verification/data/screen_security.dart';
@@ -432,14 +435,17 @@ void main() {
       expect(find.text('STUB /verification/capture'), findsOneWidget);
     });
 
-    testWidgets('intro with missing consents offers the consents step',
+    testWidgets('missing consents are collected inline, unticked, then retried',
         (t) async {
       final repo = FakeVerificationRepository();
+      final auth = _RecordingAuth();
       await pumpScreen(
         t,
         const VerificationScreen(),
-        overrides: overrides(repo),
-        stubs: ['/onboarding/consents'],
+        overrides: [
+          ...overrides(repo),
+          authRepositoryProvider.overrideWithValue(auth),
+        ],
       );
       await t.pumpAndSettle();
       final l = await l10n();
@@ -457,9 +463,33 @@ void main() {
           .read(verificationProvider.notifier)
           .runCapture(idType: 'PASSPORT');
       await t.pumpAndSettle();
-      await t.tap(find.text(l.verifConsentsAction));
+      // nothing is pre-ticked and the button waits for an explicit act
+      final boxes = find.byType(CheckboxListTile);
+      expect(boxes, findsNWidgets(3));
+      expect(
+        t.widgetList<CheckboxListTile>(boxes).every((b) => b.value == false),
+        isTrue,
+      );
+      await t.ensureVisible(find.text(l.v2bConsentsAcceptContinue));
+      expect(
+        t
+            .widget<FilledButton>(
+              find.widgetWithText(FilledButton, l.v2bConsentsAcceptContinue),
+            )
+            .onPressed,
+        isNull,
+      );
+      await t.tap(find.text(l.v2bSelectAll));
+      await t.pump();
+      await t.tap(find.text(l.v2bConsentsAcceptContinue));
       await t.pumpAndSettle();
-      expect(find.text('STUB /onboarding/consents'), findsOneWidget);
+      expect(auth.recorded, {
+        'terms': true,
+        'privacy': true,
+        'data_transfer': true,
+      });
+      // the card is gone: the member can start again
+      expect(find.text(l.v2bConsentsAcceptContinue), findsNothing);
     });
 
     testWidgets('expired attempt shows a note on the intro', (t) async {
@@ -583,16 +613,22 @@ void main() {
       expect(msgs.values.toSet().length, greaterThanOrEqualTo(8));
     });
 
-    testWidgets('passed: continue re-reads /me and opens the builder',
+    testWidgets('passed: continue re-reads /me and opens "Make your profile"',
         (t) async {
       final repo = FakeVerificationRepository()
         ..current = status(VerificationStage.passed);
-      final me = FakeMeRepository();
+      final me = FakeMeRepository(
+        const MeSnapshot(
+          accountStatus: 'active',
+          verificationStatus: 'passed',
+          profileStatus: 'draft',
+        ),
+      );
       await pumpScreen(
         t,
         const VerificationScreen(),
         overrides: overrides(repo, me: me),
-        stubs: ['/profile/builder'],
+        stubs: ['/profile/make'],
       );
       await t.pumpAndSettle();
       final l = await l10n();
@@ -600,7 +636,76 @@ void main() {
       await t.tap(find.text(l.verifPassedContinue));
       await t.pumpAndSettle();
       expect(me.calls, greaterThan(before));
-      expect(find.text('STUB /profile/builder'), findsOneWidget);
+      expect(find.text('STUB /profile/make'), findsOneWidget);
+    });
+
+    testWidgets('passed with a live profile goes back to browsing', (t) async {
+      final repo = FakeVerificationRepository()
+        ..current = status(VerificationStage.passed);
+      await pumpScreen(
+        t,
+        const VerificationScreen(),
+        overrides: overrides(repo),
+        stubs: ['/home', '/profile/make'],
+      );
+      await t.pumpAndSettle();
+      final l = await l10n();
+      await t.tap(find.text(l.verifPassedContinue));
+      await t.pumpAndSettle();
+      expect(find.text('STUB /profile/make'), findsNothing);
+    });
+
+    testWidgets('pending: browsing is never blocked', (t) async {
+      final repo = FakeVerificationRepository()
+        ..current = status(VerificationStage.submitted);
+      await pumpScreen(
+        t,
+        const VerificationScreen(),
+        overrides: overrides(repo),
+        stubs: ['/home'],
+      );
+      await t.pumpAndSettle();
+      final l = await l10n();
+      await t.tap(find.text(l.v2bKeepBrowsing));
+      await t.pumpAndSettle();
+      expect(find.text('STUB /home'), findsOneWidget);
+    });
+
+    testWidgets('failed: reason-specific tips and a way back', (t) async {
+      final repo = FakeVerificationRepository()
+        ..current = const VerificationStatus(
+          state: VerificationStage.failed,
+          reason: 'doc_unreadable',
+        );
+      await pumpScreen(
+        t,
+        const VerificationScreen(),
+        overrides: overrides(repo),
+      );
+      await t.pumpAndSettle();
+      final l = await l10n();
+      expect(find.text(l.v2bTipsHeading), findsOneWidget);
+      expect(find.text(l.v2bTipFlat), findsOneWidget);
+      expect(find.text(l.v2bTipGlare), findsOneWidget);
+      expect(find.text(l.v2bNotNow), findsOneWidget);
+    });
+
+    testWidgets('the ID type chosen is remembered for next time', (t) async {
+      final repo = FakeVerificationRepository();
+      final prefs = MemoryPrefs();
+      await pumpScreen(
+        t,
+        const VerificationScreen(),
+        overrides: [
+          ...overrides(repo),
+          localPrefsProvider.overrideWithValue(prefs),
+        ],
+      );
+      await t.pumpAndSettle();
+      final l = await l10n();
+      await t.tap(find.text(l.verifIdPassport));
+      await t.pump();
+      expect(prefs.getString('mc.verify.id_type'), 'PASSPORT');
     });
 
     testWidgets('capture screen: FLAG_SECURE on while shown, off after',
@@ -743,4 +848,20 @@ void main() {
     await security.enable();
     await security.disable();
   });
+}
+
+class _RecordingAuth implements AuthRepository {
+  Map<String, bool>? recorded;
+  @override
+  Future<void> startOtp(String phone) async {}
+  @override
+  Future<void> verifyOtp({
+    required String phone,
+    required String code,
+    String? inviteCode,
+  }) async {}
+  @override
+  Future<void> recordConsents({required Map<String, bool> granted}) async {
+    recorded = granted;
+  }
 }

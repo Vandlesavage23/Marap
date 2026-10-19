@@ -6,11 +6,11 @@ import 'package:marriage_connect/src/features/profile/application/photos_control
 import 'package:marriage_connect/src/features/profile/application/profile_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_providers.dart';
 import 'package:marriage_connect/src/features/profile/data/profile_models.dart';
-import 'package:marriage_connect/src/features/profile/presentation/builder_screen.dart';
 import 'package:marriage_connect/src/features/profile/presentation/preview_step.dart';
 import 'package:network_image_mock/network_image_mock.dart';
 
 import 'profile_fakes.dart';
+import 'step_harness.dart';
 import 'support.dart';
 
 const _fullName = {

@@ -69,15 +69,13 @@ void main() {
       final item = got.items.firstWhere((r) => r.id == first.id);
       expect(item.sender.displayName, 'Ben Contract');
       expect(item.text, isNotEmpty); // the sender's description snapshot
-      final restricted = await failureOf(
-        () => graceRepo.send(
-          recipientProfileId: fx.member('newbie').profileId,
-          idempotencyKey: 'contract-int-restrict1',
-        ),
+      // v2: a verified free member may send too (3 free a week; the quota
+      // and the offer are covered in v2_contract_test.dart).
+      final graceSent = await graceRepo.send(
+        recipientProfileId: fx.member('newbie').profileId,
+        idempotencyKey: 'contract-int-free-send1',
       );
-      expect(restricted.code, 'entitlement_required');
-      expect(restricted.status, 403);
-      expect(restricted.extra['capability'], 'send_interest');
+      expect(graceSent.id, isNotEmpty);
 
       final matchId = await graceRepo.accept(
         interestId: first.id,

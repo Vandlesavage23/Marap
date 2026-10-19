@@ -44,10 +44,19 @@ void main() {
       final none = await ApiMembershipRepository(newbie.dio).entitlements();
       expect(none.state, EntitlementState.none);
       expect(none.trialUsed, isFalse);
-      expect(none.can(Capability.sendMessage), isFalse);
+      // v2: a verified free member can chat inside a match and has a weekly
+      // interest quota; the trial is offered when the quota is used.
+      expect(none.can(Capability.sendMessage), isTrue);
       expect(none.can(Capability.receiveInterest), isTrue);
+      expect(none.can(Capability.viewFullProfile), isTrue);
       expect(none.looksUnverified, isFalse);
       expect(none.trialAvailable, isTrue);
+      expect(none.onFreeQuota, isTrue);
+      expect(none.interests, isNotNull);
+      expect(none.interests!.limit, 3);
+      // resets_at is null until the first interest of the window is sent
+      expect(none.browse, isNotNull);
+      expect(none.verificationStatus, 'passed');
     });
 
     test('products: per platform only; no platform is refused', () async {

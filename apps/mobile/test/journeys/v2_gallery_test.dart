@@ -1,375 +1,352 @@
+// Screenshot gallery for the v2 journey. Every screen is rendered at 390x844,
+// 360x640, dark and 200% text:
+//   SHOT_DIR=/tmp/shots/v2 flutter test test/journeys/v2_gallery_test.dart
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
-import 'package:marriage_connect/src/core/network/app_failure.dart';
-import 'package:marriage_connect/src/features/discovery/application/discovery_controller.dart';
-import 'package:marriage_connect/src/features/discovery/application/media_prefs.dart';
-import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
-import 'package:marriage_connect/src/features/discovery/presentation/discovery_screen.dart';
-import 'package:marriage_connect/src/features/discovery/presentation/next_card_preloader.dart';
-import 'package:marriage_connect/src/features/discovery/presentation/profile_screen.dart';
-import 'package:marriage_connect/src/features/discovery/presentation/progressive_image.dart';
-import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
-import 'package:marriage_connect/src/features/interests/domain/interest.dart';
-import 'package:marriage_connect/src/features/interests/presentation/interest_detail_screen.dart';
-import 'package:marriage_connect/src/features/interests/presentation/interests_screen.dart';
-import 'package:marriage_connect/src/features/matches/application/matches_controller.dart';
-import 'package:marriage_connect/src/features/matches/domain/match.dart';
-import 'package:marriage_connect/src/features/matches/presentation/match_celebration.dart';
-import 'package:marriage_connect/src/features/matches/presentation/matches_screen.dart';
-import 'package:marriage_connect/src/features/shell/application/profile_tab_providers.dart';
-import 'package:marriage_connect/src/features/shell/presentation/profile_tab_screen.dart';
-import 'package:marriage_connect/src/features/shell/presentation/shell_scaffold.dart';
+import 'package:go_router/go_router.dart';
+import 'package:marriage_connect/src/core/auth/session_controller.dart';
+import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/features/membership/presentation/interest_gate.dart';
+import 'package:marriage_connect/src/features/verification/data/verification_models.dart';
+import 'package:marriage_connect/src/features/verification/presentation/verify_widgets.dart';
 
-import '../social/fakes.dart';
-import '../social/helpers.dart' show cardJson, memberJson;
+import '../profile_track/support.dart' show l10n;
 import 'shot.dart';
+import 'v2_support.dart';
+import 'v2_world.dart';
 
-const _names = ['Grace', 'Moses', 'Aisha', 'Brian', 'Sarah', 'Peter'];
-const _districts = ['Kampala', 'Mbarara', 'Wakiso', 'Gulu', 'Entebbe', 'Jinja'];
+BuildContext _ctx(WidgetTester t) => t.element(find.byType(Scaffold).last);
 
-Map<String, dynamic> _card(int i, {bool locked = false}) => {
-      ...cardJson('p$i', name: _names[i % 6]),
-      'age': 26 + i * 2,
-      'district': _districts[i % 6],
-      if (locked) 'locked': true,
-      if (locked) 'locked_reason': 'verify_to_see_more',
-      'why': [
-        'You both want children and value faith.',
-        'Similar faith practice',
-      ],
-    };
+Future<void> _go(WidgetTester t, String path) async {
+  GoRouter.of(_ctx(t)).go(path);
+  await t.pumpAndSettle();
+}
 
-Widget _img(BuildContext c, String url, int w) => SampleAvatar(
-      seed: url.contains('/p') ? url.split('/')[3] : url,
+Future<void> _tap(WidgetTester t, String text) async {
+  final f = find.text(text);
+  if (f.evaluate().isEmpty) {
+    await t.scrollUntilVisible(
+      f,
+      200,
+      scrollable: find.byType(Scrollable).first,
     );
+  }
+  await t.ensureVisible(f.first);
+  await t.pumpAndSettle();
+  await t.tap(f.first);
+  await t.pumpAndSettle();
+}
 
-List<Override> _base({bool saver = false}) => [
-      dataSaverProvider.overrideWithValue(saver),
-      networkImageBuilderProvider.overrideWithValue(_img),
-      imagePreloaderProvider.overrideWithValue((_, __, ___) async {}),
-    ];
+typedef Setup = void Function(World w);
+typedef Nav = Future<void> Function(WidgetTester t, AppLocalizations l);
+
+/// Renders the real app on a fresh [World] in every variant.
+Future<void> shotWorld(
+  WidgetTester t,
+  String name, {
+  Setup? setup,
+  Nav? nav,
+  SessionState session = SessionState.signedIn,
+  List<ShotVariant> variants = allVariants,
+}) async {
+  final l = await l10n();
+  for (final v in variants) {
+    phoneSurface(t, logical: v.size, textScale: v.scale);
+    t.platformDispatcher.platformBrightnessTestValue =
+        v.dark ? Brightness.dark : Brightness.light;
+    final world = World();
+    setup?.call(world);
+    await pumpWorld(t, world, session: session, wrap: capturable);
+    if (nav != null) await nav(t, l);
+    await snap(t, '$name${v.suffix}');
+    await t.pumpWidget(const SizedBox.shrink());
+  }
+  t.platformDispatcher.clearPlatformBrightnessTestValue();
+}
+
+void _unverified(World w) {
+  w.profileCreated = true;
+  w.profile.fields.addAll({'display_name': 'Grace', 'gender': 'female'});
+  w.seedCards();
+}
+
+void _readyToMake(World w) {
+  _unverified(w);
+  w.profile.fields.addAll({
+    'district': 'Gulu',
+    'intention': 'marriage_soon',
+    'marriage_timeline': 'open',
+    'marital_status': 'never_married',
+  });
+}
 
 void main() {
   setUpAll(loadRealFonts);
 
-  final variants = <String, ({Size size, Brightness b, double scale})>{
-    '': (size: const Size(390, 844), b: Brightness.light, scale: 1),
-    '_small': (size: const Size(360, 640), b: Brightness.light, scale: 1),
-    '_dark': (size: const Size(390, 844), b: Brightness.dark, scale: 1),
-    '_x2': (size: const Size(360, 640), b: Brightness.light, scale: 2),
-  };
-
-  Future<void> shoot(
-    WidgetTester t,
-    String name,
-    Widget Function() screen,
-    List<Override> overrides, {
-    bool shell = false,
-    int tab = 0,
-    bool settle = true,
-    Set<String> only = const {'', '_small', '_dark', '_x2'},
-  }) async {
-    for (final v in variants.entries) {
-      if (!only.contains(v.key)) continue;
-      phoneSurface(t, logical: v.value.size, textScale: v.value.scale);
-      Widget body() => shell
-          ? ShellFrame(currentIndex: tab, onSelect: (_) {}, child: screen())
-          : screen();
-      await t.pumpWidget(
-        shotHost(body(), brightness: v.value.b, overrides: overrides),
-      );
-      await t.pump();
-      await t.pump(const Duration(milliseconds: 600));
-      if (settle) await t.pumpAndSettle();
-      expect(t.takeException(), isNull, reason: '$name${v.key}');
-      await snap(t, '$name${v.key}');
-      await t.pumpWidget(const SizedBox());
-    }
-  }
-
-  testWidgets('discover', (t) async {
-    final repo = FakeDiscovery(
-      pages: [
-        [for (var i = 0; i < 4; i++) Candidate.fromJson(_card(i))],
-      ],
-    );
-    await shoot(
+  testWidgets('00-04 first run', (t) async {
+    await shotWorld(
       t,
-      'discover',
-      DiscoveryScreen.new,
-      [
-        ..._base(),
-        discoveryRepositoryProvider.overrideWithValue(repo),
-        interestsRepositoryProvider.overrideWithValue(FakeInterests()),
-      ],
-      shell: true,
+      'flow_00_welcome',
+      session: SessionState.signedOut,
+      nav: (t, l) async {},
+    );
+    await shotWorld(
+      t,
+      'flow_01_look_around',
+      session: SessionState.signedOut,
+      nav: (t, l) => _tap(t, l.v2bLookAround),
+    );
+    await shotWorld(
+      t,
+      'flow_02_phone',
+      session: SessionState.signedOut,
+      nav: (t, l) => _tap(t, l.v2bGetStarted),
+    );
+    await shotWorld(
+      t,
+      'flow_03_code',
+      session: SessionState.signedOut,
+      nav: (t, l) async {
+        await _tap(t, l.v2bGetStarted);
+        await t.enterText(find.byType(TextField), '772000111');
+        await t.pump();
+        await _tap(t, l.v2bSendCode);
+        await t.enterText(find.byType(TextField).first, '48');
+        await t.pump();
+      },
+    );
+    await shotWorld(
+      t,
+      'flow_03b_code_wrong',
+      variants: [allVariants.first, allVariants[3]],
+      session: SessionState.signedOut,
+      nav: (t, l) async {
+        await _tap(t, l.v2bGetStarted);
+        await t.enterText(find.byType(TextField), '772000111');
+        await t.pump();
+        await _tap(t, l.v2bSendCode);
+        await t.enterText(find.byType(TextField).first, '000000');
+        await t.pumpAndSettle();
+      },
+    );
+    await shotWorld(
+      t,
+      'flow_04_about_you',
+      nav: (t, l) async {
+        await t.enterText(find.byType(TextField).first, 'Grace');
+        await _tap(t, l.v2bBirthDateChoose);
+        await _tap(t, l.v2bIAmWoman);
+      },
     );
   });
 
-  testWidgets('discover locked + states', (t) async {
-    await shoot(
+  testWidgets('05-06 discover and locked profile', (t) async {
+    await shotWorld(t, 'flow_05_discover_first_card', setup: _unverified);
+    await shotWorld(
       t,
-      'discover_locked',
-      DiscoveryScreen.new,
-      [
-        ..._base(),
-        discoveryRepositoryProvider.overrideWithValue(
-          FakeDiscovery(
-            pages: [
-              [Candidate.fromJson(_card(1, locked: true))],
-            ],
-          ),
-        ),
-      ],
-      shell: true,
-      only: {'', '_small'},
+      'flow_06_locked_profile',
+      setup: _unverified,
+      nav: (t, l) => _go(t, '/discovery/profile/c0'),
     );
-    await shoot(
-      t,
-      'discover_empty',
-      DiscoveryScreen.new,
-      [
-        ..._base(),
-        discoveryRepositoryProvider
-            .overrideWithValue(FakeDiscovery(pages: [[]])),
-      ],
-      shell: true,
-      only: {'', '_dark'},
-    );
-    await shoot(
-      t,
-      'discover_offline',
-      DiscoveryScreen.new,
-      [
-        ..._base(),
-        discoveryRepositoryProvider.overrideWithValue(
-          FakeDiscovery(
-            error: const AppFailure(code: 'offline', retryable: true),
-          ),
-        ),
-      ],
-      shell: true,
-      only: {''},
-    );
-    await shoot(
-      t,
-      'discover_limit',
-      DiscoveryScreen.new,
-      [
-        ..._base(),
-        discoveryRepositoryProvider.overrideWithValue(
-          FakeDiscovery(
-            error: const AppFailure(code: 'limit_reached', status: 429),
-          ),
-        ),
-      ],
-      shell: true,
-      only: {''},
-    );
-    final gate = Completer<void>();
-    await shoot(
-      t,
-      'discover_loading',
-      DiscoveryScreen.new,
-      [
-        ..._base(),
-        discoveryRepositoryProvider.overrideWithValue(
-          FakeDiscovery(pages: [[]])..gate = gate,
-        ),
-      ],
-      shell: true,
-      only: {''},
-      settle: false,
-    );
-    gate.complete();
   });
 
-  testWidgets('profile detail', (t) async {
-    Future<void> go(
-      String name,
-      Map<String, dynamic> extra,
-      Set<String> only,
-    ) =>
-        shoot(
-          t,
-          name,
-          () => const ProfileScreen(profileId: 'a'),
-          [
-            ..._base(),
-            discoveryRepositoryProvider.overrideWithValue(
-              FakeDiscovery()
-                ..profileResult = PublicProfile.fromJson({
-                  ..._card(0),
-                  'description':
-                      'I am a nurse in Kampala. I love Sunday lunches with family, church choir and long walks. Looking for a kind, faithful partner to build a home with.',
-                  'languages': ['en', 'lg'],
-                  'occupation': 'Nurse',
-                  'education': 'bachelors',
-                  'has_children': 'no',
-                  'wants_children': 'yes',
-                  ...extra,
-                }),
-            ),
-            interestsRepositoryProvider.overrideWithValue(FakeInterests()),
-          ],
-          only: only,
+  testWidgets('07 verify sheet and flow', (t) async {
+    await shotWorld(
+      t,
+      'flow_07_verify_sheet',
+      setup: _unverified,
+      nav: (t, l) async {
+        unawaited(
+          showVerifySheet(_ctx(t), reason: VerifyReason.interest),
         );
-    await go('profile', {}, {'', '_dark', '_x2'});
-    await go('profile_locked', {'locked': true, 'description': null}, {''});
+        await t.pumpAndSettle();
+      },
+    );
+    await shotWorld(
+      t,
+      'flow_07b_verify_id_type',
+      setup: _unverified,
+      nav: (t, l) => _go(t, '/verification'),
+    );
+    await shotWorld(
+      t,
+      'flow_07c_verify_capture',
+      setup: _unverified,
+      nav: (t, l) => _go(t, '/verification/capture'),
+    );
+    await shotWorld(
+      t,
+      'flow_07d_verify_pending',
+      setup: (w) {
+        _unverified(w);
+        w.verification = VerificationStage.submitted;
+      },
+      nav: (t, l) => _go(t, '/verification'),
+    );
+    await shotWorld(
+      t,
+      'flow_07e_verify_failed',
+      setup: (w) {
+        _unverified(w);
+        w.verification = VerificationStage.failed;
+        w.verificationRepo.current = const VerificationStatus(
+          state: VerificationStage.failed,
+          reason: 'doc_unreadable',
+        );
+      },
+      nav: (t, l) => _go(t, '/verification'),
+    );
+    await shotWorld(
+      t,
+      'flow_07f_verify_passed',
+      setup: (w) {
+        _unverified(w);
+        w.verification = VerificationStage.passed;
+      },
+      nav: (t, l) => _go(t, '/verification'),
+    );
   });
 
-  testWidgets('interests', (t) async {
-    ReceivedInterest r(int i) => ReceivedInterest.fromJson({
-          'id': 'i$i',
-          'sender': memberJson('s$i', name: _names[i]),
-          'snapshot': {
-            'text': i.isEven
-                ? 'I am a teacher who loves hiking and cooking. I would love to get to know you.'
-                : 'Hello! I read your profile and we share the same values.',
-          },
-          'created_at': DateTime.now()
-              .subtract(Duration(hours: i * 20))
-              .toIso8601String(),
+  testWidgets('08 make your profile', (t) async {
+    await shotWorld(
+      t,
+      'flow_08a_make_photo',
+      setup: _unverified,
+      nav: (t, l) => _go(t, '/profile/make'),
+    );
+    await shotWorld(
+      t,
+      'flow_08a2_make_photo_added',
+      setup: _unverified,
+      nav: (t, l) async {
+        await _go(t, '/profile/make');
+        await _tap(t, l.v2bPhotoPick);
+      },
+    );
+    await shotWorld(
+      t,
+      'flow_08b_make_looking',
+      setup: (w) {
+        _unverified(w);
+        w.profile.photoJson.add({
+          'id': 'p1',
+          'position': 0,
+          'moderation_status': 'approved',
+          'url': 'x',
         });
-    final repo = FakeInterests()
-      ..receivedItems = [for (var i = 0; i < 4; i++) r(i)]
-      ..sentItems = [
-        for (var i = 0; i < 3; i++)
-          SentInterest.fromJson({
-            'id': 's$i',
-            'recipient': memberJson('r$i', name: _names[i + 2]),
-            'status': ['pending', 'accepted', 'expired'][i],
-            'created_at':
-                DateTime.now().subtract(Duration(days: i)).toIso8601String(),
-          }),
-      ];
-    final o = [..._base(), interestsRepositoryProvider.overrideWithValue(repo)];
-    await shoot(t, 'interests', InterestsScreen.new, o, shell: true, tab: 1);
-    await shoot(
-      t,
-      'interest_detail',
-      () => const InterestDetailScreen(interestId: 'i0'),
-      o,
+      },
+      nav: (t, l) => _go(t, '/profile/make'),
     );
-    await shoot(
+    await shotWorld(
       t,
-      'interests_empty',
-      InterestsScreen.new,
-      [
-        ..._base(),
-        interestsRepositoryProvider.overrideWithValue(FakeInterests()),
-      ],
-      shell: true,
-      tab: 1,
-      only: {'', '_dark'},
+      'flow_08c_make_intro',
+      setup: (w) {
+        _readyToMake(w);
+        w.profile.photoJson.add({
+          'id': 'p1',
+          'position': 0,
+          'moderation_status': 'approved',
+          'url': 'x',
+        });
+      },
+      nav: (t, l) async {
+        await _go(t, '/profile/make');
+        await _tap(t, l.v2bIntroChip1);
+      },
+    );
+    void withIntro(World w) {
+      _readyToMake(w);
+      w.profile.photoJson.add({
+        'id': 'p1',
+        'position': 0,
+        'moderation_status': 'approved',
+        'url': 'x',
+      });
+      w.profile.seedIntro('I am a nurse who loves music. ' * 6);
+    }
+
+    await shotWorld(
+      t,
+      'flow_08d_make_questions',
+      setup: withIntro,
+      nav: (t, l) => _go(t, '/profile/make'),
+    );
+    await shotWorld(
+      t,
+      'flow_08e_make_ready_unverified',
+      setup: (w) {
+        withIntro(w);
+        w.profile.questionnaireDone = true;
+        for (final q in worldQuestions.take(8)) {
+          w.questionnaire.stored[q['key']! as String] = answerOf(q);
+        }
+      },
+      nav: (t, l) => _go(t, '/profile/make'),
     );
   });
 
-  testWidgets('matches', (t) async {
-    final repo = FakeMatches()
-      ..server = [
-        Match.fromJson({
-          'id': 'm1',
-          'member': memberJson('a', name: 'Grace'),
-          'created_at': DateTime.now()
-              .subtract(const Duration(days: 2))
-              .toIso8601String(),
-          'last_message_at': DateTime.now()
-              .subtract(const Duration(minutes: 12))
-              .toIso8601String(),
-          'last_message_kind': 'text',
-          'last_message_sender': 'them',
-          'unread_count': 3,
-        }),
-        Match.fromJson({
-          'id': 'm2',
-          'member': memberJson('b', name: 'Aisha'),
-          'created_at': DateTime.now()
-              .subtract(const Duration(days: 5))
-              .toIso8601String(),
-          'last_message_at': DateTime.now()
-              .subtract(const Duration(days: 1))
-              .toIso8601String(),
-          'last_message_kind': 'image',
-          'last_message_sender': 'me',
-        }),
-        Match.fromJson({
-          'id': 'm3',
-          'member': memberJson('c', name: 'Sarah'),
-          'created_at': DateTime.now()
-              .subtract(const Duration(days: 9))
-              .toIso8601String(),
-          'last_message_at': DateTime.now()
-              .subtract(const Duration(days: 4))
-              .toIso8601String(),
-          'last_message_kind': 'voice',
-          'last_message_sender': 'them',
-          'unread_count': 1,
-        }),
-        Match.fromJson({
-          'id': 'm4',
-          'member': memberJson('d', name: 'Ruth'),
-          'created_at': DateTime.now()
-              .subtract(const Duration(hours: 3))
-              .toIso8601String(),
-        }),
-      ];
-    await shoot(
+  testWidgets('09-10 membership offer', (t) async {
+    await shotWorld(
       t,
-      'matches',
-      MatchesScreen.new,
-      [
-        ..._base(),
-        matchesRepositoryProvider.overrideWithValue(repo),
-      ],
-      shell: true,
-      tab: 2,
+      'flow_10_membership_offer',
+      setup: (w) {
+        w
+          ..makeMember()
+          ..interestsUsed = 3
+          ..seedCards(locked: false);
+      },
+      nav: (t, l) async {
+        unawaited(
+          sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+        );
+        await t.pumpAndSettle();
+      },
     );
-    await shoot(
+    await shotWorld(
       t,
-      'matches_empty',
-      MatchesScreen.new,
-      [
-        ..._base(),
-        matchesRepositoryProvider.overrideWithValue(FakeMatches()),
-      ],
-      shell: true,
-      tab: 2,
-      only: {'', '_dark'},
+      'flow_10b_membership_offer_no_trial',
+      variants: [allVariants.first],
+      setup: (w) {
+        w
+          ..makeMember()
+          ..interestsUsed = 3
+          ..trialUsed = true
+          ..seedCards(locked: false);
+      },
+      nav: (t, l) async {
+        unawaited(
+          sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+        );
+        await t.pumpAndSettle();
+      },
     );
   });
 
-  testWidgets('profile tab, celebration', (t) async {
-    await shoot(
+  testWidgets('13 profile tab and edit list', (t) async {
+    await shotWorld(
       t,
-      'profile_tab',
-      ProfileTabScreen.new,
-      [
-        ..._base(),
-        profileCompletenessProvider.overrideWithValue(
-          const ProfileCompleteness(
-            fraction: 0.65,
-            nextTitle: 'Add a second photo',
-            nextBody: 'Profiles with two photos get more replies.',
-          ),
-        ),
-        profileTabHeaderProvider.overrideWithValue(
-          const ProfileTabHeader(displayName: 'Esther', verified: true),
-        ),
-      ],
-      shell: true,
-      tab: 3,
+      'flow_13_profile_tab_new',
+      setup: _unverified,
+      nav: (t, l) => _tap(t, l.v2aNavProfile),
     );
-    await shoot(
+    await shotWorld(
       t,
-      'match_celebration',
-      () => const MatchCelebration(name: 'Grace'),
-      _base(),
-      only: {'', '_small', '_dark'},
+      'flow_13b_profile_tab_member',
+      setup: (w) => w
+        ..makeMember()
+        ..seedCards(locked: false),
+      nav: (t, l) => _tap(t, l.v2aNavProfile),
+    );
+    await shotWorld(
+      t,
+      'flow_13c_edit_profile',
+      variants: [allVariants.first, allVariants[3]],
+      setup: (w) => w
+        ..makeMember()
+        ..seedCards(locked: false),
+      nav: (t, l) => _go(t, '/profile/builder'),
     );
   });
 }

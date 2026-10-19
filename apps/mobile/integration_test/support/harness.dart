@@ -71,6 +71,7 @@ Future<TestApp> pumpApp(
   WidgetTester tester,
   FakeBackend backend, {
   bool signedIn = false,
+  List<Override> overrides = const [],
 }) async {
   driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   final tokens = MemoryTokenStore(
@@ -111,6 +112,7 @@ Future<TestApp> pumpApp(
       ),
       chatChannelFactoryProvider
           .overrideWithValue((uri) => FakeChannel(backend)),
+      ...overrides,
     ],
   );
   addTearDown(container.dispose);

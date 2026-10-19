@@ -42,14 +42,53 @@ class PhotoVisibilityChoice extends ConsumerWidget {
       }
     }
 
-    final body = Column(
+    final large = MediaQuery.textScalerOf(context).scale(10) >= 15;
+    if (!compact && !large) {
+      // The Profile tab: one compact row, so the ring and the next step stay
+      // above the fold.
+      return McCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Semantics(
+              header: true,
+              child: Text(l.v2bVisibilityCardTitle, style: mc.text.subtitle),
+            ),
+            SizedBox(height: mc.space.xs),
+            SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<String>(
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
+                    value: 'everyone',
+                    label: Text(l.v2bVisibilityEveryoneShort),
+                  ),
+                  ButtonSegment(
+                    value: 'verified_only',
+                    label: Text(l.v2bVisibilityVerifiedShort),
+                  ),
+                ],
+                selected: {current},
+                onSelectionChanged: (v) => pick(v.first),
+              ),
+            ),
+            SizedBox(height: mc.space.xs),
+            Text(
+              current == 'everyone'
+                  ? l.v2bVisibilityEveryoneHint
+                  : l.v2bVisibilityVerifiedHint,
+              style: mc.text.caption.copyWith(color: mc.colors.onSurfaceMuted),
+            ),
+          ],
+        ),
+      );
+    }
+    final options = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (!compact) ...[
-          Semantics(
-            header: true,
-            child: Text(l.v2bVisibilityCardTitle, style: mc.text.subtitle),
-          ),
+          Text(l.v2bVisibilityCardTitle, style: mc.text.subtitle),
           SizedBox(height: mc.space.xs),
         ],
         _Option(
@@ -72,7 +111,7 @@ class PhotoVisibilityChoice extends ConsumerWidget {
         ),
       ],
     );
-    return compact ? body : McCard(child: body);
+    return compact ? options : McCard(child: options);
   }
 }
 
@@ -157,4 +196,24 @@ class _Option extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The Profile tab's privacy nudge: shown until the member has decided once
+/// (in the photo step or here), then it lives only in "Edit your profile".
+/// It stays on screen after a change so the confirmation is not yanked away.
+class PhotoVisibilityNudge extends ConsumerStatefulWidget {
+  const PhotoVisibilityNudge({super.key});
+
+  @override
+  ConsumerState<PhotoVisibilityNudge> createState() =>
+      _PhotoVisibilityNudgeState();
+}
+
+class _PhotoVisibilityNudgeState extends ConsumerState<PhotoVisibilityNudge> {
+  late final bool _decidedBefore =
+      ref.read(localPrefsProvider).getBool(photoVisibilityChosenKey) ?? false;
+
+  @override
+  Widget build(BuildContext context) =>
+      _decidedBefore ? const SizedBox.shrink() : const PhotoVisibilityChoice();
 }

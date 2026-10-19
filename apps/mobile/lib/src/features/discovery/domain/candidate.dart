@@ -52,7 +52,7 @@ class Candidate {
         why: j.strings('why'),
         discuss: j.strings('discuss'),
         scoreBand: j.strOrNull('score_band'),
-        locked: j.flag('locked'),
+        locked: j.flag('locked') || j.flag('limited'),
         lockedReason: j.strOrNull('locked_reason'),
       );
 

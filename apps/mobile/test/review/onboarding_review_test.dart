@@ -49,7 +49,7 @@ void main() {
     );
     await t.pump();
     expect(
-      find.textContaining('You can ask for a new code in'),
+      find.textContaining('Send a new code in'),
       findsOneWidget,
     );
     expect(find.text('Send a new code'), findsNothing);
@@ -65,14 +65,5 @@ void main() {
     );
     await t.pump();
     expect(find.text('Send a new code'), findsOneWidget);
-  });
-
-  testWidgets('the consents screen links to Settings', (t) async {
-    _tall(t);
-    await t.pumpWidget(_app(const ConsentsScreen(), DateTime.now()));
-    await t.pump();
-    await t.tap(find.byTooltip('Settings'));
-    await t.pumpAndSettle();
-    expect(find.text('SETTINGS'), findsOneWidget);
   });
 }

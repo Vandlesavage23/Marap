@@ -83,6 +83,6 @@ List<Override> profileTabOverrides() => [
         );
       }),
       profileTabBannersProvider.overrideWith(
-        (ref) => const [VerificationBanner(), PhotoVisibilityChoice()],
+        (ref) => const [VerificationBanner(), PhotoVisibilityNudge()],
       ),
     ];

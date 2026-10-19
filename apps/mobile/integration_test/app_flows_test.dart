@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/onboarding_screens.dart';
 
 import 'support/fake_backend.dart';
 import 'support/harness.dart';
@@ -24,77 +25,82 @@ void main() {
     l = await AppLocalizations.delegate.load(const Locale('en'));
   });
 
-  testWidgets('onboarding: welcome -> phone -> otp -> consents -> home',
-      (tester) async {
-    final backend = FakeBackend();
-    final app = await pumpApp(tester, backend);
-    expect(find.text(l.welcomeTitle), findsOneWidget);
+  testWidgets(
+      'first run: welcome -> phone -> code -> About you -> Discover, with no '
+      'verification or payment on the way', (tester) async {
+    final backend = FakeBackend(signedUpVerified: false);
+    final app = await pumpApp(
+      tester,
+      backend,
+      overrides: [
+        birthDatePickerProvider.overrideWithValue(
+          (context, {required initial, required first, required last}) async =>
+              DateTime(1998, 4, 12),
+        ),
+      ],
+    );
+    expect(find.text(l.v2bWelcomeTitle), findsOneWidget);
 
-    await tester.tap(find.text('Continue')); // welcome -> how it works
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Continue')); // how it works -> phone
+    await tester.tap(find.text(l.v2bGetStarted));
     await tester.pumpAndSettle();
 
     await tester.enterText(find.byType(TextField), '0772000001');
     await tester.pump();
-    await tester.tap(find.text(l.phoneSend));
+    await tester.tap(find.text(l.v2bSendCode));
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextField), '123456');
-    await tester.pump();
-    await tester.tap(find.text(l.otpVerify));
+    // The 6th digit submits by itself.
+    await tester.enterText(find.byType(TextField).first, '123456');
     await tester.pumpAndSettle();
     expect(app.container.read(sessionProvider), SessionState.signedIn);
 
-    // The server says no consents yet: the guard keeps the member here.
-    expect(find.text(l.consentsTitle), findsOneWidget);
-    final boxes = find.byType(CheckboxListTile);
-    for (var i = 0; i < 3; i++) {
-      await tester.tap(boxes.at(i));
-      await tester.pump();
-    }
-    await tester.tap(find.text(l.consentsAgree));
+    // The server has no profile yet: About you is the only wall.
+    expect(find.text(l.v2bAboutTitle), findsOneWidget);
+    await tester.enterText(find.byType(TextField).first, 'Grace');
+    await tester.tap(find.text(l.v2bBirthDateChoose));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l.v2bIAmWoman));
+    await tester.pump();
+    await tester.ensureVisible(find.text(l.v2bSelectAll));
+    await tester.tap(find.text(l.v2bSelectAll));
+    await tester.pump();
+    await tester.ensureVisible(find.text(l.v2bAboutCta));
+    await tester.tap(find.text(l.v2bAboutCta));
     await tester.pumpAndSettle();
 
     expect(backend.consentsGranted, {'terms', 'privacy', 'data_transfer'});
-    // KNOWN CLIENT BUG C4 (found by running this flow): ConsentsScreen._submit
-    // calls ref.invalidate(meProvider) and context.go('/home') at once. The
-    // guard still sees the stale /me (consents missing) and bounces back to
-    // /onboarding/consents, and appRedirect never redirects away from that
-    // location, so the member must tap "Agree and continue" a second time.
-    // Fix: `await ref.read(meProvider.notifier).reload()` before go('/home').
+    expect(backend.patches.single['birth_date'], '1998-04-12');
+    // Straight into the app: the Discover tab, unverified, nothing asked.
+    expect(find.text(l.v2aNavDiscover), findsWidgets);
+    expect(find.text(l.verifIntroTitle), findsNothing);
+    expect(backend.requests, isNot(contains('POST /billing/trial/start')));
     expect(
-      find.text(l.homeWelcome),
-      findsOneWidget,
-      reason: 'C4: stuck on consents after the first "Agree and continue"',
+      backend.events,
+      containsAll(['welcome_seen', 'otp_sent', 'otp_verified', 'about_done']),
     );
   });
 
-  testWidgets('onboarding: a wrong code stays on the page with friendly copy',
+  testWidgets('a wrong code stays on the page with friendly copy',
       (tester) async {
     final backend = FakeBackend();
     await pumpApp(tester, backend);
-    await tester.tap(find.text('Continue'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Continue'));
+    await tester.tap(find.text(l.v2bGetStarted));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), '0772000001');
     await tester.pump();
-    await tester.tap(find.text(l.phoneSend));
+    await tester.tap(find.text(l.v2bSendCode));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), '000000');
-    await tester.pump();
-    await tester.tap(find.text(l.otpVerify));
+    await tester.enterText(find.byType(TextField).first, '000000');
     await tester.pumpAndSettle();
-    expect(find.text(l.otpInvalid), findsOneWidget);
-    expect(find.text(l.consentsTitle), findsNothing);
+    expect(find.text(l.v2bCodeWrong), findsOneWidget);
+    expect(find.text(l.v2bAboutTitle), findsNothing);
   });
 
-  testWidgets('returning member lands on home', (tester) async {
+  testWidgets('returning member lands on Discover', (tester) async {
     final backend = FakeBackend()
       ..consentsGranted.addAll(['terms', 'privacy', 'data_transfer']);
     await pumpApp(tester, backend, signedIn: true);
-    await pumpUntil(tester, find.text(l.homeWelcome));
-    expect(find.text(l.homeWelcome), findsOneWidget);
+    await pumpUntil(tester, find.text(l.v2aNavDiscover));
+    expect(find.text(l.v2aNavDiscover), findsWidgets);
   });
 }

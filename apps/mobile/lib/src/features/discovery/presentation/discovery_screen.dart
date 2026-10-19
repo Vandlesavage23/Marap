@@ -15,8 +15,8 @@ import 'package:marriage_connect/src/features/discovery/presentation/filters_she
 import 'package:marriage_connect/src/features/discovery/presentation/next_card_preloader.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/swipe_card.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/why_sheet.dart';
-import 'package:marriage_connect/src/features/interests/presentation/send_interest_sheet.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
+import 'package:marriage_connect/src/features/membership/presentation/interest_gate.dart';
 
 /// The hero of the app: one big photo card at a time, a large pass button and
 /// a large "send interest" button, skeletons while loading, and friendly
@@ -253,7 +253,7 @@ class _Deck extends ConsumerWidget {
       );
     }
 
-    Future<void> interested() => showSendInterestSheet(
+    Future<void> interested() => sendInterestFlow(
           context,
           profileId: card.profileId,
           displayName: card.displayName,
