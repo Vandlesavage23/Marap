@@ -116,11 +116,28 @@ class _ErrorBanner extends StatelessWidget {
 
 /// `/verification`: one screen that renders the server's verification state
 /// (intro, pending, failed + retry/appeal, passed).
-class VerificationScreen extends ConsumerWidget {
+class VerificationScreen extends ConsumerStatefulWidget {
   const VerificationScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VerificationScreen> createState() => _VerificationScreenState();
+}
+
+class _VerificationScreenState extends ConsumerState<VerificationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // The provider outlives the screen: opening it again (from a sheet or a
+    // banner) re-reads the server so a pass or a failure is never stale.
+    Future.microtask(() {
+      if (mounted && ref.read(verificationProvider).hasValue) {
+        unawaited(ref.read(verificationProvider.notifier).refresh());
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final async = ref.watch(verificationProvider);
     final ctrl = ref.read(verificationProvider.notifier);

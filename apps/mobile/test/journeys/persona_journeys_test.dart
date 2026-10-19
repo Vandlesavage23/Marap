@@ -148,6 +148,136 @@ Future<void> main() async {
   });
 
   testWidgets(
+      'Grace continues: verify at the first interest, make the profile, '
+      'use the free quota, decline the offer', (t) async {
+    phone(t);
+    final world = World()
+      ..profileCreated = true
+      ..seedCards();
+    final trail = Trail();
+    await pumpWorld(t, world, session: SessionState.signedIn);
+    trail.note(t);
+    expect(find.textContaining('Amani'), findsWidgets);
+
+    // Open a locked profile: the description is replaced by the inline card.
+    await t.tap(find.textContaining('Amani').first);
+    await _settle(t);
+    expect(find.text(l.v2aVerifyMoreTitle), findsOneWidget);
+
+    // First "Send interest": the Verify sheet with an honest reason.
+    unawaited(
+      sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+    );
+    await _settle(t);
+    expect(find.text(l.v2bVerifySheetTitleInterest), findsOneWidget);
+    expect(find.text(l.v2bVerifyWhyInterest), findsOneWidget);
+    expect(find.text(l.v2bNotNow), findsOneWidget);
+    await _tapText(t, l.verifStartCapture);
+    // Step 1: ID type (resumable), then scan + selfie, then the result.
+    expect(find.text(l.v2bVStepId), findsOneWidget);
+    await _tapText(t, l.verifStartCapture);
+    await _tapText(t, l.verifCaptureOpen);
+    expect(world.security.enabled, greaterThan(0));
+    expect(world.capture.launched, hasLength(1));
+    expect(find.text(l.verifPendingTitle), findsOneWidget);
+    expect(world.analytics.count(AnalyticsEvent.verifyStarted), 1);
+
+    // A pending review never blocks browsing.
+    await _tapText(t, l.v2bKeepBrowsing);
+    expect(find.textContaining('Amani'), findsWidgets);
+
+    // The review passes; the member continues to make the profile.
+    world.finishVerification(passed: true);
+    GoRouter.of(_ctx(t)).go('/verification');
+    await _settle(t);
+    expect(find.text(l.verifPassedTitle), findsOneWidget);
+    expect(world.analytics.count(AnalyticsEvent.verifyPassed), 1);
+    await _tapText(t, l.verifPassedContinue);
+    expect(find.text(l.v2bStepOf(1, 4)), findsWidgets);
+
+    // 1/4 photo
+    await _tapText(t, l.v2bPhotoPick);
+    await _tapText(t, l.v2bContinue);
+    // 2/4 district + what you are looking for (+ what the server still needs)
+    await _tapText(t, l.v2bDistrictChoose);
+    await _tapText(t, 'Kampala');
+    await _tapText(t, l.profileIntentionSoon);
+    await _tapText(t, l.profileMaritalNever);
+    await _tapText(t, l.v2bContinue);
+    // 3/4 intro
+    await t.enterText(
+      find.byType(TextField).first,
+      'I am a nurse in Kampala who loves music, cooking and long walks. '
+      'My family is close and I value honesty and kindness. I am looking for '
+      'a faithful, hardworking man who wants a peaceful home.',
+    );
+    await t.pump();
+    await _tapText(t, l.v2bContinue);
+    // 4/4 eight quick questions, one tap each
+    for (var i = 0; i < 8; i++) {
+      expect(find.text(l.v2bQuestionOf(i + 1, 8)), findsOneWidget);
+      final first = (worldQuestions[i]['options']! as List).first as Map;
+      await _tapText(t, first['label']! as String);
+    }
+    // ready: go live
+    expect(find.text(l.profileGoLive), findsWidgets);
+    await _tapText(t, l.profileGoLive);
+    expect(find.text(l.v2bLiveTitle), findsOneWidget);
+    await _tapText(t, l.v2bLiveCta);
+    expect(world.analytics.count(AnalyticsEvent.goliveDone), 1);
+    expect(find.textContaining('Amani'), findsWidgets);
+
+    // Three free interests; the first one asks about notifications once.
+    for (var n = 1; n <= 3; n++) {
+      unawaited(
+        sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+      );
+      await _settle(t);
+      await _tapText(t, l.interestSendButton);
+      await _tapText(t, l.interestDone);
+      if (n == 1) {
+        expect(find.text(l.v2bPrimeTitle), findsOneWidget);
+        await _tapText(t, l.v2bPrimeNo);
+      } else {
+        expect(find.text(l.v2bPrimeTitle), findsNothing);
+      }
+    }
+    expect(world.analytics.count(AnalyticsEvent.firstInterest), 1);
+    expect(world.interestsUsed, 3);
+
+    // The fourth: the offer, never at launch, never forced.
+    unawaited(
+      sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+    );
+    await _settle(t);
+    expect(find.text(l.v2bOfferTitle(3)), findsOneWidget);
+    await _tapText(t, l.v2bOfferLater);
+    expect(find.text(l.v2bOfferTitle(3)), findsNothing);
+    expect(world.trialUsed, isFalse);
+    expect(world.analytics.count(AnalyticsEvent.trialStarted), 0);
+    expect(find.textContaining('Amani'), findsWidgets);
+  });
+
+  testWidgets('Brian: the 24 h trial is explicit and only from the offer',
+      (t) async {
+    phone(t);
+    final world = World()
+      ..makeMember()
+      ..interestsUsed = 3
+      ..seedCards(locked: false);
+    await pumpWorld(t, world, session: SessionState.signedIn);
+    unawaited(
+      sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+    );
+    await _settle(t);
+    await _tapText(t, l.v2bOfferTrial);
+    expect(world.trialUsed, isTrue);
+    expect(world.membership.trialKeys, hasLength(1));
+    expect(world.analytics.count(AnalyticsEvent.trialStarted), 1);
+    expect(find.text(l.v2bOfferTrialStarted), findsOneWidget);
+  });
+
+  testWidgets(
       'Brian never pays: browse, hit the quota, say Maybe later, '
       'carry on free', (t) async {
     phone(t);
