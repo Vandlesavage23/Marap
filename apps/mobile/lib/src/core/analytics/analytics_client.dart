@@ -48,7 +48,8 @@ class NoopAnalyticsClient implements AnalyticsClient {
 }
 
 /// Sends events to `POST /events`. Anonymous: the only identifier is this
-/// install's random id, in a header (never in the body, never a user id).
+/// install's random id (`install_id`, required by the server when signed out;
+/// never a user id).
 /// Failures (offline, server refusal) are dropped: a lost funnel event must
 /// never become a user-visible problem or a retry storm on a 3G phone.
 class ApiAnalyticsClient implements AnalyticsClient {
@@ -74,9 +75,8 @@ class ApiAnalyticsClient implements AnalyticsClient {
       }
       await _dio.post<void>(
         '/events',
-        data: {'name': event.wire},
+        data: {'name': event.wire, if (id != null) 'install_id': id},
         options: Options(
-          headers: {if (id != null) 'X-Install-Id': id},
           sendTimeout: const Duration(seconds: 5),
           receiveTimeout: const Duration(seconds: 5),
         ),
