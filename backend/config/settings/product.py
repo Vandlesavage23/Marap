@@ -41,14 +41,24 @@ TRIBE_PREFERENCE_ENABLED = _bool("TRIBE_PREFERENCE_ENABLED", False)  # PENDING O
 WEB_CHECKOUT_ENABLED = _bool("WEB_CHECKOUT_ENABLED", True)  # PENDING OD-01
 
 # "See first, verify to act, pay for reach" (docs/design/user-flow-v2.md, ADR-0009). All PENDING OD: tune with funnel data.
-FREE_INTERESTS_PER_WEEK = _int("FREE_INTERESTS_PER_WEEK", 3)  # PENDING OD: rolling window, free + expired accounts
+FREE_INTERESTS_PER_WEEK = _int(
+    "FREE_INTERESTS_PER_WEEK", 3
+)  # PENDING OD: rolling window, free + expired accounts
 FREE_INTERESTS_WINDOW_DAYS = _int("FREE_INTERESTS_WINDOW_DAYS", 7)  # PENDING OD
-BROWSE_CARDS_PER_DAY_UNVERIFIED = _int("BROWSE_CARDS_PER_DAY_UNVERIFIED", 30)  # PENDING OD (Kampala day)
-BROWSE_CARDS_PER_DAY_FREE = _int("BROWSE_CARDS_PER_DAY_FREE", 60)  # PENDING OD (verified, no trial/membership)
+BROWSE_CARDS_PER_DAY_UNVERIFIED = _int(
+    "BROWSE_CARDS_PER_DAY_UNVERIFIED", 30
+)  # PENDING OD (Kampala day)
+BROWSE_CARDS_PER_DAY_FREE = _int(
+    "BROWSE_CARDS_PER_DAY_FREE", 60
+)  # PENDING OD (verified, no trial/membership)
 PROFILE_OPENS_PER_DAY_UNVERIFIED = _int("PROFILE_OPENS_PER_DAY_UNVERIFIED", 10)  # PENDING OD
 GO_LIVE_MIN_PHOTOS = _int("GO_LIVE_MIN_PHOTOS", 1)  # PENDING OD (v1 required 2)
-GO_LIVE_MIN_CORE_ANSWERS = _int("GO_LIVE_MIN_CORE_ANSWERS", 8)  # PENDING OD (v1 required all core questions)
-FREE_CHAT_IN_MATCH = _bool("FREE_CHAT_IN_MATCH", True)  # PENDING OD: sending inside a match needs no trial/membership
+GO_LIVE_MIN_CORE_ANSWERS = _int(
+    "GO_LIVE_MIN_CORE_ANSWERS", 8
+)  # PENDING OD (v1 required all core questions)
+FREE_CHAT_IN_MATCH = _bool(
+    "FREE_CHAT_IN_MATCH", True
+)  # PENDING OD: sending inside a match needs no trial/membership
 # Anti-scraping for unverified viewers, per IP address and per device (counted on HMACs, never raw values) (A).
 BROWSE_PAGES_PER_IP_PER_DAY_UNVERIFIED = _int("BROWSE_PAGES_PER_IP_PER_DAY_UNVERIFIED", 120)
 PROFILE_OPENS_PER_IP_PER_DAY_UNVERIFIED = _int("PROFILE_OPENS_PER_IP_PER_DAY_UNVERIFIED", 60)

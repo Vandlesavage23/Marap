@@ -101,10 +101,22 @@ class _MarkPainter extends CustomPainter {
     canvas.drawPath(
       Path()
         ..moveTo(hx, hy + hs * 0.9)
-        ..cubicTo(hx - hs * 1.6, hy - hs * 0.2, hx - hs * 0.5, hy - hs * 1.2,
-            hx, hy - hs * 0.1)
-        ..cubicTo(hx + hs * 0.5, hy - hs * 1.2, hx + hs * 1.6, hy - hs * 0.2,
-            hx, hy + hs * 0.9),
+        ..cubicTo(
+          hx - hs * 1.6,
+          hy - hs * 0.2,
+          hx - hs * 0.5,
+          hy - hs * 1.2,
+          hx,
+          hy - hs * 0.1,
+        )
+        ..cubicTo(
+          hx + hs * 0.5,
+          hy - hs * 1.2,
+          hx + hs * 1.6,
+          hy - hs * 0.2,
+          hx,
+          hy + hs * 0.9,
+        ),
       Paint()..color = const Color(0xFFFFF3E6),
     );
   }

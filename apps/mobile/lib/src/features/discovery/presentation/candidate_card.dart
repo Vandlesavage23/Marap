@@ -145,8 +145,11 @@ class BadgeChips extends StatelessWidget {
 /// viewer. It cannot reveal anything: it only opens the verify flow. On a
 /// photo card use [onPhoto]; on a plain surface leave it false.
 class VerifyToReadMore extends ConsumerWidget {
-  const VerifyToReadMore(
-      {this.onPhoto = false, this.compact = false, super.key});
+  const VerifyToReadMore({
+    this.onPhoto = false,
+    this.compact = false,
+    super.key,
+  });
 
   final bool onPhoto;
 
@@ -176,7 +179,6 @@ class VerifyToReadMore extends ConsumerWidget {
         child: Padding(
           padding: EdgeInsets.all(mc.space.sm + 2),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ExcludeSemantics(
                 child: Icon(Icons.verified_user_outlined, color: fg, size: 28),
@@ -266,8 +268,7 @@ class _CandidateCardViewState extends State<CandidateCardView> {
     return LayoutBuilder(
       builder: (context, box) {
         // Small cards (360x640, 200% text) keep only the essentials.
-        final compact = box.maxHeight < 440 ||
-            MediaQuery.textScalerOf(context).scale(16) > 24;
+        final compact = box.maxHeight < 440;
         return PhotoProfileCard(
           semanticLabel: l.discCardSemantics(c.displayName, c.age, c.district),
           photo: PhotoStrip(

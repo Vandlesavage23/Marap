@@ -1,6 +1,6 @@
 import json
 
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_serializer
 from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
@@ -17,6 +17,7 @@ from mc.profiles.models import Profile
 from . import serializers as s
 
 
+@extend_schema_serializer(component_name="ProfileUpdate")
 class ProfilePatchBody(s.ProfileUpdateSerializer):
     """PATCH body. `birth_date` ("About you") is accepted only until the identity check passes; from then on the
     ID's date of birth is the only truth. It is declared here, in the request-only serializer, and not in

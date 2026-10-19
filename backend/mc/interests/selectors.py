@@ -51,7 +51,9 @@ def allowance(account_id: uuid.UUID, *, state: str, now: datetime) -> Allowance:
         )
         return Allowance(limit, used, next_kampala_midnight(now) if used else None, "day")
     window = timedelta(days=settings.FREE_INTERESTS_WINDOW_DAYS)
-    in_window = mine.filter(created_at__gt=now - window)  # an interest leaves the window at created_at + 7 d
+    in_window = mine.filter(
+        created_at__gt=now - window
+    )  # an interest leaves the window at created_at + 7 d
     limit = settings.FREE_INTERESTS_PER_WEEK
     stamps = list(in_window.order_by("created_at").values_list("created_at", flat=True))
     used = len(stamps)

@@ -12,12 +12,12 @@ import 'package:marriage_connect/src/features/discovery/application/discovery_co
 import 'package:marriage_connect/src/features/discovery/application/media_prefs.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/discovery_screen.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/next_card_preloader.dart';
-import 'package:marriage_connect/src/features/shell/presentation/profile_tab_screen.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/notifications/application/push_controller.dart';
 import 'package:marriage_connect/src/features/notifications/domain/push_gateway.dart';
 import 'package:marriage_connect/src/features/settings/data/account_repository.dart';
 import 'package:marriage_connect/src/features/settings/presentation/device_settings_screens.dart';
+import 'package:marriage_connect/src/features/shell/presentation/profile_tab_screen.dart';
 
 import '../social/fakes.dart';
 import '../social/helpers.dart';

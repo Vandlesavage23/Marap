@@ -389,7 +389,9 @@ void main() {
         ..receivedItems = [received('i1'), received('i2', name: 'Bea')];
       await t.pumpWidget(screen(repo));
       expect(
-          find.byType(SkeletonRows), findsWidgets); // skeleton, not a spinner
+        find.byType(SkeletonRows),
+        findsWidgets,
+      ); // skeleton, not a spinner
       await t.pumpAndSettle();
       expect(find.text('Amani, 29'), findsOneWidget);
       expect(find.text('Bea, 29'), findsOneWidget);

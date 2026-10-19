@@ -6,7 +6,12 @@ import 'shot.dart';
 
 /// One way of looking at a screen: size, brightness, text scale.
 class ShotVariant {
-  const ShotVariant(this.suffix, this.size, {this.dark = false, this.scale = 1});
+  const ShotVariant(
+    this.suffix,
+    this.size, {
+    this.dark = false,
+    this.scale = 1,
+  });
   final String suffix;
   final Size size;
   final bool dark;

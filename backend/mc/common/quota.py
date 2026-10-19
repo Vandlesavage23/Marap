@@ -39,7 +39,7 @@ def consume_upto(key: str, *, want: int, limit: int, now: datetime) -> int:
     """Take up to `want` units from the allowance; returns how many were granted (0 when exhausted)."""
     if want <= 0:
         return 0
-    return int(get_redis().eval(_GRANT, 1, key, want, limit, ttl_for(now)))  # type: ignore[no-untyped-call]
+    return int(get_redis().eval(_GRANT, 1, key, want, limit, ttl_for(now)))
 
 
 def used(key: str) -> int:
@@ -59,8 +59,8 @@ def consume_unique(key: str, *, member: uuid.UUID, limit: int, now: datetime) ->
     """Count one distinct `member` (e.g. a profile opened today). Opening the same one again is free; a new one
     is refused once `limit` distinct members were taken. The member is stored only as an HMAC fragment."""
     tag = hmac_value(f"quota-member|{member}", purpose="account").hex()[:16]
-    return bool(int(get_redis().eval(_UNIQUE, 1, key, tag, limit, ttl_for(now))))  # type: ignore[no-untyped-call]
+    return bool(int(get_redis().eval(_UNIQUE, 1, key, tag, limit, ttl_for(now))))
 
 
 def used_unique(key: str) -> int:
-    return int(get_redis().scard(key))  # type: ignore[no-untyped-call]
+    return int(get_redis().scard(key))

@@ -38,8 +38,11 @@ typedef StepActionSink = void Function(StepAction action);
 // ---------------------------------------------------------------------------
 
 class MakePhotoStep extends ConsumerStatefulWidget {
-  const MakePhotoStep(
-      {required this.onAction, required this.onDone, super.key});
+  const MakePhotoStep({
+    required this.onAction,
+    required this.onDone,
+    super.key,
+  });
   final StepActionSink onAction;
   final VoidCallback onDone;
 
@@ -60,7 +63,6 @@ class _MakePhotoStepState extends ConsumerState<MakePhotoStep> {
       widget.onAction(
         StepAction(
           onContinue: s.photos.isEmpty ? null : _continue,
-          busy: false,
         ),
       );
     });
@@ -741,8 +743,11 @@ class ChoiceCards extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class MakeIntroStep extends ConsumerStatefulWidget {
-  const MakeIntroStep(
-      {required this.onAction, required this.onDone, super.key});
+  const MakeIntroStep({
+    required this.onAction,
+    required this.onDone,
+    super.key,
+  });
   final StepActionSink onAction;
   final VoidCallback onDone;
 
@@ -882,16 +887,16 @@ class _MakeIntroStepState extends ConsumerState<MakeIntroStep> {
             ),
             if (s.failure != null) ...[
               SizedBox(height: mc.space.xs),
-              s.failure!.code == 'description_rejected'
-                  ? Semantics(
-                      liveRegion: true,
-                      child: Text(
-                        l.profileDescRejected,
-                        style:
-                            mc.text.bodySmall.copyWith(color: mc.colors.error),
-                      ),
-                    )
-                  : FailureText(s.failure),
+              if (s.failure!.code == 'description_rejected')
+                Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    l.profileDescRejected,
+                    style: mc.text.bodySmall.copyWith(color: mc.colors.error),
+                  ),
+                )
+              else
+                FailureText(s.failure),
             ],
             SizedBox(height: mc.space.md),
             Text(l.v2bIntroChipsLabel, style: mc.text.label),
@@ -986,9 +991,10 @@ class _MakeQuestionsStepState extends ConsumerState<MakeQuestionsStep> {
         ok = true;
         break;
       }
-      ok = s.saving ? true : await ctrl.save();
-      if (s.saving)
+      ok = s.saving || await ctrl.save();
+      if (s.saving) {
         await Future<void>.delayed(const Duration(milliseconds: 150));
+      }
     }
     final s = ref.read(questionnaireProvider).valueOrNull;
     if (!mounted) return;
@@ -1103,7 +1109,7 @@ class _MakeQuestionsStepState extends ConsumerState<MakeQuestionsStep> {
                   [
                     ..._multi.isEmpty && answer?.value is List
                         ? (answer!.value! as List).cast<String>()
-                        : _multi
+                        : _multi,
                   ],
                   index,
                   total,

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/app.dart';
+import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
 import 'package:marriage_connect/src/core/analytics/sentry_scrub.dart';
 import 'package:marriage_connect/src/core/auth/install_id.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
@@ -11,11 +12,14 @@ import 'package:marriage_connect/src/core/config/env.dart';
 import 'package:marriage_connect/src/core/network/providers.dart';
 import 'package:marriage_connect/src/core/router/app_router.dart';
 import 'package:marriage_connect/src/core/storage/local_prefs.dart';
+import 'package:marriage_connect/src/features/discovery/application/verify_prompt.dart';
 import 'package:marriage_connect/src/features/notifications/application/push_controller.dart';
 import 'package:marriage_connect/src/features/notifications/data/fcm_push_gateway.dart';
 import 'package:marriage_connect/src/features/notifications/domain/push_gateway.dart';
 import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
+import 'package:marriage_connect/src/features/profile/application/profile_tab_overrides.dart';
+import 'package:marriage_connect/src/features/verification/presentation/verify_widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -71,6 +75,13 @@ List<Override> appOverrides(Env env, BootstrapDeps deps) => [
           ref.watch(installIdProvider),
         ),
       ),
+      analyticsProvider.overrideWith(buildApiAnalytics),
+      // "Verify to read more" on a locked card opens the contextual sheet.
+      verifyPromptProvider.overrideWithValue(
+        (context) => showVerifySheet(context, reason: VerifyReason.readMore),
+      ),
+      // Profile tab: completeness ring, next best action, banners.
+      ...profileTabOverrides(),
       pushRouteSinkProvider.overrideWith(
         (ref) =>
             (route) => unawaited(ref.read(routerProvider).push<void>(route)),

@@ -6,8 +6,8 @@ import 'package:marriage_connect/src/core/router/feature_routes.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
 import 'package:marriage_connect/src/features/me/data/me_repository.dart';
 import 'package:marriage_connect/src/features/me/presentation/boot_screen.dart';
-import 'package:marriage_connect/src/features/shell/shell_routes.dart';
 import 'package:marriage_connect/src/features/onboarding/presentation/onboarding_screens.dart';
+import 'package:marriage_connect/src/features/shell/shell_routes.dart';
 
 /// Where a signed-in member lands: the shell's Discover tab.
 const homeRoute = '/home';

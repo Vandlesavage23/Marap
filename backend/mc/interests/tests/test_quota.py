@@ -13,10 +13,10 @@ from django.utils import timezone
 from freezegun import freeze_time
 
 from mc.accounts.tests.helpers import bearer
+from mc.common.errors import InterestQuotaReached
 from mc.common.redis import get_redis
 from mc.entitlements import selectors as ent_selectors
 from mc.entitlements import services as ent
-from mc.common.errors import InterestQuotaReached
 from mc.interests import selectors
 from mc.interests import services as interest_services
 from mc.interests.models import Interest
@@ -89,7 +89,9 @@ def test_resets_at_is_when_the_oldest_interest_leaves_the_window_and_the_boundar
         clock.tick(timedelta(seconds=1))  # exactly 7 days after the first send
         svc_send(m[2], t[3])
         err = quota_error(m[2], t[4])
-        assert err.extra["resets_at"] == "2026-04-09T08:00:00Z"  # the NEXT one to leave: the day-1 interest
+        assert (
+            err.extra["resets_at"] == "2026-04-09T08:00:00Z"
+        )  # the NEXT one to leave: the day-1 interest
 
 
 def test_quota_is_a_rolling_window_not_a_calendar_week():
@@ -160,7 +162,9 @@ def test_accepting_an_interest_that_is_waiting_for_you_costs_no_quota():
     w = member("female")
     assert send(w[0], w[1], m[3]).status_code == 201  # w -> m, pending
     resp = send(m[0], m[1], w[3])  # m "sends" back while out of quota: that is an accept
-    assert resp.status_code == 200 and resp.json()["status"] == "accepted" and resp.json()["match_id"]
+    assert (
+        resp.status_code == 200 and resp.json()["status"] == "accepted" and resp.json()["match_id"]
+    )
     assert used(m[2]).used == 3  # no row was created for the accept
 
 
@@ -258,7 +262,8 @@ def test_unverified_sender_gets_verification_required_and_consumes_nothing():
 
 def test_forbidden_without_auth_and_idempotency_key():
     assert (
-        Client(headers={"host": "api.mc.test"}).post("/api/v1/interests", {}, **J).status_code == 401
+        Client(headers={"host": "api.mc.test"}).post("/api/v1/interests", {}, **J).status_code
+        == 401
     )
 
 

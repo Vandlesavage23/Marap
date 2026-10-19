@@ -289,7 +289,9 @@ def _browse_quota(
     return limit, quota.day_key("cards", viewer.id, now)
 
 
-def browse_usage(viewer: "Account", summary: "entitlement_selectors.EntitlementState", now: datetime) -> dict[str, Any]:
+def browse_usage(
+    viewer: "Account", summary: "entitlement_selectors.EntitlementState", now: datetime
+) -> dict[str, Any]:
     """`{limit, used, resets_at}` for today's card allowance (limit None = no daily cap)."""
     limit, key = _browse_quota(summary, viewer, now)
     return {
@@ -314,7 +316,9 @@ def next_candidates(
     now = timezone.now()
     limit = max(1, min(limit or settings.DISCOVERY_PAGE_SIZE, 50))
     summary = entitlement_selectors.entitlement_summary(viewer, now)
-    if not summary.capabilities["browse"]:  # pragma: no cover - browse is granted to every signed-in member
+    if not summary.capabilities[
+        "browse"
+    ]:  # pragma: no cover - browse is granted to every signed-in member
         raise LimitReached("Browsing isn't available right now.")
     if not summary.verified:
         account_services.require_verification_consents(viewer)

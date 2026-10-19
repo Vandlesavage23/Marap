@@ -3217,4 +3217,73 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get v2bEditSaved => 'Saved';
+
+  @override
+  String v2bOfferTitle(int limit) {
+    return 'You\'ve used your $limit free introductions this week';
+  }
+
+  @override
+  String v2bOfferRenews(String day) {
+    return 'They renew on $day.';
+  }
+
+  @override
+  String get v2bOfferBody =>
+      'Membership lets you reach more people and puts your profile first. Reading and accepting interests, and chatting after a match, stay free.';
+
+  @override
+  String get v2bOfferTrial => 'Try membership free for 24 hours';
+
+  @override
+  String get v2bOfferPlans => 'See plans';
+
+  @override
+  String get v2bOfferLater => 'Maybe later';
+
+  @override
+  String get v2bOfferTrialNote =>
+      'The trial lasts 24 hours, needs no card and does not renew.';
+
+  @override
+  String v2bOfferPlansNote(String store) {
+    return 'Plans are paid through $store. They renew until you cancel in your store settings, and you can cancel any time.';
+  }
+
+  @override
+  String get v2bStoreGoogle => 'Google Play';
+
+  @override
+  String get v2bStoreApple => 'the App Store';
+
+  @override
+  String get v2bOfferTrialStarted => 'Your 24-hour trial has started.';
+
+  @override
+  String v2bQuotaLeft(int left, int limit, String day) {
+    return '$left of $limit free introductions left, renews $day';
+  }
+
+  @override
+  String v2bQuotaNone(String day) {
+    return 'No free introductions left, renews $day';
+  }
+
+  @override
+  String v2bQuotaDaily(int left, int limit) {
+    return '$left of $limit introductions left today';
+  }
+
+  @override
+  String get v2bPrimeTitle => 'Want a nudge when someone replies?';
+
+  @override
+  String get v2bPrimeBody =>
+      'We\'ll tell you when someone is interested in you, when you match and when you get a message. Notifications never show names or message text.';
+
+  @override
+  String get v2bPrimeYes => 'Turn on notifications';
+
+  @override
+  String get v2bPrimeNo => 'Not now';
 }

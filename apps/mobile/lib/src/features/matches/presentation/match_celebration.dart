@@ -1,3 +1,4 @@
+// ignore_for_file: cascade_invocations
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -15,7 +16,6 @@ Future<void> showMatchCelebration(
 }) =>
     showGeneralDialog<void>(
       context: context,
-      barrierDismissible: false,
       barrierLabel: AppLocalizations.of(context).v2aMatchTitle,
       transitionDuration: context.mc.motion(context, context.mc.durations.slow),
       pageBuilder: (_, __, ___) =>
@@ -104,11 +104,11 @@ class _MatchCelebrationState extends State<MatchCelebration>
                         child: Stack(
                           alignment: Alignment.center,
                           children: [
-                            Positioned(
+                            const Positioned(
                               left: 0,
                               child: _Face(
                                 size: 128,
-                                child: const _PersonFallback(),
+                                child: _PersonFallback(),
                               ),
                             ),
                             Positioned(
@@ -253,7 +253,10 @@ class _ConfettiPainter extends CustomPainter {
       final seed = i * 7919 % 1000 / 1000;
       final x = size.width * (0.04 + 0.92 * ((i * 37 % 100) / 100));
       final startY = -40.0 - seed * 200;
-      final endY = size.height * (0.04 + 0.9 * ((i * 53 % 100) / 100));
+      final r01 = (i * 53 % 100) / 100;
+      // Settle in the top and bottom bands, clear of the text.
+      final endY =
+          size.height * (i.isEven ? 0.02 + 0.2 * r01 : 0.8 + 0.18 * r01);
       final y = startY + (endY - startY) * eased;
       final r = 5 + (i % 4) * 2.5;
       final paint = Paint()..color = _colors[i % _colors.length];
@@ -268,7 +271,10 @@ class _ConfettiPainter extends CustomPainter {
           ..drawRRect(
             RRect.fromRectAndRadius(
               Rect.fromCenter(
-                  center: Offset.zero, width: r * 1.6, height: r * 0.7),
+                center: Offset.zero,
+                width: r * 1.6,
+                height: r * 0.7,
+              ),
               const Radius.circular(2),
             ),
             paint,
@@ -282,10 +288,22 @@ class _ConfettiPainter extends CustomPainter {
     c.drawPath(
       Path()
         ..moveTo(o.dx, o.dy + r * 0.9)
-        ..cubicTo(o.dx - r * 1.7, o.dy - r * 0.1, o.dx - r * 0.7,
-            o.dy - r * 1.3, o.dx, o.dy - r * 0.2)
-        ..cubicTo(o.dx + r * 0.7, o.dy - r * 1.3, o.dx + r * 1.7,
-            o.dy - r * 0.1, o.dx, o.dy + r * 0.9),
+        ..cubicTo(
+          o.dx - r * 1.7,
+          o.dy - r * 0.1,
+          o.dx - r * 0.7,
+          o.dy - r * 1.3,
+          o.dx,
+          o.dy - r * 0.2,
+        )
+        ..cubicTo(
+          o.dx + r * 0.7,
+          o.dy - r * 1.3,
+          o.dx + r * 1.7,
+          o.dy - r * 0.1,
+          o.dx,
+          o.dy + r * 0.9,
+        ),
       p,
     );
   }

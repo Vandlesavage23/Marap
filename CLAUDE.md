@@ -9,8 +9,10 @@ the ordered work list is `docs/BACKLOG.md`. When this file and the Bible disagre
 Marriage Connect is a mobile app (Android + iOS) for verified adults (18+) seeking courtship and marriage,
 launching in Uganda. Core loop: verified profile → compatibility-ranked discovery → "interest" that delivers
 the sender's description to the recipient immediately → mutual interest creates a match → chat.
-Monetisation: one 24-hour free trial (no payment details), then membership paid via App Store / Google Play
-in-app purchase OR mobile money on a web checkout. The backend is the only authority on who may do what.
+Sign-up and browsing are free (unverified members see limited profiles); verification is asked at the first act
+that affects someone else. Free members receive, accept, chat in matches and send 3 interests a week. Monetisation
+(ADR-0009): membership sells reach and convenience, offered when the free quota ends together with one 24-hour
+free trial (no payment details), paid via App Store / Google Play in-app purchase OR mobile money on a web checkout. The backend is the only authority on who may do what.
 
 ## 2. Hard rules (never break these)
 

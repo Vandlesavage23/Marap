@@ -43,7 +43,9 @@ class ProfileUpdateSerializer(serializers.Serializer):
     )
     occupation = serializers.CharField(max_length=60, required=False, allow_blank=True)
     education = serializers.CharField(max_length=24, required=False, allow_blank=True)
-    photo_visibility = serializers.CharField(max_length=13, required=False)  # everyone | verified_only
+    photo_visibility = serializers.CharField(
+        max_length=13, required=False
+    )  # everyone | verified_only
 
 
 def own_profile(profile: Profile) -> dict[str, object]:

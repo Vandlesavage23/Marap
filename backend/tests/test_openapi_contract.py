@@ -19,6 +19,7 @@ PUBLIC = {
     ("/api/v1/health", "get"), ("/api/v1/ready", "get"), ("/health", "get"), ("/ready", "get"),
     ("/api/v1/webhooks/apple", "post"), ("/api/v1/webhooks/flutterwave", "post"),
     ("/api/v1/webhooks/google", "post"), ("/api/v1/webhooks/smile-id", "post"),
+    ("/api/v1/events", "post"),  # funnel steps: anonymous installs allowed, token optional
 }  # fmt: skip
 METHODS = {"get", "post", "put", "patch", "delete"}
 

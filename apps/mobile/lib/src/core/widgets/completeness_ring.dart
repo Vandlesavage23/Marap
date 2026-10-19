@@ -83,14 +83,7 @@ class _RingPainter extends CustomPainter {
         -math.pi / 2,
         math.pi * 2 * f,
         false,
-        base
-          ..shader = SweepGradient(
-            startAngle: -math.pi / 2,
-            endAngle: -math.pi / 2 + math.pi * 2,
-            colors: [arc, cap],
-            transform: const GradientRotation(0),
-          ).createShader(rect)
-          ..color = arc,
+        base..color = arc,
       );
     }
   }

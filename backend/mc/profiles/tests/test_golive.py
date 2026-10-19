@@ -181,7 +181,9 @@ def test_each_rule_blocks_go_live(break_it):
         from mc.questionnaire.models import Answer
 
         keep = list(Answer.objects.filter(account=acct).values_list("id", flat=True)[:7])
-        Answer.objects.filter(account=acct).exclude(id__in=keep).delete()  # 7 < GO_LIVE_MIN_CORE_ANSWERS
+        Answer.objects.filter(account=acct).exclude(
+            id__in=keep
+        ).delete()  # 7 < GO_LIVE_MIN_CORE_ANSWERS
     else:
         Profile.objects.filter(id=p.id).update(district="")
     resp = go_live(c, r)

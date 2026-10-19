@@ -34,10 +34,13 @@ void main() {
       expect(appRedirect(SessionState.unknown, '/splash'), isNull);
     });
 
-    test('signed out users only see onboarding', () {
+    test('signed out users only see onboarding (About you needs an account)',
+        () {
       expect(appRedirect(out, '/home'), '/onboarding');
       expect(appRedirect(out, '/verification'), '/onboarding');
       expect(appRedirect(out, '/onboarding/phone'), isNull);
+      expect(appRedirect(out, '/onboarding/look-around'), isNull);
+      expect(appRedirect(out, '/onboarding/about'), '/onboarding');
     });
 
     test('signed in but /me not loaded yet: hold on splash, never guess', () {
@@ -45,40 +48,27 @@ void main() {
       expect(appRedirect(inn, '/verification'), '/splash');
       expect(appRedirect(inn, '/splash'), isNull);
       // mid-onboarding screens keep working while /me loads
-      expect(appRedirect(inn, '/onboarding/consents'), isNull);
+      expect(appRedirect(inn, '/onboarding/about'), isNull);
       expect(appRedirect(inn, '/onboarding/otp'), isNull);
     });
 
-    test('consents missing goes to consents (Q24)', () {
-      final m = me(
-        verification: 'not_started',
-        profile: 'none',
-        consents: {'terms'},
-      );
-      expect(appRedirect(inn, '/home', me: m), '/onboarding/consents');
-      expect(appRedirect(inn, '/verification', me: m), '/onboarding/consents');
-      expect(appRedirect(inn, '/onboarding/consents', me: m), isNull);
+    test('no basic profile yet goes to About you, and only that', () {
+      for (final status in ['pending_verification', 'active']) {
+        final m =
+            me(account: status, verification: 'not_started', profile: 'none');
+        expect(appRedirect(inn, '/home', me: m), '/onboarding/about');
+        expect(appRedirect(inn, '/discovery', me: m), '/onboarding/about');
+        expect(appRedirect(inn, '/splash', me: m), '/onboarding/about');
+        expect(appRedirect(inn, '/onboarding/about', me: m), isNull);
+        expect(appRedirect(inn, '/settings', me: m), isNull);
+        expect(appRedirect(inn, '/settings/sessions', me: m), isNull);
+      }
     });
 
-    test('unknown consents (server silent) do not block', () {
-      expect(
-        appRedirect(
-          inn,
-          '/home',
-          me: me(verification: 'not_started', profile: 'none'),
-        ),
-        '/verification',
-      );
-    });
-
-    test('the consents screen is never redirected away from', () {
-      expect(
-        appRedirect(inn, '/onboarding/consents', me: MeSnapshot.complete),
-        isNull,
-      );
-    });
-
-    test('unverified goes to verification, whatever the status', () {
+    test('there are no verification, consents or builder walls any more', () {
+      // Consents (even when the server says some are missing) never redirect:
+      // they are collected in About you, and in the verification flow for old
+      // accounts.
       for (final v in [
         'not_started',
         'created',
@@ -87,48 +77,46 @@ void main() {
         'failed',
         'error',
         'expired',
+        'passed',
       ]) {
-        final m = me(verification: v, profile: 'none');
-        expect(appRedirect(inn, '/home', me: m), '/verification', reason: v);
-        expect(appRedirect(inn, '/profile/builder', me: m), '/verification');
-        expect(appRedirect(inn, '/verification/capture', me: m), isNull);
+        for (final p in ['draft', 'live', 'hidden_by_user']) {
+          final m = me(
+            verification: v,
+            profile: p,
+            consents: {'terms'},
+          );
+          for (final loc in [
+            '/discovery',
+            '/interests',
+            '/matches',
+            '/me',
+            '/discovery/profile/abc',
+            '/verification',
+            '/profile/make',
+            '/profile/builder',
+            '/questionnaire',
+            '/membership/paywall',
+          ]) {
+            expect(appRedirect(inn, loc, me: m), isNull, reason: '$v $p $loc');
+          }
+        }
       }
     });
 
-    test('verified with an incomplete profile goes to the builder', () {
-      for (final p in ['none', 'draft']) {
-        final m = me(profile: p);
-        expect(appRedirect(inn, '/home', me: m), '/profile/builder');
-        expect(appRedirect(inn, '/splash', me: m), '/profile/builder');
-        expect(appRedirect(inn, '/profile/builder', me: m), isNull);
-        expect(appRedirect(inn, '/questionnaire', me: m), isNull);
-        // the "you're verified" screen stays reachable until Continue
-        expect(appRedirect(inn, '/verification', me: m), isNull);
+    test('signed-in members leave the setup screens for the app', () {
+      for (final p in ['draft', 'live']) {
+        final m = me(verification: 'not_started', profile: p);
+        expect(appRedirect(inn, '/splash', me: m), '/home');
+        expect(appRedirect(inn, '/onboarding', me: m), '/home');
+        expect(appRedirect(inn, '/onboarding/otp', me: m), '/home');
       }
-    });
-
-    test('verified + live goes home and off the setup screens', () {
-      expect(appRedirect(inn, '/splash', me: MeSnapshot.complete), '/home');
-      expect(
-        appRedirect(inn, '/onboarding/phone', me: MeSnapshot.complete),
-        '/home',
-      );
-      expect(
-        appRedirect(inn, '/verification', me: MeSnapshot.complete),
-        '/home',
-      );
       expect(appRedirect(inn, '/home', me: MeSnapshot.complete), isNull);
-      expect(appRedirect(inn, '/matches', me: MeSnapshot.complete), isNull);
-      // hidden profiles are complete: not sent back to the builder
-      expect(
-        appRedirect(inn, '/home', me: me(profile: 'hidden_by_user')),
-        isNull,
-      );
     });
 
-    test('a suspended account is not pushed into verification or builder', () {
+    test('a suspended account is not pushed into About you or setup', () {
       final m = me(account: 'suspended', profile: 'none');
       expect(appRedirect(inn, '/splash', me: m), '/home');
+      expect(appRedirect(inn, '/home', me: m), isNull);
       expect(appRedirect(inn, '/settings', me: m), isNull);
     });
   });
@@ -147,6 +135,7 @@ void main() {
       });
       expect(m.verified, isTrue);
       expect(m.profileIncomplete, isTrue);
+      expect(m.basicProfileMissing, isFalse);
       expect(m.grantedConsents, {'terms', 'privacy'});
       expect(m.consentsMissing, isTrue);
     });

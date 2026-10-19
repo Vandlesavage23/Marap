@@ -37,7 +37,9 @@ class EntitlementState:
     membership_source: str | None
     capabilities: dict[str, bool]
     trial_started_at: datetime | None = None
-    trial_available: bool = False  # verified, and neither this account nor this person has used the trial
+    trial_available: bool = (
+        False  # verified, and neither this account nor this person has used the trial
+    )
 
 
 def _active(account_id: uuid.UUID, now: datetime) -> QuerySet[Entitlement]:
@@ -128,7 +130,9 @@ def browse_card_limit(st: EntitlementState) -> int | None:
     if st.state in ("trial", "member") and st.verified:
         return None
     return (
-        settings.BROWSE_CARDS_PER_DAY_FREE if st.verified else settings.BROWSE_CARDS_PER_DAY_UNVERIFIED
+        settings.BROWSE_CARDS_PER_DAY_FREE
+        if st.verified
+        else settings.BROWSE_CARDS_PER_DAY_UNVERIFIED
     )
 
 

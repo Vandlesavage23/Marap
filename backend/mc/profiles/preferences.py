@@ -31,7 +31,9 @@ def derived_preference(profile: Profile) -> Preference:
 
 
 def get_or_create_preference(*, profile: Profile) -> Preference:
-    pref, _ = Preference.objects.get_or_create(profile=profile, defaults=default_age_window(profile))
+    pref, _ = Preference.objects.get_or_create(
+        profile=profile, defaults=default_age_window(profile)
+    )
     return pref
 
 

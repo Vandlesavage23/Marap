@@ -151,76 +151,82 @@ class PhotoProfileCard extends StatelessWidget {
     final title = age == null ? displayName : l.discNameAge(displayName, age!);
     final r = BorderRadius.circular(radius ?? mc.radii.lg);
     final why = (whyLine ?? '').trim();
-    return Semantics(
-      container: true,
-      label: semanticLabel ??
-          [
-            title,
-            if (district != null && district!.isNotEmpty) district!,
-            if (verified) l.kitVerifiedSemantics,
-            if (intention != null) intention!,
-          ].join(', '),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: r,
-          boxShadow: mc.shadow(context, mc.shadows.raised),
-        ),
-        child: ClipRRect(
-          borderRadius: r,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ColoredBox(color: mc.colors.surfaceVariant, child: photo),
-              // Bottom scrim: keeps white text AA over any photo.
-              const Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0x00000000),
-                        Color(0x00000000),
-                        Color(0x99000000),
-                        Color(0xEB000000),
-                      ],
-                      stops: [0, 0.42, 0.72, 1],
+    // Text drawn over a photo is capped at 130%: it must fit the card. The
+    // same facts are readable at full size on the profile screen.
+    return MediaQuery.withClampedTextScaling(
+      maxScaleFactor: 1.3,
+      child: Semantics(
+        container: true,
+        label: semanticLabel ??
+            [
+              title,
+              if (district != null && district!.isNotEmpty) district!,
+              if (verified) l.kitVerifiedSemantics,
+              if (intention != null) intention!,
+            ].join(', '),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: r,
+            boxShadow: mc.shadow(context, mc.shadows.raised),
+          ),
+          child: ClipRRect(
+            borderRadius: r,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ColoredBox(color: mc.colors.surfaceVariant, child: photo),
+                // Bottom scrim: keeps white text AA over any photo.
+                const Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0x00000000),
+                          Color(0x00000000),
+                          Color(0x99000000),
+                          Color(0xEB000000),
+                        ],
+                        stops: [0, 0.42, 0.72, 1],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              if (overlay != null) Positioned.fill(child: overlay!),
-              if (photoCount > 1)
-                Positioned(
-                  top: mc.space.sm,
-                  left: mc.space.sm,
-                  right: mc.space.sm,
-                  child: PhotoDots(count: photoCount, index: photoIndex),
-                ),
-              Positioned.fill(
-                child: LayoutBuilder(
-                  builder: (context, box) => Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxHeight: (box.maxHeight - mc.space.md).clamp(0, 900),
-                      ),
-                      // Bottom-anchored; if text ever outgrows a small card
-                      // the top is clipped instead of overflowing.
-                      child: SingleChildScrollView(
-                        reverse: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        padding: EdgeInsets.all(mc.space.md),
-                        child: IgnorePointer(
-                          ignoring: bottom == null,
-                          child: _info(context, title, why),
+                if (overlay != null) Positioned.fill(child: overlay!),
+                if (photoCount > 1)
+                  Positioned(
+                    top: mc.space.sm,
+                    left: mc.space.sm,
+                    right: mc.space.sm,
+                    child: PhotoDots(count: photoCount, index: photoIndex),
+                  ),
+                Positioned.fill(
+                  child: LayoutBuilder(
+                    builder: (context, box) => Align(
+                      alignment: Alignment.bottomCenter,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxHeight:
+                              (box.maxHeight - mc.space.md).clamp(0, 900),
+                        ),
+                        // Bottom-anchored; if text ever outgrows a small card
+                        // the top is clipped instead of overflowing.
+                        child: SingleChildScrollView(
+                          reverse: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.all(mc.space.md),
+                          child: IgnorePointer(
+                            ignoring: bottom == null,
+                            child: _info(context, title, why),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -234,7 +240,6 @@ class PhotoProfileCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Flexible(
               child: Text(

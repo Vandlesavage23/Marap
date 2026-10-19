@@ -9,6 +9,7 @@ import 'package:marriage_connect/src/features/discovery/application/discovery_co
 import 'package:marriage_connect/src/features/discovery/application/media_prefs.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/discovery_screen.dart';
+import 'package:marriage_connect/src/features/discovery/presentation/next_card_preloader.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/profile_screen.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/progressive_image.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
@@ -36,7 +37,10 @@ Map<String, dynamic> _card(int i, {bool locked = false}) => {
       'district': _districts[i % 6],
       if (locked) 'locked': true,
       if (locked) 'locked_reason': 'verify_to_see_more',
-      'why': ['You both want children and value faith.', 'Similar faith practice'],
+      'why': [
+        'You both want children and value faith.',
+        'Similar faith practice',
+      ],
     };
 
 Widget _img(BuildContext c, String url, int w) => SampleAvatar(
@@ -46,6 +50,7 @@ Widget _img(BuildContext c, String url, int w) => SampleAvatar(
 List<Override> _base({bool saver = false}) => [
       dataSaverProvider.overrideWithValue(saver),
       networkImageBuilderProvider.overrideWithValue(_img),
+      imagePreloaderProvider.overrideWithValue((_, __, ___) async {}),
     ];
 
 void main() {
@@ -65,6 +70,7 @@ void main() {
     List<Override> overrides, {
     bool shell = false,
     int tab = 0,
+    bool settle = true,
     Set<String> only = const {'', '_small', '_dark', '_x2'},
   }) async {
     for (final v in variants.entries) {
@@ -78,7 +84,7 @@ void main() {
       );
       await t.pump();
       await t.pump(const Duration(milliseconds: 600));
-      await t.pumpAndSettle(const Duration(milliseconds: 100), EnginePhase.sendSemanticsUpdate, const Duration(seconds: 5));
+      if (settle) await t.pumpAndSettle();
       expect(t.takeException(), isNull, reason: '$name${v.key}');
       await snap(t, '$name${v.key}');
       await t.pumpWidget(const SizedBox());
@@ -86,51 +92,108 @@ void main() {
   }
 
   testWidgets('discover', (t) async {
-    final repo = FakeDiscovery(pages: [
-      [for (var i = 0; i < 4; i++) Candidate.fromJson(_card(i))],
-    ]);
-    await shoot(t, 'discover', DiscoveryScreen.new, [
-      ..._base(),
-      discoveryRepositoryProvider.overrideWithValue(repo),
-      interestsRepositoryProvider.overrideWithValue(FakeInterests()),
-    ], shell: true);
+    final repo = FakeDiscovery(
+      pages: [
+        [for (var i = 0; i < 4; i++) Candidate.fromJson(_card(i))],
+      ],
+    );
+    await shoot(
+      t,
+      'discover',
+      DiscoveryScreen.new,
+      [
+        ..._base(),
+        discoveryRepositoryProvider.overrideWithValue(repo),
+        interestsRepositoryProvider.overrideWithValue(FakeInterests()),
+      ],
+      shell: true,
+    );
   });
 
   testWidgets('discover locked + states', (t) async {
-    await shoot(t, 'discover_locked', DiscoveryScreen.new, [
-      ..._base(),
-      discoveryRepositoryProvider.overrideWithValue(FakeDiscovery(pages: [
-        [Candidate.fromJson(_card(1, locked: true))],
-      ])),
-    ], shell: true, only: {'', '_small'});
-    await shoot(t, 'discover_empty', DiscoveryScreen.new, [
-      ..._base(),
-      discoveryRepositoryProvider.overrideWithValue(FakeDiscovery(pages: [[]])),
-    ], shell: true, only: {'', '_dark'});
-    await shoot(t, 'discover_offline', DiscoveryScreen.new, [
-      ..._base(),
-      discoveryRepositoryProvider.overrideWithValue(FakeDiscovery(
-        error: const AppFailure(code: 'offline', retryable: true),
-      )),
-    ], shell: true, only: {''});
-    await shoot(t, 'discover_limit', DiscoveryScreen.new, [
-      ..._base(),
-      discoveryRepositoryProvider.overrideWithValue(FakeDiscovery(
-        error: const AppFailure(code: 'limit_reached', status: 429),
-      )),
-    ], shell: true, only: {''});
+    await shoot(
+      t,
+      'discover_locked',
+      DiscoveryScreen.new,
+      [
+        ..._base(),
+        discoveryRepositoryProvider.overrideWithValue(
+          FakeDiscovery(
+            pages: [
+              [Candidate.fromJson(_card(1, locked: true))],
+            ],
+          ),
+        ),
+      ],
+      shell: true,
+      only: {'', '_small'},
+    );
+    await shoot(
+      t,
+      'discover_empty',
+      DiscoveryScreen.new,
+      [
+        ..._base(),
+        discoveryRepositoryProvider
+            .overrideWithValue(FakeDiscovery(pages: [[]])),
+      ],
+      shell: true,
+      only: {'', '_dark'},
+    );
+    await shoot(
+      t,
+      'discover_offline',
+      DiscoveryScreen.new,
+      [
+        ..._base(),
+        discoveryRepositoryProvider.overrideWithValue(
+          FakeDiscovery(
+            error: const AppFailure(code: 'offline', retryable: true),
+          ),
+        ),
+      ],
+      shell: true,
+      only: {''},
+    );
+    await shoot(
+      t,
+      'discover_limit',
+      DiscoveryScreen.new,
+      [
+        ..._base(),
+        discoveryRepositoryProvider.overrideWithValue(
+          FakeDiscovery(
+            error: const AppFailure(code: 'limit_reached', status: 429),
+          ),
+        ),
+      ],
+      shell: true,
+      only: {''},
+    );
     final gate = Completer<void>();
-    await shoot(t, 'discover_loading', DiscoveryScreen.new, [
-      ..._base(),
-      discoveryRepositoryProvider.overrideWithValue(
-        FakeDiscovery(pages: [[]])..gate = gate,
-      ),
-    ], shell: true, only: {''});
+    await shoot(
+      t,
+      'discover_loading',
+      DiscoveryScreen.new,
+      [
+        ..._base(),
+        discoveryRepositoryProvider.overrideWithValue(
+          FakeDiscovery(pages: [[]])..gate = gate,
+        ),
+      ],
+      shell: true,
+      only: {''},
+      settle: false,
+    );
     gate.complete();
   });
 
   testWidgets('profile detail', (t) async {
-    Future<void> go(String name, Map<String, dynamic> extra, Set<String> only) =>
+    Future<void> go(
+      String name,
+      Map<String, dynamic> extra,
+      Set<String> only,
+    ) =>
         shoot(
           t,
           name,
@@ -168,7 +231,9 @@ void main() {
                 ? 'I am a teacher who loves hiking and cooking. I would love to get to know you.'
                 : 'Hello! I read your profile and we share the same values.',
           },
-          'created_at': DateTime.now().subtract(Duration(hours: i * 20)).toIso8601String(),
+          'created_at': DateTime.now()
+              .subtract(Duration(hours: i * 20))
+              .toIso8601String(),
         });
     final repo = FakeInterests()
       ..receivedItems = [for (var i = 0; i < 4; i++) r(i)]
@@ -178,17 +243,26 @@ void main() {
             'id': 's$i',
             'recipient': memberJson('r$i', name: _names[i + 2]),
             'status': ['pending', 'accepted', 'expired'][i],
-            'created_at': DateTime.now().subtract(Duration(days: i)).toIso8601String(),
+            'created_at':
+                DateTime.now().subtract(Duration(days: i)).toIso8601String(),
           }),
       ];
     final o = [..._base(), interestsRepositoryProvider.overrideWithValue(repo)];
     await shoot(t, 'interests', InterestsScreen.new, o, shell: true, tab: 1);
-    await shoot(t, 'interest_detail', () => const InterestDetailScreen(interestId: 'i0'), o);
+    await shoot(
+      t,
+      'interest_detail',
+      () => const InterestDetailScreen(interestId: 'i0'),
+      o,
+    );
     await shoot(
       t,
       'interests_empty',
       InterestsScreen.new,
-      [..._base(), interestsRepositoryProvider.overrideWithValue(FakeInterests())],
+      [
+        ..._base(),
+        interestsRepositoryProvider.overrideWithValue(FakeInterests()),
+      ],
       shell: true,
       tab: 1,
       only: {'', '_dark'},
@@ -201,8 +275,12 @@ void main() {
         Match.fromJson({
           'id': 'm1',
           'member': memberJson('a', name: 'Grace'),
-          'created_at': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
-          'last_message_at': DateTime.now().subtract(const Duration(minutes: 12)).toIso8601String(),
+          'created_at': DateTime.now()
+              .subtract(const Duration(days: 2))
+              .toIso8601String(),
+          'last_message_at': DateTime.now()
+              .subtract(const Duration(minutes: 12))
+              .toIso8601String(),
           'last_message_kind': 'text',
           'last_message_sender': 'them',
           'unread_count': 3,
@@ -210,16 +288,24 @@ void main() {
         Match.fromJson({
           'id': 'm2',
           'member': memberJson('b', name: 'Aisha'),
-          'created_at': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
-          'last_message_at': DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+          'created_at': DateTime.now()
+              .subtract(const Duration(days: 5))
+              .toIso8601String(),
+          'last_message_at': DateTime.now()
+              .subtract(const Duration(days: 1))
+              .toIso8601String(),
           'last_message_kind': 'image',
           'last_message_sender': 'me',
         }),
         Match.fromJson({
           'id': 'm3',
           'member': memberJson('c', name: 'Sarah'),
-          'created_at': DateTime.now().subtract(const Duration(days: 9)).toIso8601String(),
-          'last_message_at': DateTime.now().subtract(const Duration(days: 4)).toIso8601String(),
+          'created_at': DateTime.now()
+              .subtract(const Duration(days: 9))
+              .toIso8601String(),
+          'last_message_at': DateTime.now()
+              .subtract(const Duration(days: 4))
+              .toIso8601String(),
           'last_message_kind': 'voice',
           'last_message_sender': 'them',
           'unread_count': 1,
@@ -227,33 +313,57 @@ void main() {
         Match.fromJson({
           'id': 'm4',
           'member': memberJson('d', name: 'Ruth'),
-          'created_at': DateTime.now().subtract(const Duration(hours: 3)).toIso8601String(),
+          'created_at': DateTime.now()
+              .subtract(const Duration(hours: 3))
+              .toIso8601String(),
         }),
       ];
-    await shoot(t, 'matches', MatchesScreen.new, [
-      ..._base(),
-      matchesRepositoryProvider.overrideWithValue(repo),
-    ], shell: true, tab: 2);
-    await shoot(t, 'matches_empty', MatchesScreen.new, [
-      ..._base(),
-      matchesRepositoryProvider.overrideWithValue(FakeMatches()),
-    ], shell: true, tab: 2, only: {'', '_dark'});
+    await shoot(
+      t,
+      'matches',
+      MatchesScreen.new,
+      [
+        ..._base(),
+        matchesRepositoryProvider.overrideWithValue(repo),
+      ],
+      shell: true,
+      tab: 2,
+    );
+    await shoot(
+      t,
+      'matches_empty',
+      MatchesScreen.new,
+      [
+        ..._base(),
+        matchesRepositoryProvider.overrideWithValue(FakeMatches()),
+      ],
+      shell: true,
+      tab: 2,
+      only: {'', '_dark'},
+    );
   });
 
   testWidgets('profile tab, celebration', (t) async {
-    await shoot(t, 'profile_tab', ProfileTabScreen.new, [
-      ..._base(),
-      profileCompletenessProvider.overrideWithValue(
-        const ProfileCompleteness(
-          fraction: 0.65,
-          nextTitle: 'Add a second photo',
-          nextBody: 'Profiles with two photos get more replies.',
+    await shoot(
+      t,
+      'profile_tab',
+      ProfileTabScreen.new,
+      [
+        ..._base(),
+        profileCompletenessProvider.overrideWithValue(
+          const ProfileCompleteness(
+            fraction: 0.65,
+            nextTitle: 'Add a second photo',
+            nextBody: 'Profiles with two photos get more replies.',
+          ),
         ),
-      ),
-      profileTabHeaderProvider.overrideWithValue(
-        const ProfileTabHeader(displayName: 'Esther', verified: true),
-      ),
-    ], shell: true, tab: 3);
+        profileTabHeaderProvider.overrideWithValue(
+          const ProfileTabHeader(displayName: 'Esther', verified: true),
+        ),
+      ],
+      shell: true,
+      tab: 3,
+    );
     await shoot(
       t,
       'match_celebration',

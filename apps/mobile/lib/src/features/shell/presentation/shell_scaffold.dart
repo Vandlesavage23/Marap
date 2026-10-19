@@ -10,7 +10,7 @@ import 'package:marriage_connect/src/features/shell/application/shell_badges.dar
 /// The four tabs, in order.
 enum ShellTab { discover, interests, matches, profile }
 
-/// The signed-in app frame: [child] above a bottom navigation bar
+/// The signed-in app frame: `child` above a bottom navigation bar
 /// (Discover, Interests, Matches, Profile) with a badge for received
 /// interests and unread messages. An offline banner sits above the content.
 ///
@@ -75,7 +75,7 @@ class ShellFrame extends ConsumerWidget {
     return Scaffold(
       body: Column(
         children: [
-          if (offline) SafeArea(bottom: false, child: const OfflineBanner()),
+          if (offline) const SafeArea(bottom: false, child: OfflineBanner()),
           Expanded(child: child),
         ],
       ),

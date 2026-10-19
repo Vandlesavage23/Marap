@@ -564,3 +564,26 @@ def test_portal_pages_are_not_served_on_the_public_api_host():
     api = Client(headers={"host": "api.mc.test"})
     for path in ("/flags", "/dashboards/funnel", "/dashboards/density", "/payments/reconciliation"):
         assert api.get(path).status_code == 404, path
+
+
+def test_funnel_page_shows_app_steps_with_small_cell_suppression():
+    from mc.accounts import services as account_services
+
+    for _ in range(6):
+        account_services.record_funnel_event(
+            name="welcome_seen", install_id=uuid.uuid4(), account=None, ip=None
+        )
+    for _ in range(3):
+        account_services.record_funnel_event(
+            name="otp_sent", install_id=uuid.uuid4(), account=None, ip=None
+        )
+    c = full_login(staff(["payments_ops"]))
+    r = c.get("/dashboards/funnel")
+    rows = {x["key"]: x for x in r.context["app_rows"]}
+    assert r.status_code == 200
+    assert rows["welcome_seen"]["text"] == "6" and rows["welcome_seen"]["of_first"] is None
+    assert rows["otp_sent"]["text"] == "<5" and rows["otp_sent"]["of_previous"] is None
+    assert rows["trial_started"]["text"] == "<5"
+    page = r.content.decode()
+    assert "In the app" in page and "Saw the welcome screen" in page
+    assert next(iter(rows)) == "welcome_seen" and len(rows) == 12

@@ -1,3 +1,4 @@
+// ignore_for_file: cascade_invocations
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -87,12 +88,12 @@ class SampleAvatarPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
     final h = stableHash(seed);
-    final isWoman = woman ?? (h % 2 == 0);
+    final isWoman = woman ?? (h.isEven);
     final skin = _skins[(h >> 3) % _skins.length];
     final outfit = _outfits[(h >> 7) % _outfits.length];
     final bg = _bgs[(h >> 11) % _bgs.length];
     final style = (h >> 15) % (isWoman ? 5 : 3);
-    final hair = const Color(0xFF1C1210);
+    const hair = Color(0xFF1C1210);
 
     final w = size.width;
     final ht = size.height;
@@ -121,7 +122,7 @@ class SampleAvatarPainter extends CustomPainter {
 
     // Figure square of side f, positioned so the head sits ~36% down.
     final f = math.max(w, ht * 0.7);
-    var top = ht * 0.36 - 0.42 * f;
+    var top = ht * 0.29 - 0.42 * f;
     if (top + f < ht) top = ht - f;
     canvas
       ..save()
@@ -232,7 +233,10 @@ class SampleAvatarPainter extends CustomPainter {
     c
       ..drawArc(
         Rect.fromCenter(
-            center: o(0.5, 0.48), width: s * 0.09, height: s * 0.06),
+          center: o(0.5, 0.48),
+          width: s * 0.09,
+          height: s * 0.06,
+        ),
         0.25,
         math.pi - 0.5,
         false,

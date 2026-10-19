@@ -147,9 +147,10 @@ def card_data(profile_ids, viewer) -> dict[uuid.UUID, dict[str, object]]:  # typ
         approved = photos_by_profile.get(p.id, [])
         photos = []
         for n, ph in enumerate(approved):
-            if not photo_visible_to(
-                viewer_verified=not limited, target=p, is_primary=n == 0
-            ) and p.account_id != viewer.id:
+            if (
+                not photo_visible_to(viewer_verified=not limited, target=p, is_primary=n == 0)
+                and p.account_id != viewer.id
+            ):
                 continue
             url = (
                 media_selectors.signed_url_prechecked(ph.media)

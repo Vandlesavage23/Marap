@@ -61,3 +61,4 @@ beta.DistrictCap.*,beta.DistrictCap,throttle go-lives per district (no personal 
 flags.FeatureFlag.*,flags.FeatureFlag,runtime feature-flag overrides (no personal data; updated_by is a staff id),legitimate interest,retained,none,af-south-1 Postgres
 billing.ReconciliationReport.*,billing.ReconciliationReport,show payments_ops the nightly reconciliation result (ids and problem codes only),legitimate interest (payments integrity),last 90 nights,none,af-south-1 Postgres
 accounts.FunnelEvent.*,accounts.FunnelEvent,product funnel measurement (step name + HMAC of a random install id; no account link; first time each step was reached),legitimate interest,400 days then purged by the retention job (no personal data),none,af-south-1 Postgres
+profiles.Profile.photo_visibility,profiles.Profile,member's choice of who may see their photos (everyone or verified members only),consent (member's own setting),deleted with account,none,af-south-1 Postgres

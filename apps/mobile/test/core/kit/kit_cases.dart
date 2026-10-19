@@ -149,8 +149,8 @@ final Map<String, Widget Function()> kitCases = {
         icon: Icons.favorite,
       ),
   'photo_dots': () => const PhotoDots(count: 4, index: 1, onPhoto: false),
-  'photo_profile_card': () => PhotoProfileCard(
-        photo: const SampleAvatar(seed: 'grace-nurse'),
+  'photo_profile_card': () => const PhotoProfileCard(
+        photo: SampleAvatar(seed: 'grace-nurse'),
         displayName: 'Grace',
         age: 29,
         district: 'Kampala',
@@ -158,7 +158,7 @@ final Map<String, Widget Function()> kitCases = {
         whyLine: 'You both want children and value faith.',
         verified: true,
         photoCount: 3,
-        chips: const [
+        chips: [
           PhotoChip(label: 'Strong match', icon: Icons.thumb_up_alt_outlined),
         ],
       ),

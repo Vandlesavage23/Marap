@@ -12,7 +12,6 @@ import 'package:marriage_connect/src/features/profile/application/description_co
 import 'package:marriage_connect/src/features/profile/application/make_profile.dart';
 import 'package:marriage_connect/src/features/profile/application/photos_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_controller.dart';
-import 'package:marriage_connect/src/features/profile/presentation/profile_labels.dart';
 import 'package:marriage_connect/src/features/profile/presentation/make_steps.dart';
 import 'package:marriage_connect/src/features/profile/presentation/preview_step.dart';
 import 'package:marriage_connect/src/features/questionnaire/application/questionnaire_controller.dart';
@@ -71,7 +70,6 @@ class _MakeProfileScreenState extends ConsumerState<MakeProfileScreen> {
 
     Widget body;
     Widget? bottom;
-    var title = l.v2bMakeTitle;
     if (_live) {
       return _LiveScreen(onStart: () => context.go('/home'));
     }
@@ -119,7 +117,6 @@ class _MakeProfileScreenState extends ConsumerState<MakeProfileScreen> {
           ),
         MakeStep.ready => (l.v2bMakeStepReady, l.v2bReadyBody),
       };
-      title = stepTitle;
       final Widget content = switch (step) {
         MakeStep.photo => MakePhotoStep(
             onAction: _setAction,
@@ -306,8 +303,11 @@ class _LiveScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Icon(Icons.celebration_outlined,
-                  size: 72, color: mc.colors.accent),
+              Icon(
+                Icons.celebration_outlined,
+                size: 72,
+                color: mc.colors.accent,
+              ),
               SizedBox(height: mc.space.md),
               Semantics(
                 header: true,

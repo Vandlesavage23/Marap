@@ -402,7 +402,9 @@ def refresh(profile: Profile) -> Profile:
 
 def go_live(*, account: "Account") -> Profile:
     """Draft → live only when every §10.3 rule holds; otherwise `profile_incomplete` lists what's missing."""
-    profile = get_or_create_profile(account=account)  # NotVerified until the identity check has passed
+    profile = get_or_create_profile(
+        account=account
+    )  # NotVerified until the identity check has passed
     with transaction.atomic():
         profile = Profile.objects.select_for_update().get(pk=profile.pk)
         if profile.status == Profile.Status.SUSPENDED:

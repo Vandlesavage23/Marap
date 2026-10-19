@@ -1,3 +1,4 @@
+// ignore_for_file: cascade_invocations
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -59,8 +60,10 @@ class HeroPainter extends CustomPainter {
       for (var i = 0; i < 18; i++) {
         final a = i * 2.399;
         canvas.drawCircle(
-          Offset(w * (0.5 + 0.46 * math.cos(a) * ((i % 5) / 5 + 0.1)),
-              h * (0.06 + (i * 0.021))),
+          Offset(
+            w * (0.5 + 0.46 * math.cos(a) * ((i % 5) / 5 + 0.1)),
+            h * (0.06 + (i * 0.021)),
+          ),
           w * (i.isEven ? 0.004 : 0.0028),
           Paint()..color = Colors.white.withValues(alpha: 0.7),
         );
@@ -102,7 +105,11 @@ class HeroPainter extends CustomPainter {
           ..moveTo(b.dx - w * 0.02, b.dy)
           ..quadraticBezierTo(b.dx - w * 0.01, b.dy - w * 0.014, b.dx, b.dy)
           ..quadraticBezierTo(
-              b.dx + w * 0.01, b.dy - w * 0.014, b.dx + w * 0.02, b.dy),
+            b.dx + w * 0.01,
+            b.dy - w * 0.014,
+            b.dx + w * 0.02,
+            b.dy,
+          ),
         bird,
       );
     }
@@ -173,19 +180,39 @@ class HeroPainter extends CustomPainter {
     // Hearts.
     _heart(canvas, Offset(w * 0.5, h * 0.2), w * 0.06, const Color(0xFFE5486F));
     _heart(
-        canvas, Offset(w * 0.4, h * 0.27), w * 0.032, const Color(0xFFFFC857));
-    _heart(canvas, Offset(w * 0.62, h * 0.29), w * 0.036,
-        dark ? const Color(0xFFF4A9BF) : Colors.white);
+      canvas,
+      Offset(w * 0.4, h * 0.27),
+      w * 0.032,
+      const Color(0xFFFFC857),
+    );
+    _heart(
+      canvas,
+      Offset(w * 0.62, h * 0.29),
+      w * 0.036,
+      dark ? const Color(0xFFF4A9BF) : Colors.white,
+    );
   }
 
   void _heart(Canvas c, Offset o, double r, Color color) {
     c.drawPath(
       Path()
         ..moveTo(o.dx, o.dy + r * 0.9)
-        ..cubicTo(o.dx - r * 1.7, o.dy - r * 0.1, o.dx - r * 0.7,
-            o.dy - r * 1.3, o.dx, o.dy - r * 0.2)
-        ..cubicTo(o.dx + r * 0.7, o.dy - r * 1.3, o.dx + r * 1.7,
-            o.dy - r * 0.1, o.dx, o.dy + r * 0.9),
+        ..cubicTo(
+          o.dx - r * 1.7,
+          o.dy - r * 0.1,
+          o.dx - r * 0.7,
+          o.dy - r * 1.3,
+          o.dx,
+          o.dy - r * 0.2,
+        )
+        ..cubicTo(
+          o.dx + r * 0.7,
+          o.dy - r * 1.3,
+          o.dx + r * 1.7,
+          o.dy - r * 0.1,
+          o.dx,
+          o.dy + r * 0.9,
+        ),
       Paint()..color = color,
     );
   }
@@ -201,8 +228,12 @@ class HeroPainter extends CustomPainter {
     for (final dx in [-0.035, 0.035]) {
       c.drawRRect(
         RRect.fromRectAndRadius(
-          Rect.fromLTWH(x + w * dx - w * 0.026, foot.dy - ht * 0.42, w * 0.052,
-              ht * 0.42),
+          Rect.fromLTWH(
+            x + w * dx - w * 0.026,
+            foot.dy - ht * 0.42,
+            w * 0.052,
+            ht * 0.42,
+          ),
           Radius.circular(w * 0.015),
         ),
         p..color = trousers,
@@ -270,7 +301,11 @@ class HeroPainter extends CustomPainter {
           ..moveTo(x - w * 0.045, top + ht * 0.1)
           ..quadraticBezierTo(x, top - ht * 0.03, x + w * 0.045, top + ht * 0.1)
           ..quadraticBezierTo(
-              x, top + ht * 0.045, x - w * 0.045, top + ht * 0.1),
+            x,
+            top + ht * 0.045,
+            x - w * 0.045,
+            top + ht * 0.1,
+          ),
         p..color = const Color(0xFF1C1210),
       );
   }
@@ -285,13 +320,25 @@ class HeroPainter extends CustomPainter {
     final dress = Path()
       ..moveTo(x - w * 0.06, top + ht * 0.2)
       ..quadraticBezierTo(
-          x - w * 0.07, top + ht * 0.4, x - w * 0.05, top + ht * 0.45)
+        x - w * 0.07,
+        top + ht * 0.4,
+        x - w * 0.05,
+        top + ht * 0.45,
+      )
       ..quadraticBezierTo(x - w * 0.11, top + ht * 0.75, x - w * 0.14, foot.dy)
       ..lineTo(x + w * 0.14, foot.dy)
       ..quadraticBezierTo(
-          x + w * 0.11, top + ht * 0.75, x + w * 0.05, top + ht * 0.45)
+        x + w * 0.11,
+        top + ht * 0.75,
+        x + w * 0.05,
+        top + ht * 0.45,
+      )
       ..quadraticBezierTo(
-          x + w * 0.07, top + ht * 0.4, x + w * 0.06, top + ht * 0.2)
+        x + w * 0.07,
+        top + ht * 0.4,
+        x + w * 0.06,
+        top + ht * 0.2,
+      )
       ..close();
     c
       ..drawPath(dress, p..color = gown)
@@ -350,9 +397,17 @@ class HeroPainter extends CustomPainter {
         Path()
           ..moveTo(x - w * 0.03, top + ht * 0.03)
           ..quadraticBezierTo(
-              x + w * 0.02, top - ht * 0.04, x + w * 0.07, top + ht * 0.02)
+            x + w * 0.02,
+            top - ht * 0.04,
+            x + w * 0.07,
+            top + ht * 0.02,
+          )
           ..quadraticBezierTo(
-              x + w * 0.1, top + ht * 0.06, x + w * 0.04, top + ht * 0.05)
+            x + w * 0.1,
+            top + ht * 0.06,
+            x + w * 0.04,
+            top + ht * 0.05,
+          )
           ..close(),
         p..color = const Color(0xFFE0A21B),
       );

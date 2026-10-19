@@ -834,11 +834,22 @@ via app (support only), and the attempt is flagged for safety review. On pass: A
 Profile.birth_date set, event `AccountVerified`. Vendor images: request deletion at vendor per contract
 after decision (A: 30 days); we never store them.
 
-### 10.3 Profile go-live
+### 10.3 Profile go-live (v2, ADR-0009)
 
-Profile becomes `live` when: verified; display name valid; gender, district, intention, timeline,
-marital status set; ≥ 2 approved photos; an approved description; core questionnaire (all questions marked
-`core`) answered. Completeness % shown to the user; optional fields raise it.
+Sign-up is free and browsing needs no verification. "About you" (first name, birth date 18+, man/woman) creates a
+draft profile for an unverified member; the verified ID's date of birth replaces the declared one and locks it.
+
+A profile becomes `live` (visible to others) when ALL hold: identity verified; display name, gender, district,
+intention and marital status set; >= `GO_LIVE_MIN_PHOTOS` (1) approved photo(s); an approved description;
+>= `GO_LIVE_MIN_CORE_ANSWERS` (8) core questionnaire answers. Marriage timeline is optional ("complete later").
+Marital status stays required because the married-status rule (BR-MAR-01, PENDING OD-03) filters on it: married
+statuses need a man resident in Uganda, the declaration and `married_visibility` consent, and married profiles
+are only shown to members who opted in, so a blank status must never be a way around it.
+
+`readiness` returns `missing` (blocking codes: the field names, `verification`, `photos`, `description`,
+`questionnaire`), `complete_later` (`more_photos`, `more_questions`, `marriage_timeline`, `optional_details`)
+and `progress` counters. Completeness % = 60 for the go-live items + 40 for the "complete later" items.
+Unverified accounts are never live, so they never appear in anyone's discovery.
 
 ### 10.4 Interest lifecycle
 
@@ -852,13 +863,13 @@ marital status set; ≥ 2 approved photos; an approved description; core questio
 `send_interest(sender, recipient, idempotency_key)` in one transaction:
 
 1. Replay check on `(sender, idempotency_key)` → return existing.
-2. Policy: sender capability `send_interest`; sender profile live with approved description; recipient
+2. Policy: sender capability `send_interest` (unverified: `verification_required`); sender profile live with approved description; recipient
    profile live; not blocked either way; recipient passes sender's hard filters and sender passes
    recipient's hard filters (§10.6 step 1); no pending interest either way between them — if the
    recipient already has a pending interest TO the sender, the call is treated as an **accept** of that
    interest (creates match) and returns `{status:"accepted", match_id}`.
 3. Daily limit: count interests by sender since local midnight (Kampala) < `INTEREST_DAILY_LIMIT_TRIAL`
-   (20) or `_MEMBER` (30) (A).
+   (20) or `_MEMBER` (30) (A). Free/expired accounts: the rolling weekly quota of §10.7 instead (`interest_quota_reached`).
 4. Re-send cooldown: no interest from sender to recipient with status passed/expired in last 90 days (A).
 5. Create InterestSnapshot from the current approved Description (copy text + display name).
 6. Create Interest; emit `InterestSent` → push to recipient "Someone is interested in you".
@@ -902,30 +913,53 @@ active ──account deleted──> closed_deleted
 FORBIDDEN inputs to scoring: photos, likes received, popularity, payment status, religion text
 (only the faith-match answer the user chose to answer), any Phase 5 data.
 
-### 10.7 Entitlements and trial
+### 10.7 Entitlements, quotas and trial (v2, ADR-0009)
 
 Capabilities (single source: `entitlements.selectors.capabilities_for(account, now)`):
 
-| Capability | not verified | trial active | member | none / expired |
-| --- | --- | --- | --- | --- |
-| browse | ✗ | ✓ | ✓ | ✗ |
-| send_interest | ✗ | ✓ | ✓ | ✗ |
-| receive_interest | ✗ | ✓ | ✓ | ✓ |
-| accept_interest | ✗ | ✓ | ✓ | ✓ (PENDING OD-11) |
-| send_message | ✗ | ✓ | ✓ | ✗ |
-| read_conversations | ✗ | ✓ | ✓ | ✓ (read-only) |
-| account_controls (profile, privacy, block, report, support, export, delete) | ✓ | ✓ | ✓ | ✓ |
+| Capability | signed in, unverified | verified, free | trial | member | expired |
+| --- | --- | --- | --- | --- | --- |
+| browse | yes (limited payloads, 30 cards/day) | yes (60/day) | yes (no daily cap) | yes | yes (60/day) |
+| view_full_profile | no | yes | yes | yes | yes |
+| send_interest | no (`verification_required`) | yes, quota 3 per rolling 7 days | yes | yes | yes, quota |
+| receive_interest / read_conversations | no (not live) | yes | yes | yes | yes |
+| accept_interest | no | yes (PENDING OD-11) | yes | yes | yes |
+| send_message (inside a match) | no | yes (`FREE_CHAT_IN_MATCH`) | yes | yes | yes |
+| priority_placement, extra_filters, higher_interest_cap | no | no | yes | yes | no |
+| account_controls | yes | yes | yes | yes | yes |
 
-Trial rules: verified accounts only; `start_trial` is explicit (button) after a screen stating duration (24 h),
-what stops afterwards and the membership price; one trial per `identity_hmac` (survives account deletion via
-retained hash); `ends_at = started_at + 24h` (server clock); reminders via push at T-3 h and at expiry (A);
-no auto-conversion, no payment details collected.
+`priority_placement` and `extra_filters` are capability flags only: payment status is a forbidden ranking input
+(§10.6), so nothing in discovery reads them yet.
+
+Limited payloads (server-side): an unverified viewer's cards hold only primary photo, first name, age, district,
+intention and badges (`limited: true`); `GET /profiles/{id}` returns the same with `locked: true`,
+`locked_reason: "verify_to_see_more"`. Description, answers, extra photos, why/discuss, timeline and marital label are
+never put in the payload. Media policy: unverified viewers can fetch only the primary approved photo, and none when
+the owner's `photo_visibility` is `verified_only`. Caps (config, PENDING OD): cards per Kampala day (30 unverified /
+60 verified free-or-expired / none for trial and member), distinct profile opens per day (10 unverified), per-IP and
+per-device caps; all counted in Redis on HMACs (no PII). Exhaustion is `429 limit_reached` with `resets_at`.
+
+Interest quota: free and expired accounts may send `FREE_INTERESTS_PER_WEEK` interests in any rolling
+`FREE_INTERESTS_WINDOW_DAYS` days (an interest stops counting exactly 7 days after it was created). The count and the
+send happen under the pair lock plus a per-sender advisory lock, so parallel sends cannot overshoot; replays and
+"send back = accept" create no row and cost nothing. Exhaustion: `403 interest_quota_reached` with `resets_at`,
+`limit`, `can_start_trial`. Trial and member are bounded only by the daily cap (§10.4 step 3).
+
+Trial rules: verified accounts only; `start_trial` is explicit (button), offered at the membership offer when the
+free quota ends; one trial per `identity_hmac` (survives account deletion); `ends_at = started_at + 24h` (server
+clock); push reminders at T-3 h and at expiry (skipped if the member bought a plan meanwhile); no auto-conversion,
+no payment details. After the trial the account is "expired": browsing, chat, accepting and the free quota continue.
 
 Membership: entitlement windows from purchases. Store subscriptions auto-renew per store; web purchases are
 prepaid periods (1/3/6 months) that do NOT auto-renew; reminder push 3 days before end (A). Overlapping
 purchases extend: new window starts at max(now, current ends_at).
 
-Expiry never deletes data. Expired users keep read-only chats, received interests, and all account controls.
+Expiry never deletes data. `GET /me/entitlements` also returns `interests`, `browse`, `profile_opens`, `trial`
+(`available`, `started_at`) and `verification` so the app never guesses.
+
+Funnel events: `POST /events {name, install_id?}` (allowlisted step names, anonymous or signed in, rate-limited)
+stores one row per (HMAC of install id or account id, step) in `accounts.FunnelEvent`; the staff funnel page shows
+the counts with small-cell suppression.
 
 ### 10.8 Blocking and reporting
 
@@ -1173,6 +1207,11 @@ Product values live in `backend/config/settings/product.py` (env-overridable) an
 | `INTEREST_EXPIRY_DAYS` | 30 | (A) |
 | `INTEREST_RESEND_COOLDOWN_DAYS` | 90 | (A) |
 | `NONMEMBER_CAN_ACCEPT_INTEREST` | true | PENDING OD-11 |
+| `FREE_INTERESTS_PER_WEEK` / `_WINDOW_DAYS` | 3 / 7 | PENDING OD (v2) |
+| `BROWSE_CARDS_PER_DAY_UNVERIFIED` / `_FREE` | 30 / 60 | PENDING OD (v2) |
+| `PROFILE_OPENS_PER_DAY_UNVERIFIED` | 10 | PENDING OD (v2) |
+| `GO_LIVE_MIN_PHOTOS` / `GO_LIVE_MIN_CORE_ANSWERS` | 1 / 8 | PENDING OD (v2) |
+| `FREE_CHAT_IN_MATCH` | true | PENDING OD (v2) |
 | `MARRIED_PROFILES_ENABLED` | true | PENDING OD-03 |
 | `MARRIED_VISIBILITY_DEFAULT` | false (opt-in) | PENDING OD-03 |
 | `PHOTO_UNLOCK_MIN_MESSAGES` | 10 | (A) |

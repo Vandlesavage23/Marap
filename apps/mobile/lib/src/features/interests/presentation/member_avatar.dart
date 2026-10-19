@@ -85,7 +85,7 @@ class MemberCardTile extends StatelessWidget {
       child: McCard(
         onTap: onTap,
         color: unreadRow || highlight
-            ? c.primaryContainer.withValues(alpha: 0.35)
+            ? c.primaryContainer.withValues(alpha: 0.2)
             : null,
         // One spoken label for the whole row (the card is a single button).
         semanticLabel: [

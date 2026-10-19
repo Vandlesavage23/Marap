@@ -1547,5 +1547,74 @@
   "v2bEditPreview": "See how others see you",
   "v2bEditPreviewHint": "Preview and go live",
   "v2bEditDone": "Done",
-  "v2bEditSaved": "Saved"
+  "v2bEditSaved": "Saved",
+  "v2bOfferTitle": "You've used your {limit} free introductions this week",
+  "@v2bOfferTitle": {
+    "placeholders": {
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bOfferRenews": "They renew on {day}.",
+  "@v2bOfferRenews": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bOfferBody": "Membership lets you reach more people and puts your profile first. Reading and accepting interests, and chatting after a match, stay free.",
+  "v2bOfferTrial": "Try membership free for 24 hours",
+  "v2bOfferPlans": "See plans",
+  "v2bOfferLater": "Maybe later",
+  "v2bOfferTrialNote": "The trial lasts 24 hours, needs no card and does not renew.",
+  "v2bOfferPlansNote": "Plans are paid through {store}. They renew until you cancel in your store settings, and you can cancel any time.",
+  "@v2bOfferPlansNote": {
+    "placeholders": {
+      "store": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bStoreGoogle": "Google Play",
+  "v2bStoreApple": "the App Store",
+  "v2bOfferTrialStarted": "Your 24-hour trial has started.",
+  "v2bQuotaLeft": "{left} of {limit} free introductions left, renews {day}",
+  "@v2bQuotaLeft": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      },
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bQuotaNone": "No free introductions left, renews {day}",
+  "@v2bQuotaNone": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bQuotaDaily": "{left} of {limit} introductions left today",
+  "@v2bQuotaDaily": {
+    "placeholders": {
+      "left": {
+        "type": "int"
+      },
+      "limit": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bPrimeTitle": "Want a nudge when someone replies?",
+  "v2bPrimeBody": "We'll tell you when someone is interested in you, when you match and when you get a message. Notifications never show names or message text.",
+  "v2bPrimeYes": "Turn on notifications",
+  "v2bPrimeNo": "Not now"
 }

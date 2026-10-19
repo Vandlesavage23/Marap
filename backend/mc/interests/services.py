@@ -53,7 +53,8 @@ def _sender_lock(sender_id: uuid.UUID) -> None:
     Always taken AFTER the pair lock, so lock order is fixed and cannot deadlock."""
     with connection.cursor() as cur:
         cur.execute(
-            "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", [f"interest-sender:{sender_id}"]
+            "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))",
+            [f"interest-sender:{sender_id}"],
         )
 
 

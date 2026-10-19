@@ -18,7 +18,16 @@ Widget _sheet() => Scaffold(
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final s in ['grace', 'moses', 'aisha', 'brian', 'sarah', 'peter', 'ruth', 'david'])
+                for (final s in [
+                  'grace',
+                  'moses',
+                  'aisha',
+                  'brian',
+                  'sarah',
+                  'peter',
+                  'ruth',
+                  'david',
+                ])
                   SampleAvatar(seed: s, size: 72, circle: true),
                 const VerifiedBadgeArt(size: 40),
               ],
@@ -28,7 +37,8 @@ Widget _sheet() => Scaffold(
               spacing: 8,
               runSpacing: 8,
               children: [
-                for (final k in EmptyKind.values) EmptyIllustration(kind: k, size: 110),
+                for (final k in EmptyKind.values)
+                  EmptyIllustration(kind: k, size: 110),
               ],
             ),
             const SizedBox(height: 12),

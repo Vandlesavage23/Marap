@@ -407,6 +407,28 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/events:
+    post:
+      operationId: api_v1_events_create
+      description: |-
+        `POST /events {name, install_id?}`: privacy-safe funnel step from a signed-in OR anonymous client. A bearer
+        token is optional; anonymous callers identify themselves only by the random `install_id` their app generated.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FunnelEvent'
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/health:
     get:
       operationId: api_v1_health_retrieve
@@ -1751,6 +1773,18 @@ components:
           maxLength: 254
       required:
       - email
+    FunnelEvent:
+      type: object
+      description: 'Nothing but a step name and the client''s random install id: no
+        free text, so no PII can be sent.'
+      properties:
+        name:
+          $ref: '#/components/schemas/NameEnum'
+        install_id:
+          type: string
+          format: uuid
+      required:
+      - name
     Location:
       type: object
       properties:
@@ -1783,6 +1817,34 @@ components:
       description: |-
         * `mobile_money` - mobile_money
         * `card` - card
+    NameEnum:
+      enum:
+      - welcome_seen
+      - otp_sent
+      - otp_verified
+      - about_done
+      - first_card_seen
+      - profile_opened
+      - verify_started
+      - verify_passed
+      - golive_done
+      - first_interest
+      - paywall_seen
+      - trial_started
+      type: string
+      description: |-
+        * `welcome_seen` - welcome_seen
+        * `otp_sent` - otp_sent
+        * `otp_verified` - otp_verified
+        * `about_done` - about_done
+        * `first_card_seen` - first_card_seen
+        * `profile_opened` - profile_opened
+        * `verify_started` - verify_started
+        * `verify_passed` - verify_passed
+        * `golive_done` - golive_done
+        * `first_interest` - first_interest
+        * `paywall_seen` - paywall_seen
+        * `trial_started` - trial_started
     NotificationsRead:
       type: object
       properties:
@@ -1833,6 +1895,10 @@ components:
       - phone
     PatchedProfileUpdate:
       type: object
+      description: |-
+        PATCH body. `birth_date` ("About you") is accepted only until the identity check passes; from then on the
+        ID's date of birth is the only truth. It is declared here, in the request-only serializer, and not in
+        `serializers.py` where `test_serializers_never_expose_identity_fields` guards the output allowlists.
       properties:
         display_name:
           type: string
@@ -1893,6 +1959,12 @@ components:
         education:
           type: string
           maxLength: 24
+        photo_visibility:
+          type: string
+          maxLength: 13
+        birth_date:
+          type: string
+          format: date
     PhotoCreate:
       type: object
       properties:

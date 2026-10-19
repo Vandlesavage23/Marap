@@ -1,3 +1,4 @@
+// ignore_for_file: cascade_invocations
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -92,10 +93,22 @@ class _EmptyPainter extends CustomPainter {
     canvas.drawPath(
       Path()
         ..moveTo(o.dx, o.dy + r * 0.9)
-        ..cubicTo(o.dx - r * 1.7, o.dy - r * 0.1, o.dx - r * 0.7,
-            o.dy - r * 1.3, o.dx, o.dy - r * 0.2)
-        ..cubicTo(o.dx + r * 0.7, o.dy - r * 1.3, o.dx + r * 1.7,
-            o.dy - r * 0.1, o.dx, o.dy + r * 0.9),
+        ..cubicTo(
+          o.dx - r * 1.7,
+          o.dy - r * 0.1,
+          o.dx - r * 0.7,
+          o.dy - r * 1.3,
+          o.dx,
+          o.dy - r * 0.2,
+        )
+        ..cubicTo(
+          o.dx + r * 0.7,
+          o.dy - r * 1.3,
+          o.dx + r * 1.7,
+          o.dy - r * 0.1,
+          o.dx,
+          o.dy + r * 0.9,
+        ),
       Paint()..color = color,
     );
   }
@@ -121,7 +134,10 @@ class _EmptyPainter extends CustomPainter {
       ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
-              center: Offset.zero, width: s * 0.36, height: s * 0.48),
+            center: Offset.zero,
+            width: s * 0.36,
+            height: s * 0.48,
+          ),
           Radius.circular(s * 0.05),
         ),
         p..color = c.accentContainer,
@@ -135,7 +151,10 @@ class _EmptyPainter extends CustomPainter {
       ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
-              center: Offset.zero, width: s * 0.36, height: s * 0.48),
+            center: Offset.zero,
+            width: s * 0.36,
+            height: s * 0.48,
+          ),
           Radius.circular(s * 0.05),
         ),
         p..color = c.surfaceVariant,
@@ -152,7 +171,10 @@ class _EmptyPainter extends CustomPainter {
       ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
-              center: o(0.5, 0.48), width: s * 0.32, height: s * 0.34),
+            center: o(0.5, 0.48),
+            width: s * 0.32,
+            height: s * 0.34,
+          ),
           Radius.circular(s * 0.035),
         ),
         p..color = c.primaryContainer,
@@ -168,7 +190,10 @@ class _EmptyPainter extends CustomPainter {
       ..drawRRect(
         RRect.fromRectAndRadius(
           Rect.fromCenter(
-              center: o(0.46, 0.73), width: s * 0.2, height: s * 0.025),
+            center: o(0.46, 0.73),
+            width: s * 0.2,
+            height: s * 0.025,
+          ),
           Radius.circular(s * 0.012),
         ),
         p..color = c.outline.withValues(alpha: 0.5),
@@ -297,12 +322,27 @@ class _EmptyPainter extends CustomPainter {
   void _cloud(Canvas canvas, double s, {required bool slash}) {
     Offset o(double x, double y) => Offset(s * x, s * y);
     final cloud = Path()
-      ..addOval(Rect.fromCenter(
-          center: o(0.4, 0.56), width: s * 0.26, height: s * 0.26))
-      ..addOval(Rect.fromCenter(
-          center: o(0.54, 0.48), width: s * 0.3, height: s * 0.3))
-      ..addOval(Rect.fromCenter(
-          center: o(0.66, 0.58), width: s * 0.24, height: s * 0.24))
+      ..addOval(
+        Rect.fromCenter(
+          center: o(0.4, 0.56),
+          width: s * 0.26,
+          height: s * 0.26,
+        ),
+      )
+      ..addOval(
+        Rect.fromCenter(
+          center: o(0.54, 0.48),
+          width: s * 0.3,
+          height: s * 0.3,
+        ),
+      )
+      ..addOval(
+        Rect.fromCenter(
+          center: o(0.66, 0.58),
+          width: s * 0.24,
+          height: s * 0.24,
+        ),
+      )
       ..addRRect(
         RRect.fromRectAndRadius(
           Rect.fromLTRB(s * 0.36, s * 0.56, s * 0.7, s * 0.7),
@@ -340,7 +380,10 @@ class _EmptyPainter extends CustomPainter {
         ..drawRRect(
           RRect.fromRectAndRadius(
             Rect.fromCenter(
-                center: o(0.53, 0.55), width: s * 0.04, height: s * 0.14),
+              center: o(0.53, 0.55),
+              width: s * 0.04,
+              height: s * 0.14,
+            ),
             Radius.circular(s * 0.02),
           ),
           Paint()..color = c.primary,

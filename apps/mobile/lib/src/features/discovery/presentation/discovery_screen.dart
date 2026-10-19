@@ -58,6 +58,8 @@ class DiscoveryScreen extends ConsumerWidget {
                       header: true,
                       child: Text(
                         l.discTitle,
+                        textScaler: MediaQuery.textScalerOf(context)
+                            .clamp(maxScaleFactor: 1.4),
                         style: mc.text.headline
                             .copyWith(color: mc.colors.onBackground),
                       ),
@@ -139,7 +141,7 @@ class DeckSkeleton extends StatelessWidget {
                             radius: mc.radii.sm,
                           ),
                           SizedBox(height: mc.space.xs),
-                          SkeletonBox(width: 120, height: 18),
+                          const SkeletonBox(width: 120, height: 18),
                           SizedBox(height: mc.space.sm),
                           SkeletonBox(
                             width: 150,
@@ -153,9 +155,9 @@ class DeckSkeleton extends StatelessWidget {
                 ),
               ),
               SizedBox(height: mc.space.md),
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
+                children: [
                   SkeletonBox(width: 60, height: 60, circle: true),
                   SkeletonBox(width: 48, height: 48, circle: true),
                   SkeletonBox(width: 72, height: 72, circle: true),
@@ -438,6 +440,8 @@ class _RoundAction extends StatelessWidget {
         SizedBox(height: mc.space.xxs),
         Text(
           label,
+          textScaler:
+              MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.3),
           textAlign: TextAlign.center,
           style: mc.text.caption.copyWith(
             color: c.onSurfaceMuted,

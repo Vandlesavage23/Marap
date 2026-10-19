@@ -159,7 +159,9 @@ void main() {
       await t.pumpWidget(discoveryApp(repo));
       await t.pump();
       expect(
-          find.byType(DeckSkeleton), findsOneWidget); // skeleton, not a spinner
+        find.byType(DeckSkeleton),
+        findsOneWidget,
+      ); // skeleton, not a spinner
       expect(find.byType(CircularProgressIndicator), findsNothing);
       repo.gate!.complete();
       await t.pumpAndSettle();

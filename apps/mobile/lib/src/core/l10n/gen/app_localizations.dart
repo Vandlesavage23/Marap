@@ -5739,6 +5739,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved'**
   String get v2bEditSaved;
+
+  /// No description provided for @v2bOfferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve used your {limit} free introductions this week'**
+  String v2bOfferTitle(int limit);
+
+  /// No description provided for @v2bOfferRenews.
+  ///
+  /// In en, this message translates to:
+  /// **'They renew on {day}.'**
+  String v2bOfferRenews(String day);
+
+  /// No description provided for @v2bOfferBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership lets you reach more people and puts your profile first. Reading and accepting interests, and chatting after a match, stay free.'**
+  String get v2bOfferBody;
+
+  /// No description provided for @v2bOfferTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Try membership free for 24 hours'**
+  String get v2bOfferTrial;
+
+  /// No description provided for @v2bOfferPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'See plans'**
+  String get v2bOfferPlans;
+
+  /// No description provided for @v2bOfferLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get v2bOfferLater;
+
+  /// No description provided for @v2bOfferTrialNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The trial lasts 24 hours, needs no card and does not renew.'**
+  String get v2bOfferTrialNote;
+
+  /// No description provided for @v2bOfferPlansNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans are paid through {store}. They renew until you cancel in your store settings, and you can cancel any time.'**
+  String v2bOfferPlansNote(String store);
+
+  /// No description provided for @v2bStoreGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play'**
+  String get v2bStoreGoogle;
+
+  /// No description provided for @v2bStoreApple.
+  ///
+  /// In en, this message translates to:
+  /// **'the App Store'**
+  String get v2bStoreApple;
+
+  /// No description provided for @v2bOfferTrialStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your 24-hour trial has started.'**
+  String get v2bOfferTrialStarted;
+
+  /// No description provided for @v2bQuotaLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} of {limit} free introductions left, renews {day}'**
+  String v2bQuotaLeft(int left, int limit, String day);
+
+  /// No description provided for @v2bQuotaNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No free introductions left, renews {day}'**
+  String v2bQuotaNone(String day);
+
+  /// No description provided for @v2bQuotaDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'{left} of {limit} introductions left today'**
+  String v2bQuotaDaily(int left, int limit);
+
+  /// No description provided for @v2bPrimeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Want a nudge when someone replies?'**
+  String get v2bPrimeTitle;
+
+  /// No description provided for @v2bPrimeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'ll tell you when someone is interested in you, when you match and when you get a message. Notifications never show names or message text.'**
+  String get v2bPrimeBody;
+
+  /// No description provided for @v2bPrimeYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on notifications'**
+  String get v2bPrimeYes;
+
+  /// No description provided for @v2bPrimeNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get v2bPrimeNo;
 }
 
 class _AppLocalizationsDelegate

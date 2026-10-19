@@ -15,7 +15,8 @@ import 'package:marriage_connect/src/features/verification/data/screen_security.
 
 import '../profile_track/profile_fakes.dart';
 import '../profile_track/support.dart';
-import '../profile_track/verification_test.dart' show FakeVerificationRepository;
+import '../profile_track/verification_test.dart'
+    show FakeVerificationRepository;
 import 'shot.dart';
 
 class _SignedOut extends SessionController {
@@ -27,7 +28,11 @@ class NoAuth implements AuthRepository {
   @override
   Future<void> startOtp(String phone) async {}
   @override
-  Future<void> verifyOtp({required String phone, required String code, String? inviteCode}) async {}
+  Future<void> verifyOtp({
+    required String phone,
+    required String code,
+    String? inviteCode,
+  }) async {}
   @override
   Future<void> recordConsents({required Map<String, bool> granted}) async {}
 }
@@ -46,7 +51,8 @@ Future<void> pumpRoute(
         overrides: [
           ...baseOverrides(FakeMeRepository(me)),
           if (signedOut) sessionProvider.overrideWith(_SignedOut.new),
-          verificationRepositoryProvider.overrideWithValue(FakeVerificationRepository()),
+          verificationRepositoryProvider
+              .overrideWithValue(FakeVerificationRepository()),
           screenSecurityProvider.overrideWithValue(FakeScreenSecurity()),
           verificationPollIntervalProvider.overrideWithValue(null),
           profileRepositoryProvider.overrideWithValue(FakeProfileRepository()),

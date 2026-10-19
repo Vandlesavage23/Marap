@@ -18,8 +18,8 @@ def start_of_kampala_day(now: datetime) -> datetime:
 
 
 def next_kampala_midnight(now: datetime) -> datetime:
-    """Start of the next Kampala calendar day (when daily counters reset)."""
-    return start_of_kampala_day(now) + timedelta(days=1)
+    """Start of the next Kampala calendar day (when daily counters reset), as a UTC instant."""
+    return (start_of_kampala_day(now) + timedelta(days=1)).astimezone(UTC)
 
 
 def iso_z(moment: datetime) -> str:

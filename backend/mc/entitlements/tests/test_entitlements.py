@@ -136,7 +136,9 @@ def test_membership_beats_trial_and_window_boundaries():
         assert selectors.entitlement_summary(acct).state == "trial"
     with freeze_time("2026-01-02 10:00:00"):  # exactly 24 h: ends_at is exclusive
         assert selectors.entitlement_summary(acct).state == "expired"
-        assert not selectors.has_capability(acct, "higher_interest_cap")  # the perks end with the window
+        assert not selectors.has_capability(
+            acct, "higher_interest_cap"
+        )  # the perks end with the window
         assert selectors.has_capability(acct, "send_message")  # v2: chat inside a match stays free
         assert selectors.has_capability(acct, "read_conversations")
 

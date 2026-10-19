@@ -1,3 +1,4 @@
+// ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,8 +9,8 @@ import 'package:marriage_connect/src/features/interests/application/interests_co
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
 import 'package:marriage_connect/src/features/interests/presentation/interests_screen.dart';
 import 'package:marriage_connect/src/features/interests/presentation/member_avatar.dart';
-import 'package:marriage_connect/src/features/matches/presentation/match_celebration.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
+import 'package:marriage_connect/src/features/matches/presentation/match_celebration.dart';
 import 'package:marriage_connect/src/features/safety/domain/safety_models.dart';
 import 'package:marriage_connect/src/features/safety/presentation/safety_screens.dart';
 
