@@ -53,6 +53,12 @@ class McColors {
     required this.onWarningContainer,
     required this.outline,
     required this.scrim,
+    required this.accent,
+    required this.onAccent,
+    required this.accentContainer,
+    required this.onAccentContainer,
+    required this.gradientStart,
+    required this.gradientEnd,
   });
 
   final Color background;
@@ -83,18 +89,37 @@ class McColors {
   final Color outline;
   final Color scrim;
 
+  /// Warm secondary brand colour (amber / marigold): highlights, the
+  /// "interest" heart, gentle emphasis. Never the only carrier of meaning.
+  final Color accent;
+  final Color onAccent;
+  final Color accentContainer;
+  final Color onAccentContainer;
+
+  /// Ends of the brand gradient (hero surfaces, avatars, primary banners).
+  /// [onPrimary] text is verified against both (see [textPairs]).
+  final Color gradientStart;
+  final Color gradientEnd;
+
+  /// The brand gradient, top-left to bottom-right.
+  LinearGradient get brandGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [gradientStart, gradientEnd],
+      );
+
   static const light = McColors(
-    background: Color(0xFFFFFBF7),
-    onBackground: Color(0xFF1F1A1D),
+    background: Color(0xFFFFF9F3),
+    onBackground: Color(0xFF2A1B20),
     surface: Color(0xFFFFFFFF),
-    onSurface: Color(0xFF1F1A1D),
-    onSurfaceMuted: Color(0xFF5E5459),
-    surfaceVariant: Color(0xFFF4EDF1),
-    onSurfaceVariant: Color(0xFF4A4045),
-    primary: Color(0xFF6B2D5C),
+    onSurface: Color(0xFF2A1B20),
+    onSurfaceMuted: Color(0xFF65555B),
+    surfaceVariant: Color(0xFFF8EDE6),
+    onSurfaceVariant: Color(0xFF4F3F45),
+    primary: Color(0xFF9A2F55),
     onPrimary: Color(0xFFFFFFFF),
-    primaryContainer: Color(0xFFF3DCEC),
-    onPrimaryContainer: Color(0xFF3A0F30),
+    primaryContainer: Color(0xFFFFDDE6),
+    onPrimaryContainer: Color(0xFF4D0F26),
     error: Color(0xFFB3261E),
     onError: Color(0xFFFFFFFF),
     errorContainer: Color(0xFFF9DEDC),
@@ -109,20 +134,26 @@ class McColors {
     onWarningContainer: Color(0xFF3D2400),
     outline: Color(0xFF7D7378),
     scrim: Color(0x99000000),
+    accent: Color(0xFFA85208),
+    onAccent: Color(0xFFFFFFFF),
+    accentContainer: Color(0xFFFFE6BD),
+    onAccentContainer: Color(0xFF4A2800),
+    gradientStart: Color(0xFFB23A5F),
+    gradientEnd: Color(0xFF7E2150),
   );
 
   static const dark = McColors(
-    background: Color(0xFF161214),
-    onBackground: Color(0xFFEDE0E6),
-    surface: Color(0xFF1F1A1D),
-    onSurface: Color(0xFFEDE0E6),
-    onSurfaceMuted: Color(0xFFC9BDC3),
-    surfaceVariant: Color(0xFF2B2429),
-    onSurfaceVariant: Color(0xFFD3C3CB),
-    primary: Color(0xFFE8B4DA),
-    onPrimary: Color(0xFF3A0F30),
-    primaryContainer: Color(0xFF53204A),
-    onPrimaryContainer: Color(0xFFF9D8F1),
+    background: Color(0xFF171013),
+    onBackground: Color(0xFFF2E6EA),
+    surface: Color(0xFF221A1E),
+    onSurface: Color(0xFFF2E6EA),
+    onSurfaceMuted: Color(0xFFCDBFC5),
+    surfaceVariant: Color(0xFF30262B),
+    onSurfaceVariant: Color(0xFFD9CAD1),
+    primary: Color(0xFFF4A9BF),
+    onPrimary: Color(0xFF4A0E24),
+    primaryContainer: Color(0xFF6B1F3C),
+    onPrimaryContainer: Color(0xFFFFD9E3),
     error: Color(0xFFF2B8B5),
     onError: Color(0xFF601410),
     errorContainer: Color(0xFF8C1D18),
@@ -137,6 +168,12 @@ class McColors {
     onWarningContainer: Color(0xFFFFE0B2),
     outline: Color(0xFF9A8E94),
     scrim: Color(0xCC000000),
+    accent: Color(0xFFF5B461),
+    onAccent: Color(0xFF3D2400),
+    accentContainer: Color(0xFF5E3A00),
+    onAccentContainer: Color(0xFFFFE2B3),
+    gradientStart: Color(0xFFF7B3C6),
+    gradientEnd: Color(0xFFE48DAB),
   );
 
   /// Every (foreground, background, name) text pair that the UI may draw.
@@ -168,6 +205,16 @@ class McColors {
           onSuccessContainer,
           successContainer
         ),
+        ('primary/accentContainer', primary, accentContainer),
+        ('onAccent/accent', onAccent, accent),
+        ('accent/surface', accent, surface),
+        (
+          'onAccentContainer/accentContainer',
+          onAccentContainer,
+          accentContainer
+        ),
+        ('onPrimary/gradientStart', onPrimary, gradientStart),
+        ('onPrimary/gradientEnd', onPrimary, gradientEnd),
         ('onWarning/warning', onWarning, warning),
         ('warning/surface', warning, surface),
         (
@@ -214,6 +261,36 @@ class McElevations {
   double get high => 6;
 }
 
+/// Soft, warm shadows in three levels (rest / raised / floating). Cheap:
+/// one blurred layer each, no spread. Use on cards, bars and floating actions.
+@immutable
+class McShadows {
+  const McShadows();
+  static const _tint = Color(0xFF3A1020);
+  List<BoxShadow> get none => const [];
+  List<BoxShadow> get soft => [
+        BoxShadow(
+          color: _tint.withValues(alpha: 0.07),
+          blurRadius: 10,
+          offset: const Offset(0, 2),
+        ),
+      ];
+  List<BoxShadow> get raised => [
+        BoxShadow(
+          color: _tint.withValues(alpha: 0.12),
+          blurRadius: 18,
+          offset: const Offset(0, 6),
+        ),
+      ];
+  List<BoxShadow> get floating => [
+        BoxShadow(
+          color: _tint.withValues(alpha: 0.2),
+          blurRadius: 28,
+          offset: const Offset(0, 12),
+        ),
+      ];
+}
+
 /// Motion durations: 150 / 200 / 300 ms. Use [McTokens.motion] to honour
 /// "reduce motion".
 @immutable
@@ -256,6 +333,8 @@ class McTypography {
         letterSpacing: ls,
       );
 
+  /// Welcome / celebration headline.
+  TextStyle get hero => _h(40, 48, FontWeight.w700);
   TextStyle get display => _h(32, 40, FontWeight.w700);
   TextStyle get headline => _h(24, 32, FontWeight.w700);
   TextStyle get title => _h(20, 28, FontWeight.w600);
@@ -264,6 +343,12 @@ class McTypography {
   TextStyle get bodySmall => _b(14, 20, FontWeight.w400, 0.2);
   TextStyle get label => _b(14, 20, FontWeight.w600, 0.1);
   TextStyle get caption => _b(12, 16, FontWeight.w400, 0.3);
+
+  /// Big name on a photo card ("Grace, 29"): serif, tight.
+  TextStyle get cardName => _h(28, 34, FontWeight.w700);
+
+  /// Small all-caps-free section label above a block ("About Grace").
+  TextStyle get overline => _b(13, 16, FontWeight.w700, 0.4);
 
   /// Material [TextTheme] built from this scale.
   TextTheme toTextTheme() => TextTheme(
@@ -296,6 +381,7 @@ class McTokens extends ThemeExtension<McTokens> {
     this.elevation = const McElevations(),
     this.durations = const McDurations(),
     this.curves = const McCurves(),
+    this.shadows = const McShadows(),
   });
 
   static const light = McTokens(colors: McColors.light);
@@ -311,6 +397,12 @@ class McTokens extends ThemeExtension<McTokens> {
   final McElevations elevation;
   final McDurations durations;
   final McCurves curves;
+  final McShadows shadows;
+
+  /// Dark mode draws no drop shadows (they vanish on dark surfaces); use this
+  /// to pick the level for the current brightness.
+  List<BoxShadow> shadow(BuildContext context, List<BoxShadow> level) =>
+      Theme.of(context).brightness == Brightness.dark ? const [] : level;
 
   /// A duration that is zero when the platform asks to reduce motion.
   Duration motion(BuildContext context, Duration d) =>
@@ -325,6 +417,7 @@ class McTokens extends ThemeExtension<McTokens> {
         elevation: elevation,
         durations: durations,
         curves: curves,
+        shadows: shadows,
       );
 
   @override

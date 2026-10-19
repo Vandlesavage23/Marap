@@ -152,3 +152,22 @@ def funnel_registered_count(*, start: datetime, end: datetime) -> int | None:
 def devices_for(account: Account) -> QuerySet[Device]:
     """The member's own registered devices, most recently seen first."""
     return Device.objects.filter(account=account).order_by("-last_seen_at", "-id")
+
+
+def funnel_step_counts(*, start: datetime, end: datetime) -> dict[str, int | None]:
+    """Dashboard funnel, app steps: distinct installs/members that first reached each step in `[start, end)`.
+    Aggregate only; cells below the suppression threshold come back as None."""
+    from django.db.models import Count
+
+    from mc.common.aggregates import suppress
+
+    from .constants import FUNNEL_STEPS
+    from .models import FunnelEvent
+
+    rows = dict(
+        FunnelEvent.objects.filter(created_at__gte=start, created_at__lt=end)
+        .values_list("name")
+        .annotate(n=Count("id"))
+        .order_by()
+    )
+    return {step: suppress(rows.get(step, 0)) for step in FUNNEL_STEPS}

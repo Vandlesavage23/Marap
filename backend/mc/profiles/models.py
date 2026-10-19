@@ -57,12 +57,18 @@ class Profile(BaseModel):
         BACHELORS = "bachelors"
         POSTGRADUATE = "postgraduate"
 
+    class PhotoVisibility(models.TextChoices):
+        EVERYONE = "everyone"
+        VERIFIED_ONLY = "verified_only"
+
     account = models.OneToOneField(
         "accounts.Account", on_delete=models.CASCADE, related_name="profile"
     )
     display_name = models.CharField(max_length=30, blank=True, default="")
     gender = models.CharField(max_length=6, choices=Gender.choices, blank=True, default="")
-    birth_date = models.DateField()  # copied from passed verification; never editable
+    # Self-declared at sign-up ("About you"), then overwritten by the passed verification's date of birth and
+    # locked: a verified member can never edit it.
+    birth_date = models.DateField()
     district = models.CharField(max_length=40, blank=True, default="")
     # Coarse location (rounded to ~1 km). PostGIS geography(Point) is deferred — see ADR-0002.
     location_lat = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
@@ -94,6 +100,9 @@ class Profile(BaseModel):
     current_description = models.ForeignKey(
         "Description", null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
+    photo_visibility = models.CharField(
+        max_length=13, choices=PhotoVisibility.choices, default=PhotoVisibility.EVERYONE
+    )  # `verified_only` hides photos from members who have not verified their identity
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.DRAFT)
     completeness = models.PositiveSmallIntegerField(default=0)
 

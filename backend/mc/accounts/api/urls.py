@@ -14,6 +14,7 @@ urlpatterns = [
     path("auth/recover/complete", views.RecoverCompleteView.as_view()),
     path("me/email/start", views.EmailStartView.as_view()),
     path("me/email/verify", views.EmailVerifyView.as_view()),
+    path("events", views.FunnelEventView.as_view()),
     path("me", views.MeView.as_view()),
     path("me/sessions", views.SessionsView.as_view()),
     path("me/sessions/<uuid:session_id>", views.SessionDetailView.as_view()),

@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
 import 'package:marriage_connect/src/features/chat/data/media_services.dart';
@@ -17,19 +19,92 @@ class _Bubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = Theme.of(context).colorScheme;
+    final mc = context.mc;
+    final c = mc.colors;
+    final fg = mine ? c.onPrimary : c.onSurface;
+    const r = Radius.circular(18);
+    const tail = Radius.circular(4);
     return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: mine
+          ? AlignmentDirectional.centerEnd
+          : AlignmentDirectional.centerStart,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.78,
+          maxWidth: MediaQuery.sizeOf(context).width * 0.8,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: mine ? s.primaryContainer : s.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(16),
+            gradient: mine ? c.brandGradient : null,
+            color: mine ? null : c.surface,
+            border: mine
+                ? null
+                : Border.all(color: c.outline.withValues(alpha: 0.2)),
+            boxShadow: mc.shadow(context, mc.shadows.soft),
+            borderRadius: BorderRadiusDirectional.only(
+              topStart: r,
+              topEnd: r,
+              bottomStart: mine ? r : tail,
+              bottomEnd: mine ? tail : r,
+            ),
           ),
-          child: Padding(padding: const EdgeInsets.all(10), child: child),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            child: IconTheme(
+              data: IconThemeData(color: fg),
+              child: DefaultTextStyle(
+                style: mc.text.body.copyWith(color: fg),
+                child: child,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Today", "Yesterday" or a date, centred above the first message of a day.
+class ChatDateSeparator extends StatelessWidget {
+  const ChatDateSeparator({required this.day, required this.now, super.key});
+  final DateTime day;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final mc = context.mc;
+    final today = DateTime(now.year, now.month, now.day);
+    final d = DateTime(day.year, day.month, day.day);
+    final diff = today.difference(d).inDays;
+    final text = diff == 0
+        ? l.v2aToday
+        : diff == 1
+            ? l.v2aYesterday
+            : DateFormat.yMMMd(l.localeName).format(day);
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: mc.space.sm),
+      child: Center(
+        child: Semantics(
+          header: true,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: mc.colors.surfaceVariant,
+              borderRadius: BorderRadius.circular(mc.radii.pill),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: mc.space.sm,
+                vertical: mc.space.xxs,
+              ),
+              child: Text(
+                text,
+                style: mc.text.caption.copyWith(
+                  color: mc.colors.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -57,7 +132,9 @@ class MessageBubble extends StatelessWidget {
             m.body == 'match_created'
                 ? l.chatSystemMatchCreated
                 : l.chatSystemOther,
-            style: t.textTheme.bodySmall,
+            style: context.mc.text.bodySmall
+                .copyWith(color: context.mc.colors.onSurfaceMuted),
+            textAlign: TextAlign.center,
           ),
         ),
       );
@@ -100,11 +177,37 @@ class MessageBubble extends StatelessWidget {
                 ],
               ),
             ),
-          if (status != null)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(status!, style: t.textTheme.labelSmall),
+          Padding(
+            padding: const EdgeInsets.only(top: 2, left: 4, right: 4),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  DateFormat.Hm(l.localeName).format(m.createdAt.toLocal()),
+                  style: context.mc.text.caption
+                      .copyWith(color: context.mc.colors.onSurfaceMuted),
+                ),
+                if (status != null) ...[
+                  const SizedBox(width: 4),
+                  ExcludeSemantics(
+                    child: Icon(
+                      m.readAt != null ? Icons.done_all : Icons.done,
+                      size: 16,
+                      color: m.readAt != null
+                          ? context.mc.colors.primary
+                          : context.mc.colors.onSurfaceMuted,
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Text(
+                    status!,
+                    style: context.mc.text.caption
+                        .copyWith(color: context.mc.colors.onSurfaceMuted),
+                  ),
+                ],
+              ],
             ),
+          ),
         ],
       ),
     );
@@ -307,6 +410,7 @@ class _VoiceBubbleState extends ConsumerState<VoiceBubble> {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
+          color: IconTheme.of(context).color,
           tooltip: needsTap
               ? l.chatVoiceTapToDownload
               : (_playing ? l.chatVoicePause : l.chatVoicePlay),

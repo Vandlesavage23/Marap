@@ -11,3 +11,11 @@ def client_ip(request: HttpRequest) -> str:
         if len(parts) >= proxies:
             return parts[-proxies]
     return str(request.META.get("REMOTE_ADDR", "0.0.0.0"))  # noqa: S104
+
+
+def request_install_id(request: HttpRequest) -> str | None:
+    """The calling device's install id (from the live session's device), or None for sessions without a device."""
+    session = getattr(request, "session_obj", None)
+    device = getattr(session, "device", None)
+    install_id = getattr(device, "install_id", None)
+    return str(install_id) if install_id else None

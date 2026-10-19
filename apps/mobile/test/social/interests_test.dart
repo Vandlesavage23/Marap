@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/interests/data/api_interests_repository.dart';
 import 'package:marriage_connect/src/features/interests/domain/interest.dart';
@@ -387,7 +388,8 @@ void main() {
       final repo = FakeInterests()
         ..receivedItems = [received('i1'), received('i2', name: 'Bea')];
       await t.pumpWidget(screen(repo));
-      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      expect(
+          find.byType(SkeletonRows), findsWidgets); // skeleton, not a spinner
       await t.pumpAndSettle();
       expect(find.text('Amani, 29'), findsOneWidget);
       expect(find.text('Bea, 29'), findsOneWidget);

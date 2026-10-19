@@ -74,15 +74,15 @@ def test_duplicate_pending_with_new_key_is_409_with_existing_id():
     assert resp.json()["interest_id"] == first["id"] and Interest.objects.count() == 1
 
 
-def test_capability_required():
-    m = member("male", trial=False)
+def test_unverified_sender_is_asked_to_verify():
+    """v2: an unverified member can browse but can't affect anyone else (send_interest needs verification)."""
+    m = member("male", trial=False, verified=False, live=False)
     f = member("female")
     resp = send(m[0], m[1], f[3])
     assert resp.status_code == 403
-    assert (
-        resp.json()["code"] == "entitlement_required"
-        and resp.json()["capability"] == "send_interest"
-    )
+    assert resp.json()["code"] == "verification_required"
+    assert resp.json()["capability"] == "send_interest"
+    assert Interest.objects.count() == 0
 
 
 def test_sender_needs_live_profile_and_approved_description():

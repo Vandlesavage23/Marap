@@ -59,6 +59,18 @@ class EntitlementRequired(DomainError):
     code, status, title = "entitlement_required", 403, "Membership required"
 
 
+class VerificationRequired(DomainError):
+    """The member is signed in but must verify their identity before this act (`capability` says which one)."""
+
+    code, status, title = "verification_required", 403, "Verification required"
+
+
+class InterestQuotaReached(DomainError):
+    """A free (or expired) account used its rolling-window interests; carries `resets_at`, `limit`, `can_start_trial`."""
+
+    code, status, title = "interest_quota_reached", 403, "Free interests used"
+
+
 class TrialAlreadyUsed(DomainError):
     code, status, title = "trial_already_used", 409, "Trial already used"
 

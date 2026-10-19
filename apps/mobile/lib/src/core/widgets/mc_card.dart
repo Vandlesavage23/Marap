@@ -28,24 +28,28 @@ class McCard extends StatelessWidget {
       padding: padding ?? EdgeInsets.all(mc.space.md),
       child: child,
     );
-    final card = Material(
-      color: color ?? mc.colors.surface,
-      elevation: mc.elevation.low,
-      shadowColor: mc.colors.scrim,
-      shape: RoundedRectangleBorder(
+    final card = DecoratedBox(
+      decoration: BoxDecoration(
         borderRadius: radius,
-        side: BorderSide(color: mc.colors.outline.withValues(alpha: 0.35)),
+        boxShadow: mc.shadow(context, mc.shadows.soft),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: onTap == null
-          ? body
-          : InkWell(
-              onTap: onTap,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: mc.space.minTarget),
-                child: body,
+      child: Material(
+        color: color ?? mc.colors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: mc.colors.outline.withValues(alpha: 0.22)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null
+            ? body
+            : InkWell(
+                onTap: onTap,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: mc.space.minTarget),
+                  child: body,
+                ),
               ),
-            ),
+      ),
     );
     return Semantics(
       container: true,

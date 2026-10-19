@@ -7,7 +7,7 @@ from mc.accounts import selectors as account_selectors
 from mc.common.timeutil import age_on, kampala_date
 from mc.verification import selectors as verification_selectors
 
-from .models import Profile
+from .models import Preference, Profile
 
 
 def get_profile_for_account(account_id: uuid.UUID) -> Profile | None:
@@ -48,10 +48,48 @@ def approved_photos(profile: Profile):  # type: ignore[no-untyped-def]
 
 
 def readiness(profile: Profile) -> dict[str, object]:
+    """`missing` blocks go-live; `complete_later` never does (the app shows it as optional nudges)."""
+    from django.conf import settings
+
+    from mc.questionnaire import selectors as questionnaire_selectors
+
     from . import readiness as r
 
     missing = r.missing_for_go_live(profile)
-    return {"ready": not missing, "missing": missing}
+    answered, total = questionnaire_selectors.core_progress(profile.account_id)
+    return {
+        "ready": not missing,
+        "missing": missing,
+        "complete_later": r.complete_later(profile),
+        "progress": {
+            "photos": {
+                "have": approved_photos(profile).count(),
+                "need": settings.GO_LIVE_MIN_PHOTOS,
+                "max": settings.PHOTOS_MAX,
+            },
+            "core_answers": {
+                "have": answered,
+                "need": r.core_answers_needed(total),
+                "total": total,
+            },
+        },
+    }
+
+
+def browse_context_for(account):  # type: ignore[no-untyped-def]
+    """Search context for anyone who can browse: needs only a profile row with a gender and birth date (the "About
+    you" step), not a live profile. Saved preferences when they exist, else the derived defaults (opposite gender,
+    age window from the birth date). None when the member hasn't told us who they are yet."""
+    from . import preferences
+    from .search import viewer_context
+
+    profile = Profile.objects.filter(account=account).first()
+    if profile is None or not profile.gender:
+        return None
+    pref = Preference.objects.filter(profile=profile).first() or preferences.derived_preference(
+        profile
+    )
+    return viewer_context(profile, pref)
 
 
 def viewer_context_for(account):  # type: ignore[no-untyped-def]
@@ -65,20 +103,28 @@ def viewer_context_for(account):  # type: ignore[no-untyped-def]
     return viewer_context(profile, preferences.get_or_create_preference(profile=profile))
 
 
+def badges(has_photos: bool) -> list[str]:
+    return ["age_verified", "identity_verified", *(["photo_verified"] if has_photos else [])]
+
+
 def card_data(profile_ids, viewer) -> dict[uuid.UUID, dict[str, object]]:  # type: ignore[no-untyped-def]
     """CandidateCard basics (no numeric score) for profiles that are still live+active, keyed by profile id.
     Includes signed photo URLs for approved photos only.
 
+    A viewer who has not verified their identity gets the LIMITED card (`limited: true`): primary photo only (and
+    none when the owner chose `verified_only`), first name, age, district, intention and the badges. Everything
+    else is left out here, on the server; there is nothing for the app to hide.
+
     Batched: one query for profiles, one for all their approved photos (+media), and the viewer-side photo
-    policy facts (blocks, gender, `browse`) read once. A photo the batched check does not clear falls back to
-    the full per-media policy (`media.selectors.signed_url`), so interest/match grants still apply."""
+    policy facts (blocks, gender, `browse`, verified) read once. A photo the batched check does not clear falls
+    back to the full per-media policy (`media.selectors.signed_url`), so interest/match grants still apply."""
     from collections import defaultdict
 
     from mc.media import selectors as media_selectors
 
     from .constants import MARITAL_LABELS
     from .models import Photo
-    from .policies import BatchedProfileAccess
+    from .policies import BatchedProfileAccess, photo_visible_to
 
     out: dict[uuid.UUID, dict[str, object]] = {}
     profiles = list(
@@ -96,32 +142,37 @@ def card_data(profile_ids, viewer) -> dict[uuid.UUID, dict[str, object]]:  # typ
     ):
         photos_by_profile[ph.profile_id].append(ph)
     access = BatchedProfileAccess(viewer)
+    limited = not access.verified
     for p in profiles:
+        approved = photos_by_profile.get(p.id, [])
         photos = []
-        for ph in photos_by_profile.get(p.id, []):
+        for n, ph in enumerate(approved):
+            if not photo_visible_to(
+                viewer_verified=not limited, target=p, is_primary=n == 0
+            ) and p.account_id != viewer.id:
+                continue
             url = (
                 media_selectors.signed_url_prechecked(ph.media)
                 if access.can_view(p)
                 else media_selectors.signed_url(ph.media, viewer)
             )
             photos.append({"url": url, "w": ph.media.width, "h": ph.media.height})
-        out[p.id] = {
+        card: dict[str, object] = {
             "profile_id": str(p.id),
             "display_name": p.display_name,
             "age": age_of(p),
             "district": p.district,
             "photos": photos,
             "intention": p.intention,
-            "marriage_timeline": p.marriage_timeline,
-            "marital_status_label": MARITAL_LABELS[p.marital_status]
-            if p.marital_status.startswith("married")
-            else None,
-            "badges": [
-                "age_verified",
-                "identity_verified",
-                *(["photo_verified"] if photos else []),
-            ],
+            "badges": badges(bool(approved)),
+            "limited": limited,
         }
+        if not limited:
+            card["marriage_timeline"] = p.marriage_timeline
+            card["marital_status_label"] = (
+                MARITAL_LABELS[p.marital_status] if p.marital_status.startswith("married") else None
+            )
+        out[p.id] = card
     return out
 
 

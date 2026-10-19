@@ -1867,13 +1867,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileMissingVerification => 'Identity verification';
 
   @override
-  String get profileMissingPhotos => 'At least two approved photos';
+  String get profileMissingPhotos => 'An approved photo';
 
   @override
   String get profileMissingDescription => 'An approved description';
 
   @override
-  String get profileMissingQuestionnaire => 'The core questions';
+  String get profileMissingQuestionnaire => 'Eight quick questions';
 
   @override
   String get profileFix => 'Fix';
@@ -2264,4 +2264,957 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get v2aNavDiscover => 'Discover';
+
+  @override
+  String get v2aNavInterests => 'Interests';
+
+  @override
+  String get v2aNavMatches => 'Matches';
+
+  @override
+  String get v2aNavProfile => 'Profile';
+
+  @override
+  String v2aNavInterestsBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count new interests',
+      one: '1 new interest',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String v2aNavMatchesBadge(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count unread messages',
+      one: '1 unread message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get v2aProfileTitle => 'Your profile';
+
+  @override
+  String v2aProfileRingLabel(int percent) {
+    return '$percent% complete';
+  }
+
+  @override
+  String get v2aProfileYou => 'You';
+
+  @override
+  String get v2aProfileNextTitle => 'Your next step';
+
+  @override
+  String get v2aProfileNextPlaceholder =>
+      'A complete profile gets noticed more. Add a photo and a few words about yourself.';
+
+  @override
+  String get v2aProfileNextCta => 'Continue';
+
+  @override
+  String get v2aProfileEdit => 'Edit my profile';
+
+  @override
+  String get v2aProfileEditHint => 'Photos, intro and details';
+
+  @override
+  String get v2aProfileMembership => 'Membership';
+
+  @override
+  String get v2aProfileMembershipHint => 'Your plan, free trial and receipts';
+
+  @override
+  String get v2aProfileSettings => 'Settings';
+
+  @override
+  String get v2aProfileSettingsHint => 'Account, privacy and notifications';
+
+  @override
+  String get v2aProfileSafety => 'Safety centre';
+
+  @override
+  String get v2aProfileSafetyHint => 'Tips, blocking and reporting';
+
+  @override
+  String get v2aProfileNotifications => 'Notifications';
+
+  @override
+  String get v2aProfileNotificationsHint => 'Replies, matches and updates';
+
+  @override
+  String get v2aProfileVerified => 'Verified';
+
+  @override
+  String get v2bWelcomeTitle => 'Find a partner for marriage';
+
+  @override
+  String get v2bWelcomeSub =>
+      'Meet verified adults who are serious about marriage.';
+
+  @override
+  String get v2bValueSeriousTitle => 'Serious about marriage';
+
+  @override
+  String get v2bValueSeriousBody =>
+      'Everyone here wants a life partner, not a casual chat.';
+
+  @override
+  String get v2bValueVerifiedTitle => 'Everyone is verified';
+
+  @override
+  String get v2bValueVerifiedBody =>
+      'Members confirm their age and identity before they contact anyone.';
+
+  @override
+  String get v2bValuePrivacyTitle => 'Your privacy comes first';
+
+  @override
+  String get v2bValuePrivacyBody =>
+      'We never show your phone number. You choose who sees your photos.';
+
+  @override
+  String get v2bGetStarted => 'Get started';
+
+  @override
+  String get v2bLookAround => 'Look around first';
+
+  @override
+  String get v2bWelcomeLegal =>
+      'You will read and agree to our Terms of Use and Privacy Notice when you join.';
+
+  @override
+  String get v2bLookTitle => 'Look around';
+
+  @override
+  String get v2bLookBanner =>
+      'These are samples. Real members appear when you join.';
+
+  @override
+  String get v2bSampleLabel => 'Sample';
+
+  @override
+  String v2bSampleSemantics(String name, String facts, String why) {
+    return 'Sample profile: $name, $facts. $why';
+  }
+
+  @override
+  String get v2bWhyLabel => 'Why we matched you';
+
+  @override
+  String get v2bLookNote =>
+      'Verified members have this badge. Everyone you meet here has passed an identity and age check.';
+
+  @override
+  String get v2bSample1Name => 'Amara, 27';
+
+  @override
+  String get v2bSample1Facts => 'Kampala · Marriage within a year';
+
+  @override
+  String get v2bSample1Why => 'You both want to marry within a year.';
+
+  @override
+  String get v2bSample2Name => 'Joel, 31';
+
+  @override
+  String get v2bSample2Facts => 'Mbarara · Open on timing';
+
+  @override
+  String get v2bSample2Why =>
+      'You both want children and live in the same region.';
+
+  @override
+  String get v2bSample3Name => 'Esther, 24';
+
+  @override
+  String get v2bSample3Facts => 'Gulu · Marriage within a year';
+
+  @override
+  String get v2bSample3Why =>
+      'You answered alike about family and how to settle disagreements.';
+
+  @override
+  String get v2bSample4Name => 'Ronald, 35';
+
+  @override
+  String get v2bSample4Facts => 'Jinja · Open on timing';
+
+  @override
+  String get v2bSample4Why =>
+      'You are both looking for a serious, long-term partner.';
+
+  @override
+  String get v2bSample5Name => 'Harriet, 29';
+
+  @override
+  String get v2bSample5Facts => 'Entebbe · Marriage within a year';
+
+  @override
+  String get v2bSample5Why =>
+      'Your age ranges and where you live fit each other.';
+
+  @override
+  String get v2bSample6Name => 'Samuel, 41';
+
+  @override
+  String get v2bSample6Facts => 'Mbale · Open on timing';
+
+  @override
+  String get v2bSample6Why => 'You both want to settle close to family.';
+
+  @override
+  String get v2bPhoneTitle => 'What is your phone number?';
+
+  @override
+  String get v2bPhoneSub =>
+      'We will text you a 6-digit code to sign in. There is no password.';
+
+  @override
+  String get v2bPhoneLabel => 'Phone number';
+
+  @override
+  String get v2bPhoneHint => '772 000 000';
+
+  @override
+  String get v2bPhonePrefixSemantics => 'Uganda, country code plus 256';
+
+  @override
+  String get v2bPhoneReassure => 'We never show your number to anyone.';
+
+  @override
+  String get v2bPhoneInvalid =>
+      'Enter your 9-digit number, for example 772 000 000.';
+
+  @override
+  String get v2bSendCode => 'Send code';
+
+  @override
+  String get v2bCodeTitle => 'Enter the 6-digit code';
+
+  @override
+  String v2bCodeSent(String phone) {
+    return 'We sent it by SMS to $phone.';
+  }
+
+  @override
+  String get v2bWrongNumber => 'Wrong number?';
+
+  @override
+  String v2bCodeResendIn(String time) {
+    return 'Send a new code in $time';
+  }
+
+  @override
+  String get v2bCodeResend => 'Send a new code';
+
+  @override
+  String get v2bCodeResent => 'A new code is on its way.';
+
+  @override
+  String get v2bCodeWrong =>
+      'That code didn\'t work. Check the SMS and try again.';
+
+  @override
+  String get v2bCodeSlow =>
+      'SMS can take a minute or two. Check that the number above is right.';
+
+  @override
+  String get v2bCodeChecking => 'Checking your code';
+
+  @override
+  String v2bCodeFieldLabel(int count) {
+    return '6-digit code. $count of 6 digits entered.';
+  }
+
+  @override
+  String get v2bAboutTitle => 'About you';
+
+  @override
+  String v2bStepOf(int n, int total) {
+    return 'Step $n of $total';
+  }
+
+  @override
+  String get v2bAboutSub =>
+      'Three quick things and you can start looking. It takes about 30 seconds.';
+
+  @override
+  String get v2bFirstName => 'First name';
+
+  @override
+  String get v2bFirstNameHelp =>
+      'Other members will see this. Your first name is enough.';
+
+  @override
+  String get v2bBirthDate => 'Birth date';
+
+  @override
+  String get v2bBirthDateChoose => 'Choose your birth date';
+
+  @override
+  String get v2bBirthDateHelp => 'We show your age, never your birth date.';
+
+  @override
+  String v2bBirthDateValue(String date, int age) {
+    return '$date ($age years old)';
+  }
+
+  @override
+  String get v2bUnder18Title =>
+      'Marriage Connect is for adults aged 18 and over';
+
+  @override
+  String get v2bUnder18Body =>
+      'We\'re sorry, we can\'t set you up yet. We would be glad to see you when you turn 18. Take care until then.';
+
+  @override
+  String get v2bIAm => 'I am';
+
+  @override
+  String get v2bIAmMan => 'I am a man';
+
+  @override
+  String get v2bIAmWoman => 'I am a woman';
+
+  @override
+  String get v2bGenderNote =>
+      'This can\'t be changed later, so please choose carefully.';
+
+  @override
+  String get v2bConsentsHeading => 'Before you join';
+
+  @override
+  String get v2bSelectAll => 'Select all';
+
+  @override
+  String get v2bAboutCta => 'Continue';
+
+  @override
+  String v2bAboutMissing(String items) {
+    return 'Still needed: $items.';
+  }
+
+  @override
+  String get v2bNeedName => 'your first name';
+
+  @override
+  String get v2bNeedBirth => 'your birth date';
+
+  @override
+  String get v2bNeedGender => 'who you are';
+
+  @override
+  String get v2bNeedConsents => 'the three agreements';
+
+  @override
+  String get v2bNameRejected =>
+      'We couldn\'t use that name. Please use letters only, for example Grace.';
+
+  @override
+  String get v2bAboutSaving => 'Setting up your account';
+
+  @override
+  String get v2bBack => 'Back';
+
+  @override
+  String get v2aVerifyMoreTitle => 'Verify to read more';
+
+  @override
+  String get v2aVerifyMoreBody =>
+      'Verified members can read full intros and see every photo. It takes about 2 minutes.';
+
+  @override
+  String get v2aVerifyMoreCta => 'Verify now';
+
+  @override
+  String get v2aDiscoverLoading => 'Finding people for you';
+
+  @override
+  String get v2aEditFilters => 'Edit my filters';
+
+  @override
+  String get v2aLimitAction => 'See my interests';
+
+  @override
+  String get v2aCoachTitle => 'How Discover works';
+
+  @override
+  String get v2aCoachBody =>
+      'Tap the heart to send an interest, or the cross to pass. Tap a card for the full profile.';
+
+  @override
+  String get v2aGotIt => 'Got it';
+
+  @override
+  String get v2aCheckAgain => 'Check again';
+
+  @override
+  String get v2aProfileWhyTitle => 'Why we matched you';
+
+  @override
+  String get v2aProfileFactsTitle => 'Good to know';
+
+  @override
+  String get v2aToday => 'Today';
+
+  @override
+  String get v2aYesterday => 'Yesterday';
+
+  @override
+  String get v2aMatchTitle => 'It\'s a match!';
+
+  @override
+  String v2aMatchBody(String name) {
+    return 'You and $name both like each other. Say hello when you are ready.';
+  }
+
+  @override
+  String get v2aMatchSayHello => 'Say hello';
+
+  @override
+  String get v2aMatchLater => 'Maybe later';
+
+  @override
+  String get v2aInterestsEmptyAction => 'Browse people';
+
+  @override
+  String get v2aMatchesEmptyAction => 'Find people to meet';
+
+  @override
+  String get v2aInterestReadReply => 'Read and reply';
+
+  @override
+  String v2aInterestWrote(String name) {
+    return '$name sent you an interest';
+  }
+
+  @override
+  String v2aMatchedOn(String date) {
+    return 'Matched $date';
+  }
+
+  @override
+  String get v2aYouSent => 'You: ';
+
+  @override
+  String get v2bVerifySheetTitleInterest => 'Verify to send your interest';
+
+  @override
+  String get v2bVerifySheetTitleRead => 'Verify to read the full profile';
+
+  @override
+  String get v2bVerifySheetTitleProfile => 'Verify to be seen by others';
+
+  @override
+  String get v2bVerifySheetTitleGeneric => 'Verify your identity';
+
+  @override
+  String get v2bVerifyWhyInterest =>
+      'People who contact others are verified, to keep everyone safe. It takes about 2 minutes.';
+
+  @override
+  String get v2bVerifyWhyRead =>
+      'Full profiles are for verified members. It stops strangers copying people\'s profiles. It takes about 2 minutes.';
+
+  @override
+  String get v2bVerifyWhyProfile =>
+      'Everyone you meet here is verified, and so is everyone who sees you. It takes about 2 minutes.';
+
+  @override
+  String get v2bVerifyWhyGeneric =>
+      'Verified members keep this a safe place for marriage. It takes about 2 minutes.';
+
+  @override
+  String get v2bVerifyPoint1 =>
+      'Have your ID ready: National ID, passport or driving permit.';
+
+  @override
+  String get v2bVerifyPoint2 =>
+      'Our verification partner checks it. Your ID is never shown to any member.';
+
+  @override
+  String get v2bVerifyPoint3 => 'You can keep browsing while we check.';
+
+  @override
+  String get v2bNotNow => 'Not now';
+
+  @override
+  String get v2bKeepBrowsing => 'Keep browsing';
+
+  @override
+  String get v2bVerifyPendingTitle => 'We\'re checking your ID';
+
+  @override
+  String get v2bVerifyPendingBody =>
+      'You can keep browsing. We\'ll tell you when it\'s done. It usually takes a few minutes.';
+
+  @override
+  String get v2bVerifySeeStatus => 'See status';
+
+  @override
+  String get v2bVerifyDoneTitle => 'You\'re verified';
+
+  @override
+  String get v2bVerifyDoneBody => 'You can go ahead now.';
+
+  @override
+  String get v2bContinue => 'Continue';
+
+  @override
+  String get v2bVStepId => 'ID type';
+
+  @override
+  String get v2bVStepScan => 'Scan ID';
+
+  @override
+  String get v2bVStepSelfie => 'Selfie';
+
+  @override
+  String get v2bVStepResult => 'Result';
+
+  @override
+  String v2bVStepSemantics(int n, int total, String name) {
+    return 'Step $n of $total: $name';
+  }
+
+  @override
+  String get v2bVerifyTimeNote => 'About 2 minutes';
+
+  @override
+  String get v2bCapturePrepHeading => 'What happens next';
+
+  @override
+  String get v2bCapturePrep1 => 'Scan the front of your ID.';
+
+  @override
+  String get v2bCapturePrep2 => 'Take a short selfie video.';
+
+  @override
+  String get v2bCapturePrep3 => 'We tell you the result here.';
+
+  @override
+  String get v2bTipsHeading => 'Tips for the next try';
+
+  @override
+  String get v2bTipFlat => 'Put the ID flat on a plain, dark surface.';
+
+  @override
+  String get v2bTipGlare =>
+      'Avoid glare and shadows. Daylight near a window works well.';
+
+  @override
+  String get v2bTipFrame =>
+      'Fill the frame and wait until the text looks sharp.';
+
+  @override
+  String get v2bTipGlasses => 'Take off glasses and hats.';
+
+  @override
+  String get v2bTipFace => 'Face the camera straight on, in good light.';
+
+  @override
+  String get v2bTipSteady => 'Hold the phone steady at eye level.';
+
+  @override
+  String get v2bTipSlow => 'Follow the moves on screen slowly.';
+
+  @override
+  String get v2bTipValid =>
+      'Use an ID that is still valid, or choose a different ID type.';
+
+  @override
+  String get v2bTipDifferentId =>
+      'If it keeps failing, try a different ID type.';
+
+  @override
+  String get v2bBannerVerifyTitle => 'Verify to send interests';
+
+  @override
+  String get v2bBannerVerifyBody =>
+      'About 2 minutes. Your ID is never shown to anyone.';
+
+  @override
+  String get v2bBannerVerifyAction => 'Verify now';
+
+  @override
+  String get v2bBannerPendingTitle => 'We\'re checking your ID';
+
+  @override
+  String get v2bBannerPendingBody =>
+      'You can keep browsing. We\'ll tell you the result.';
+
+  @override
+  String get v2bBannerPendingAction => 'See status';
+
+  @override
+  String get v2bBannerFailedTitle => 'We couldn\'t verify you yet';
+
+  @override
+  String get v2bBannerFailedBody => 'See what to try next.';
+
+  @override
+  String get v2bBannerFailedAction => 'See what to do';
+
+  @override
+  String get v2bConsentsAcceptContinue => 'Accept and continue';
+
+  @override
+  String get v2bVerifyResume =>
+      'You started verifying earlier. Pick up where you left off.';
+
+  @override
+  String get v2bMakeTitle => 'Make your profile';
+
+  @override
+  String get v2bMakeTime => 'About 3 minutes';
+
+  @override
+  String get v2bCompleteLater => 'Complete later';
+
+  @override
+  String get v2bMakeStepPhoto => 'Add a photo';
+
+  @override
+  String get v2bMakeStepPhotoSub =>
+      'A clear photo of your face gets many more replies.';
+
+  @override
+  String get v2bMakeStepLooking => 'Where you live and what you want';
+
+  @override
+  String get v2bMakeStepLookingSub => 'This helps us show you people who fit.';
+
+  @override
+  String get v2bMakeStepIntro => 'A few words about you';
+
+  @override
+  String get v2bMakeStepIntroSub =>
+      'Other members read this when you send them an interest.';
+
+  @override
+  String get v2bMakeStepQuestions => 'Eight quick questions';
+
+  @override
+  String get v2bMakeStepQuestionsSub =>
+      'Tap an answer. You can change them later.';
+
+  @override
+  String get v2bMakeStepReady => 'You\'re nearly there';
+
+  @override
+  String get v2bPhotoEmpty => 'Add a clear photo of your face';
+
+  @override
+  String get v2bPhotoTake => 'Take a photo';
+
+  @override
+  String get v2bPhotoPick => 'Choose from gallery';
+
+  @override
+  String get v2bPhotoTip1 => 'Show your face clearly, on your own.';
+
+  @override
+  String get v2bPhotoTip2 => 'Use good light and no sunglasses.';
+
+  @override
+  String get v2bPhotoTip3 => 'Every photo is checked before others see it.';
+
+  @override
+  String get v2bPhotoChecking =>
+      'We\'re checking your photo. You can carry on.';
+
+  @override
+  String get v2bPhotoApproved => 'Photo approved';
+
+  @override
+  String get v2bPhotoRejected =>
+      'We couldn\'t use this photo. Please try another.';
+
+  @override
+  String get v2bPhotoUploading => 'Uploading your photo...';
+
+  @override
+  String get v2bPhotoChange => 'Use a different photo';
+
+  @override
+  String get v2bVisibilityTitle => 'Who can see your photos?';
+
+  @override
+  String get v2bVisibilityEveryone => 'Everyone on Marriage Connect';
+
+  @override
+  String get v2bVisibilityEveryoneHint =>
+      'Members who are browsing can see your photos.';
+
+  @override
+  String get v2bVisibilityVerified => 'Verified members only';
+
+  @override
+  String get v2bVisibilityVerifiedHint =>
+      'Only members who have verified their ID can see your photos.';
+
+  @override
+  String get v2bVisibilityChange =>
+      'You can change this any time in your profile.';
+
+  @override
+  String get v2bDistrictChoose => 'Choose your district';
+
+  @override
+  String get v2bDistrictSearch => 'Search districts';
+
+  @override
+  String get v2bDistrictNoMatch => 'No district matches that.';
+
+  @override
+  String get v2bLookingLabel => 'What are you looking for?';
+
+  @override
+  String get v2bIntroHelp =>
+      'Write a few lines about yourself. Be warm and honest.';
+
+  @override
+  String get v2bIntroChipsLabel => 'Tap to start a sentence';
+
+  @override
+  String get v2bIntroChip1 => 'I work as';
+
+  @override
+  String get v2bIntroChip2 => 'In my free time I like to';
+
+  @override
+  String get v2bIntroChip3 => 'My family is';
+
+  @override
+  String get v2bIntroChip4 => 'I\'m looking for someone who';
+
+  @override
+  String get v2bIntroChip5 => 'In a marriage I value';
+
+  @override
+  String get v2bIntroExampleLabel => 'Example';
+
+  @override
+  String get v2bIntroExample =>
+      'I\'m Grace, a nurse in Kampala. I enjoy cooking, music and long Sunday walks. My family is very close and I\'m a calm, hardworking person. I\'m looking for a kind, faithful man who wants a peaceful home and children one day.';
+
+  @override
+  String v2bIntroCount(int count, int min) {
+    return '$count of $min characters to start';
+  }
+
+  @override
+  String get v2bIntroEnough =>
+      'That\'s enough to continue. Add more if you like.';
+
+  @override
+  String get v2bIntroSubmitted =>
+      'Thank you. A team checks every intro. You can carry on.';
+
+  @override
+  String v2bQuestionOf(int n, int total) {
+    return 'Question $n of $total';
+  }
+
+  @override
+  String get v2bQuestionMultiHint => 'Choose all that apply, then tap Next.';
+
+  @override
+  String get v2bNext => 'Next';
+
+  @override
+  String v2bQuestionsSaveFailed(int count) {
+    return 'We couldn\'t save $count of your answers. Check your connection and try again.';
+  }
+
+  @override
+  String get v2bQuestionsLoadFailed => 'We couldn\'t load the questions.';
+
+  @override
+  String get v2bReadyTitle => 'Your profile is ready';
+
+  @override
+  String get v2bReadyBody => 'This is what other members will see.';
+
+  @override
+  String get v2bReadyVerifyTitle => 'One last step: verify to go live';
+
+  @override
+  String get v2bReadyVerifyBody =>
+      'Only verified members can be seen and send interests. It takes about 2 minutes.';
+
+  @override
+  String get v2bReadyVerifyCta => 'Verify to go live';
+
+  @override
+  String get v2bReadyPending =>
+      'Your photo or intro is still being checked. You can go live as soon as they are approved.';
+
+  @override
+  String get v2bLiveTitle => 'You\'re live!';
+
+  @override
+  String get v2bLiveBody =>
+      'Members can now see your profile. Add the extras in your profile whenever you like. Nothing else is needed.';
+
+  @override
+  String get v2bLiveCta => 'Start browsing';
+
+  @override
+  String get v2bNextPhotoTitle => 'Add your photo';
+
+  @override
+  String get v2bNextPhotoBody =>
+      'Profiles with a clear photo get far more replies. It takes a minute.';
+
+  @override
+  String get v2bNextLookingTitle => 'Say where you live';
+
+  @override
+  String get v2bNextLookingBody =>
+      'Tell us your district and what you are looking for.';
+
+  @override
+  String get v2bNextIntroTitle => 'Write a few words about you';
+
+  @override
+  String get v2bNextIntroBody =>
+      'Other members read this when you send them an interest.';
+
+  @override
+  String v2bNextQuestionsTitle(int count) {
+    return 'Answer $count quick questions';
+  }
+
+  @override
+  String get v2bNextQuestionsBody => 'They help us show you people who fit.';
+
+  @override
+  String get v2bNextVerifyTitle => 'Verify to go live';
+
+  @override
+  String get v2bNextVerifyBody =>
+      'It takes about 2 minutes. Your ID is never shown to anyone.';
+
+  @override
+  String get v2bNextGoLiveTitle => 'Go live';
+
+  @override
+  String get v2bNextGoLiveBody => 'Your profile is ready. Let members see it.';
+
+  @override
+  String get v2bNextMorePhotosTitle => 'Add more photos';
+
+  @override
+  String get v2bNextMorePhotosBody =>
+      'Two or three photos help people get to know you.';
+
+  @override
+  String get v2bNextMoreQuestionsTitle => 'Answer more questions';
+
+  @override
+  String get v2bNextMoreQuestionsBody =>
+      'Each answer improves who we show you. Skip any you like.';
+
+  @override
+  String get v2bNextDetailsTitle => 'Add a few more details';
+
+  @override
+  String get v2bNextDetailsBody =>
+      'Work, education and languages. All optional.';
+
+  @override
+  String get v2bNextDoneTitle => 'Your profile is complete';
+
+  @override
+  String get v2bNextDoneBody => 'Nothing left to add. Nice work.';
+
+  @override
+  String get v2bVisibilityCardTitle => 'Who can see your photos';
+
+  @override
+  String get v2bVisibilityEveryoneShort => 'Everyone';
+
+  @override
+  String get v2bVisibilityVerifiedShort => 'Verified only';
+
+  @override
+  String v2bVisibilitySaved(String who) {
+    return 'Saved. Your photos are visible to $who.';
+  }
+
+  @override
+  String get v2bVisibilityWhoEveryone => 'everyone';
+
+  @override
+  String get v2bVisibilityWhoVerified => 'verified members only';
+
+  @override
+  String get v2bEditTitle => 'Edit your profile';
+
+  @override
+  String get v2bEditIntro =>
+      'Change anything, any time. Your profile keeps working while you edit.';
+
+  @override
+  String get v2bEditPhotos => 'Photos';
+
+  @override
+  String v2bEditPhotosHint(int count, int max) {
+    return '$count of $max added';
+  }
+
+  @override
+  String get v2bEditIntroItem => 'Your intro';
+
+  @override
+  String get v2bEditIntroHint => 'What others read when you send an interest';
+
+  @override
+  String get v2bEditLooking => 'Where you live and what you want';
+
+  @override
+  String get v2bEditLookingHint =>
+      'District, intention and who you\'d like to meet';
+
+  @override
+  String get v2bEditQuestions => 'Questions';
+
+  @override
+  String v2bEditQuestionsHint(int count, int total) {
+    return '$count of $total answered';
+  }
+
+  @override
+  String get v2bEditDetails => 'More about you';
+
+  @override
+  String get v2bEditDetailsHint => 'Work, education, languages. All optional';
+
+  @override
+  String get v2bEditBasics => 'Name and marital status';
+
+  @override
+  String get v2bEditBasicsHint => 'Your first name as members see it';
+
+  @override
+  String get v2bEditPreview => 'See how others see you';
+
+  @override
+  String get v2bEditPreviewHint => 'Preview and go live';
+
+  @override
+  String get v2bEditDone => 'Done';
+
+  @override
+  String get v2bEditSaved => 'Saved';
 }

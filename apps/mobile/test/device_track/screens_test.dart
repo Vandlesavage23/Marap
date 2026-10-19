@@ -12,7 +12,7 @@ import 'package:marriage_connect/src/features/discovery/application/discovery_co
 import 'package:marriage_connect/src/features/discovery/application/media_prefs.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/discovery_screen.dart';
 import 'package:marriage_connect/src/features/discovery/presentation/next_card_preloader.dart';
-import 'package:marriage_connect/src/features/home/home_screen.dart';
+import 'package:marriage_connect/src/features/shell/presentation/profile_tab_screen.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 import 'package:marriage_connect/src/features/notifications/application/push_controller.dart';
 import 'package:marriage_connect/src/features/notifications/domain/push_gateway.dart';
@@ -137,10 +137,10 @@ void main() {
   });
 
   group('Home and routes', () {
-    testWidgets('home has a Notifications entry that opens the inbox',
+    testWidgets('profile tab has a Notifications entry that opens the inbox',
         (t) async {
       await t.pumpWidget(
-        routedApp(const HomeScreen(), path: '/home'),
+        routedApp(const ProfileTabScreen(), path: '/me'),
       );
       await t.pumpAndSettle();
       await t.tap(find.text('Notifications'));

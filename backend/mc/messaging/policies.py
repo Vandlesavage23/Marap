@@ -13,6 +13,7 @@ from mc.common.errors import (
     NotFound,
     PhotoLocked,
     ValidationFailed,
+    VerificationRequired,
 )
 from mc.entitlements import selectors as entitlement_selectors
 from mc.flags import selectors as flag_selectors
@@ -45,7 +46,14 @@ def check_can_send(account: "Account", match: "Match", *, kind: str, body: str |
     other = match_selectors.other_member(match, account.id)
     if safety_selectors.is_blocked_either_way(account.id, other):
         raise NotFound()
-    if not entitlement_selectors.has_capability(account, "send_message"):
+    # v2: chatting inside a match is free (FREE_CHAT_IN_MATCH); the capability only fails for an unverified
+    # account, or for everyone without a trial/membership when the product owner turns free chat off.
+    summary = entitlement_selectors.entitlement_summary(account)
+    if not summary.capabilities["send_message"]:
+        if not summary.verified:
+            raise VerificationRequired(
+                "Verify your identity to send messages.", capability="send_message"
+            )
         raise EntitlementRequired(
             "Sending messages needs an active trial or membership.", capability="send_message"
         )

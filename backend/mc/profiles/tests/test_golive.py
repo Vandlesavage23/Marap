@@ -156,7 +156,6 @@ def test_go_live_lists_everything_missing():
         "gender",
         "district",
         "intention",
-        "marriage_timeline",
         "marital_status",
         "photos",
         "description",
@@ -172,16 +171,17 @@ def test_each_rule_blocks_go_live(break_it):
     c, r, acct = verified_client()
     make_ready_member(c, r, acct)
     p = Profile.objects.get()
-    if break_it == "photos":
-        p.photos.first().delete()
+    if break_it == "photos":  # v2: ONE approved photo is enough, so take them all away
+        p.photos.all().delete()
     elif break_it == "pending_photo":
-        Photo.objects.filter(id=p.photos.first().id).update(moderation_status="pending")
+        Photo.objects.filter(profile=p).update(moderation_status="pending")
     elif break_it == "description":
         Profile.objects.filter(id=p.id).update(current_description=None)
     elif break_it == "questionnaire":
         from mc.questionnaire.models import Answer
 
-        Answer.objects.filter(account=acct).first().delete()
+        keep = list(Answer.objects.filter(account=acct).values_list("id", flat=True)[:7])
+        Answer.objects.filter(account=acct).exclude(id__in=keep).delete()  # 7 < GO_LIVE_MIN_CORE_ANSWERS
     else:
         Profile.objects.filter(id=p.id).update(district="")
     resp = go_live(c, r)
@@ -192,8 +192,11 @@ def test_go_live_succeeds_when_everything_holds_and_completeness_reflects_it():
     c, r, acct = verified_client()
     make_ready_member(c, r, acct)
     body = go_live(c, r).json()
-    assert body["status"] == "live" and body["readiness"] == {"ready": True, "missing": []}
-    assert body["completeness"] == 80  # all required items, no optional ones yet
+    assert body["status"] == "live"
+    assert body["readiness"]["ready"] is True and body["readiness"]["missing"] == []
+    assert body["readiness"]["complete_later"] == ["more_photos", "optional_details"]
+    # 60 for the go-live items + all 25 core answers (15) + one extra photo (2) + the timeline (1)
+    assert body["completeness"] == 78
     body = patch(
         c,
         r,
@@ -204,7 +207,8 @@ def test_go_live_succeeds_when_everything_holds_and_completeness_reflects_it():
         wants_children="yes",
         marriage_form_preference="monogamous_only",
     ).json()
-    assert body["completeness"] == 90
+    assert body["completeness"] == 87
+    assert body["readiness"]["complete_later"] == ["more_photos"]
     assert go_live(c, r).status_code == 200  # idempotent
 
 
@@ -212,8 +216,10 @@ def test_live_profile_goes_offline_when_photos_drop_below_minimum():
     c, r, acct = verified_client()
     make_ready_member(c, r, acct)
     go_live(c, r)
-    photo = Photo.objects.first()
-    assert c.delete(f"/api/v1/me/photos/{photo.id}", **bearer(r)).status_code == 204
+    first, second = list(Photo.objects.order_by("position"))
+    assert c.delete(f"/api/v1/me/photos/{first.id}", **bearer(r)).status_code == 204
+    assert Profile.objects.get().status == "live"  # v2: one approved photo is the minimum
+    assert c.delete(f"/api/v1/me/photos/{second.id}", **bearer(r)).status_code == 204
     assert Profile.objects.get().status == "draft"
 
 
@@ -224,7 +230,7 @@ def test_hide_and_unhide():
     assert c.post("/api/v1/me/profile/hide", **bearer(r)).json()["status"] == "hidden_by_user"
     assert c.post("/api/v1/me/profile/unhide", **bearer(r)).json()["status"] == "live"
     c.post("/api/v1/me/profile/hide", **bearer(r))
-    Photo.objects.first().delete()
+    Photo.objects.all().delete()
     assert c.post("/api/v1/me/profile/unhide", **bearer(r)).json()["status"] == "draft"
 
 

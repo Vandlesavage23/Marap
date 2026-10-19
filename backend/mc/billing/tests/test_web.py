@@ -77,7 +77,7 @@ def test_checkout_creates_pending_purchase_with_server_side_amount():
             "network": "mtn",
         }
     ]
-    assert not ent.has_capability(who[2], "browse")
+    assert not ent.has_capability(who[2], "priority_placement")  # pending payment grants nothing
 
 
 def test_client_cannot_choose_price_and_card_returns_link():

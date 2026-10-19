@@ -465,3 +465,50 @@ def purge_dead_sessions(*, before) -> int:  # type: ignore[no-untyped-def]
         Q(revoked_at__lt=before) | Q(expires_at__lt=before)
     ).delete()
     return deleted
+
+
+# ---------------------------------------------------------------- funnel events (privacy-safe analytics)
+def record_funnel_event(
+    *, name: str, install_id: uuid.UUID | None, account: Account | None, ip: str | None
+) -> None:
+    """Record that an install (or signed-in member) reached funnel step `name`. Stores only the step name, an HMAC of
+    the random install id (or of the account id when the client sent none) and whether the caller was signed in:
+    no account link, IP or device details. Each (actor, step) is kept once (the first time). Rate-limited per IP
+    and per actor."""
+    from .constants import FUNNEL_STEPS
+    from .models import FunnelEvent
+
+    if name not in FUNNEL_STEPS:
+        raise ValidationFailed("Unknown step.", allowed=list(FUNNEL_STEPS))
+    if install_id is None and account is None:
+        raise ValidationFailed("Send an install_id (a random id your app generated).")
+    subject = f"install|{install_id}" if install_id is not None else f"account|{account.id}"  # type: ignore[union-attr]
+    actor = hmac_value(f"funnel|{subject}", purpose="account")
+    if ip:
+        ratelimit.hit(
+            f"funnel:ip:{hmac_value(ip, purpose='ip').hex()[:32]}",
+            limit=settings.FUNNEL_EVENTS_PER_IP_PER_HOUR,
+            window_seconds=HOUR,
+        )
+    ratelimit.hit(
+        f"funnel:actor:{actor.hex()[:32]}",
+        limit=settings.FUNNEL_EVENTS_PER_ACTOR_PER_HOUR,
+        window_seconds=HOUR,
+    )
+    FunnelEvent.objects.bulk_create(
+        [FunnelEvent(name=name, actor_hmac=actor, authenticated=account is not None)],
+        ignore_conflicts=True,  # one row per (actor, step): repeats are accepted and dropped
+    )
+
+
+def purge_funnel_events(*, before) -> int:  # type: ignore[no-untyped-def]
+    """Retention: funnel rows older than `before` (400 days). The only code allowed to delete them."""
+    from django.db import connection
+
+    from .models import FunnelEvent
+
+    with transaction.atomic():
+        with connection.cursor() as cur:
+            cur.execute("SET LOCAL mc.purge_funnel_events = 'on'")
+        deleted, _ = FunnelEvent.objects.filter(created_at__lt=before).delete()
+    return deleted

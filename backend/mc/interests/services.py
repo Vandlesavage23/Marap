@@ -15,12 +15,14 @@ from mc.common.errors import (
     DescriptionRejected,
     Duplicate,
     EntitlementRequired,
+    InterestQuotaReached,
     LimitReached,
     NotEligible,
     NotFound,
     ProfileIncomplete,
+    VerificationRequired,
 )
-from mc.common.timeutil import start_of_kampala_day
+from mc.common.timeutil import iso_z, start_of_kampala_day
 from mc.discovery import services as discovery_services
 from mc.entitlements import selectors as entitlement_selectors
 from mc.matches import selectors as match_selectors
@@ -28,6 +30,7 @@ from mc.matches import services as match_services
 from mc.profiles import selectors as profile_selectors
 from mc.safety import selectors as safety_selectors
 
+from . import selectors
 from .events import InterestSent
 from .models import Interest, InterestSnapshot
 
@@ -44,8 +47,24 @@ def _pair_lock(a: uuid.UUID, b: uuid.UUID) -> None:
         )
 
 
+def _sender_lock(sender_id: uuid.UUID) -> None:
+    """Serialise one sender's sends across DIFFERENT recipients, so the rolling quota and the daily cap are counted
+    and spent atomically (the pair lock alone lets two parallel sends to two people both see "one left").
+    Always taken AFTER the pair lock, so lock order is fixed and cannot deadlock."""
+    with connection.cursor() as cur:
+        cur.execute(
+            "SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", [f"interest-sender:{sender_id}"]
+        )
+
+
 def _require(account: "Account", capability: str, now: datetime) -> None:
     if not entitlement_selectors.has_capability(account, capability, now):
+        summary = entitlement_selectors.entitlement_summary(account, now)
+        if not summary.verified:
+            raise VerificationRequired(
+                "Verify your identity to do this. It keeps everyone safe and takes about 2 minutes.",
+                capability=capability,
+            )
         raise EntitlementRequired(
             "This needs an active trial or membership.", capability=capability
         )
@@ -58,6 +77,23 @@ def _daily_limit(account: "Account", now: datetime) -> int:
         if state == "member"
         else settings.INTEREST_DAILY_LIMIT_TRIAL
     )
+
+
+def _quota_remaining(sender: "Account", now: datetime) -> int | None:
+    """Free and expired accounts: raise `interest_quota_reached` when the rolling weekly quota is used up, else the
+    slots left after this send. Trial/member accounts have no weekly quota (None). Call under the sender lock."""
+    summary = entitlement_selectors.entitlement_summary(sender, now)
+    if entitlement_selectors.is_unlimited_interest_sender(summary.state):
+        return None
+    allowance = selectors.allowance(sender.id, state=summary.state, now=now)
+    if allowance.exhausted:
+        raise InterestQuotaReached(
+            "You've used your free introductions for now.",
+            resets_at=iso_z(allowance.resets_at) if allowance.resets_at else None,
+            limit=allowance.limit,
+            can_start_trial=summary.trial_available,
+        )
+    return allowance.limit - allowance.used - 1
 
 
 def send_interest(
@@ -79,6 +115,7 @@ def send_interest(
 
     with transaction.atomic():
         _pair_lock(sender.id, recipient_account_id)
+        _sender_lock(sender.id)
         replay = Interest.objects.filter(sender=sender, idempotency_key=idempotency_key).first()
         if replay is not None:  # lost a race with our own retry
             return _result(replay, created=False, sender=sender, now=now)
@@ -123,6 +160,7 @@ def send_interest(
                 "interest": reverse,
                 "match_id": match.id,
                 "remaining_today": None,
+                "remaining_quota": None,
             }
 
         existing = Interest.objects.filter(
@@ -154,6 +192,10 @@ def send_interest(
             raise NotEligible(
                 "You can't send an interest to this profile right now."
             )  # never reveals "passed"
+
+        # Last gate before the row is created: every NotEligible/Duplicate answer above is independent of the
+        # quota, so being out of free interests never reveals anything about the recipient.
+        quota_left = _quota_remaining(sender, now)
 
         snapshot = InterestSnapshot.objects.create(
             description=description, text=description.text, display_name=sender_profile.display_name
@@ -190,6 +232,7 @@ def send_interest(
         "interest": interest,
         "match_id": None,
         "remaining_today": max(limit - sent_today - 1, 0),
+        "remaining_quota": quota_left,
     }
 
 
@@ -208,7 +251,16 @@ def _result(
         "interest": interest,
         "match_id": match_id,
         "remaining_today": max(_daily_limit(sender, now) - sent_today, 0),
+        "remaining_quota": _quota_left_now(sender, now),
     }
+
+
+def _quota_left_now(sender: "Account", now: datetime) -> int | None:
+    summary = entitlement_selectors.entitlement_summary(sender, now)
+    if entitlement_selectors.is_unlimited_interest_sender(summary.state):
+        return None
+    a = selectors.allowance(sender.id, state=summary.state, now=now)
+    return max(a.limit - a.used, 0)
 
 
 # ----------------------------------------------------------------------------- MC-066

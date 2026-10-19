@@ -4,6 +4,7 @@ enum EntitlementState { none, trial, member, expired }
 
 enum Capability {
   browse('browse'),
+  viewFullProfile('view_full_profile'),
   sendInterest('send_interest'),
   receiveInterest('receive_interest'),
   acceptInterest('accept_interest'),
@@ -21,6 +22,31 @@ enum Capability {
   }
 }
 
+/// A server-counted allowance in a window: `{limit, used, resets_at}`.
+/// The app only displays it; the server enforces it atomically.
+class QuotaWindow {
+  const QuotaWindow({required this.limit, required this.used, this.resetsAt});
+
+  static QuotaWindow? tryParse(Object? raw) {
+    if (raw is! Map<String, dynamic>) return null;
+    final limit = raw['limit'];
+    if (limit is! num) return null;
+    final used = raw['used'];
+    return QuotaWindow(
+      limit: limit.toInt(),
+      used: used is num ? used.toInt() : 0,
+      resetsAt: DateTime.tryParse('${raw['resets_at'] ?? ''}'),
+    );
+  }
+
+  final int limit;
+  final int used;
+  final DateTime? resetsAt;
+
+  int get left => (limit - used).clamp(0, limit);
+  bool get exhausted => used >= limit;
+}
+
 class Entitlements {
   const Entitlements({
     required this.state,
@@ -30,6 +56,10 @@ class Entitlements {
     this.membershipEndsAt,
     this.membershipSource,
     this.serverTime,
+    this.interests,
+    this.browse,
+    this.trialAvailableFromServer,
+    this.verificationStatus,
   });
 
   factory Entitlements.fromJson(Map<String, dynamic> j) {
@@ -58,7 +88,20 @@ class Entitlements {
           for (final e in caps.entries) e.key: e.value == true,
       },
       serverTime: DateTime.tryParse('${j['server_time'] ?? ''}'),
+      interests: QuotaWindow.tryParse(j['interests']),
+      browse: QuotaWindow.tryParse(j['browse']),
+      trialAvailableFromServer:
+          trial is Map<String, dynamic> && trial['available'] is bool
+              ? trial['available'] as bool
+              : null,
+      verificationStatus: _verificationStatus(j['verification']),
     );
+  }
+
+  static String? _verificationStatus(Object? raw) {
+    if (raw is Map<String, dynamic>) return raw['status'] as String?;
+    if (raw is String) return raw;
+    return null;
   }
 
   final EntitlementState state;
@@ -71,15 +114,44 @@ class Entitlements {
   final Map<String, bool> capabilities;
   final DateTime? serverTime;
 
+  /// Free interests (rolling window) or the member's daily allowance.
+  final QuotaWindow? interests;
+
+  /// Daily cards the viewer may browse.
+  final QuotaWindow? browse;
+
+  /// `trial.available` as the server computed it (null from an older server).
+  final bool? trialAvailableFromServer;
+
+  /// `verification.status` (`not_started`, `submitted`, `passed`, ...).
+  final String? verificationStatus;
+
   bool can(Capability c) => capabilities[c.wire] ?? false;
 
-  /// Every capability is off, which the server only does for accounts that
-  /// aren't verified yet.
-  bool get looksUnverified => !capabilities.values.any((v) => v);
+  /// The account has not passed identity verification. v2 servers say so in
+  /// `verification.status`; before that, `view_full_profile` is the marker;
+  /// the oldest servers turned every capability off.
+  bool get looksUnverified {
+    final v = verificationStatus;
+    if (v != null) return v != 'passed';
+    if (capabilities.containsKey(Capability.viewFullProfile.wire)) {
+      return !can(Capability.viewFullProfile);
+    }
+    return !capabilities.values.any((x) => x);
+  }
 
-  /// The trial can be offered: never used, and the account can use it.
+  /// The trial can be offered: the server says so, or (older server) it was
+  /// never used and the account can use it.
   bool get trialAvailable =>
-      !trialUsed && state == EntitlementState.none && !looksUnverified;
+      trialAvailableFromServer ??
+      (!trialUsed && state == EntitlementState.none && !looksUnverified);
+
+  /// Verified accounts without a trial or membership run on the free quota.
+  bool get onFreeQuota =>
+      state == EntitlementState.none || state == EntitlementState.expired;
+
+  /// The interest allowance is used up (the next send would be refused).
+  bool get interestsExhausted => interests?.exhausted ?? false;
 
   /// Store subscriptions are managed in the store; other sources are not.
   bool get isStoreSubscription =>

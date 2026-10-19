@@ -1,124 +1,406 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
+import 'package:marriage_connect/src/core/clock.dart';
+import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
+import 'package:marriage_connect/src/features/onboarding/application/about_you_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
-import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
+import 'package:marriage_connect/src/features/onboarding/data/phone_format.dart';
+import 'package:marriage_connect/src/features/onboarding/data/sms_autofill.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/consents_panel.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/onb_widgets.dart';
 
-class _Page extends StatelessWidget {
-  const _Page({
-    required this.title,
-    required this.children,
-    this.actions = const [],
-  });
-  final String title;
-  final List<Widget> children;
-  final List<Widget> actions;
+// ---------------------------------------------------------------------------
+// 0. Welcome
+// ---------------------------------------------------------------------------
+
+/// Warm first screen. No account, no permission prompt, no payment. Two equal
+/// ways in: start now, or look around with clearly labelled samples first.
+class WelcomeScreen extends ConsumerStatefulWidget {
+  const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: Text(title), actions: actions),
-        body: SafeArea(
-          child: ListView(
-            padding: EdgeInsets.all(context.mc.space.lg),
-            children: children,
-          ),
-        ),
-      );
+  ConsumerState<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({super.key});
+class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    ref.read(analyticsProvider).track(AnalyticsEvent.welcomeSeen, once: true);
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(context.mc.space.lg),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l.welcomeTitle,
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 12),
-              Text(l.welcomeBody),
-              const SizedBox(height: 24),
-              McButton(
-                label: l.continueLabel,
-                onPressed: () => context.go('/onboarding/how'),
-              ),
-            ],
+    final mc = context.mc;
+    final size = MediaQuery.sizeOf(context);
+    final compact = size.height < 700 || isLargeText(context);
+    final heroHeight = (size.height * (compact ? 0.27 : 0.36)).clamp(170, 320);
+    final actions = SafeArea(
+      top: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          McButton(
+            label: l.v2bGetStarted,
+            onPressed: () => context.go('/onboarding/phone'),
           ),
+          SizedBox(height: mc.space.xs),
+          McButton(
+            label: l.v2bLookAround,
+            kind: McButtonKind.secondary,
+            onPressed: () => context.go('/onboarding/look-around'),
+          ),
+        ],
+      ),
+    );
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(mc.radii.lg + 8),
+                      ),
+                      child: HeroIllustration(height: heroHeight.toDouble()),
+                    ),
+                    SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: EdgeInsets.all(mc.space.md),
+                        child: BrandMark(
+                          size: 36,
+                          showWordmark: !isLargeText(context),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    mc.space.lg,
+                    mc.space.lg,
+                    mc.space.lg,
+                    mc.space.md,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Semantics(
+                        header: true,
+                        child: Text(
+                          l.v2bWelcomeTitle,
+                          style: compact ? mc.text.headline : mc.text.display,
+                        ),
+                      ),
+                      SizedBox(height: mc.space.xs),
+                      Text(
+                        l.v2bWelcomeSub,
+                        style: mc.text.body.copyWith(
+                          color: mc.colors.onSurfaceMuted,
+                        ),
+                      ),
+                      SizedBox(height: mc.space.lg),
+                      _ValueRow(
+                        icon: Icons.favorite_border,
+                        title: l.v2bValueSeriousTitle,
+                        body: l.v2bValueSeriousBody,
+                      ),
+                      _ValueRow(
+                        icon: Icons.verified_outlined,
+                        title: l.v2bValueVerifiedTitle,
+                        body: l.v2bValueVerifiedBody,
+                      ),
+                      _ValueRow(
+                        icon: Icons.lock_outline,
+                        title: l.v2bValuePrivacyTitle,
+                        body: l.v2bValuePrivacyBody,
+                      ),
+                      Text(
+                        l.v2bWelcomeLegal,
+                        style: mc.text.caption.copyWith(
+                          color: mc.colors.onSurfaceMuted,
+                        ),
+                      ),
+                      if (isLargeText(context)) ...[
+                        SizedBox(height: mc.space.md),
+                        actions,
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (!isLargeText(context)) OnbBottomBar(child: actions),
+        ],
+      ),
+    );
+  }
+}
+
+class _ValueRow extends StatelessWidget {
+  const _ValueRow({
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    return Padding(
+      padding: EdgeInsets.only(bottom: mc.space.md),
+      child: Semantics(
+        container: true,
+        label: '$title. $body',
+        excludeSemantics: true,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            IconDisc(icon: icon),
+            SizedBox(width: mc.space.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: mc.text.subtitle),
+                  Text(
+                    body,
+                    style: mc.text.bodySmall.copyWith(
+                      color: mc.colors.onSurfaceMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class HowItWorksScreen extends StatelessWidget {
-  const HowItWorksScreen({super.key});
+// ---------------------------------------------------------------------------
+// 1. Look around (samples only: never real member data)
+// ---------------------------------------------------------------------------
+
+class _Sample {
+  const _Sample(this.seed, {required this.woman});
+  final String seed;
+  final bool woman;
+}
+
+const _samples = <_Sample>[
+  _Sample('sample-amara', woman: true),
+  _Sample('sample-joel', woman: false),
+  _Sample('sample-esther', woman: true),
+  _Sample('sample-ronald', woman: false),
+  _Sample('sample-harriet', woman: true),
+  _Sample('sample-samuel', woman: false),
+];
+
+/// Six illustrated sample profiles that show what a card, the "why we matched
+/// you" line and the verified badge look like. Everything here is invented
+/// and labelled as a sample; real members are never shown to visitors.
+class LookAroundScreen extends StatelessWidget {
+  const LookAroundScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return _Page(
-      title: l.howTitle,
-      children: [
-        for (final (i, s) in [l.howStep1, l.howStep2, l.howStep3].indexed)
-          ListTile(
-            leading: CircleAvatar(child: Text('${i + 1}')),
-            title: Text(s),
-          ),
-        const SizedBox(height: 16),
-        McButton(
-          label: l.continueLabel,
+    final mc = context.mc;
+    final texts = <(String, String, String)>[
+      (l.v2bSample1Name, l.v2bSample1Facts, l.v2bSample1Why),
+      (l.v2bSample2Name, l.v2bSample2Facts, l.v2bSample2Why),
+      (l.v2bSample3Name, l.v2bSample3Facts, l.v2bSample3Why),
+      (l.v2bSample4Name, l.v2bSample4Facts, l.v2bSample4Why),
+      (l.v2bSample5Name, l.v2bSample5Facts, l.v2bSample5Why),
+      (l.v2bSample6Name, l.v2bSample6Facts, l.v2bSample6Why),
+    ];
+    return OnbScaffold(
+      title: l.v2bLookTitle,
+      onBack: () => context.go('/onboarding'),
+      bottom: SafeArea(
+        top: false,
+        child: McButton(
+          label: l.v2bGetStarted,
           onPressed: () => context.go('/onboarding/phone'),
+        ),
+      ),
+      children: [
+        Semantics(
+          container: true,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: mc.colors.accentContainer,
+              borderRadius: BorderRadius.circular(mc.radii.md),
+            ),
+            child: Padding(
+              padding: EdgeInsets.all(mc.space.md),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: mc.colors.onAccentContainer,
+                  ),
+                  SizedBox(width: mc.space.sm),
+                  Expanded(
+                    child: Text(
+                      l.v2bLookBanner,
+                      style: mc.text.subtitle.copyWith(
+                        color: mc.colors.onAccentContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height: mc.space.md),
+        for (final (i, s) in _samples.indexed) ...[
+          _SampleCard(
+            sample: s,
+            name: texts[i].$1,
+            facts: texts[i].$2,
+            why: texts[i].$3,
+          ),
+          SizedBox(height: mc.space.sm),
+        ],
+        Text(
+          l.v2bLookNote,
+          style: mc.text.bodySmall.copyWith(color: mc.colors.onSurfaceMuted),
         ),
       ],
     );
   }
 }
 
-class _ErrorText extends StatelessWidget {
-  const _ErrorText(this.state, {this.validation});
-  final OnboardingState state;
+class _SampleCard extends StatelessWidget {
+  const _SampleCard({
+    required this.sample,
+    required this.name,
+    required this.facts,
+    required this.why,
+  });
 
-  /// What `validation_error` means on this screen (the server answers every
-  /// bad code with the same generic validation error).
-  final String? validation;
+  final _Sample sample;
+  final String name;
+  final String facts;
+  final String why;
 
   @override
   Widget build(BuildContext context) {
-    final f = state.failure;
-    if (f == null) return const SizedBox.shrink();
     final l = AppLocalizations.of(context);
-    final text = switch (f.code) {
-      'validation_error' when state.inviteRejected => l.adoptInviteNeeded,
-      'validation_error' => validation ?? l.errorValidation,
-      _ => failureMessage(l, f),
-    };
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Text(
-        text,
-        style: context.mc.text.bodySmall.copyWith(
-          color: context.mc.colors.error,
-        ),
-        semanticsLabel: text,
+    final mc = context.mc;
+    return McCard(
+      semanticLabel: l.v2bSampleSemantics(name, facts, why),
+      padding: EdgeInsets.all(mc.space.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(mc.radii.md),
+            child: SampleAvatar(
+              seed: sample.seed,
+              size: 84,
+              woman: sample.woman,
+            ),
+          ),
+          SizedBox(width: mc.space.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: mc.text.title),
+                Text(
+                  facts,
+                  style: mc.text.bodySmall.copyWith(
+                    color: mc.colors.onSurfaceMuted,
+                  ),
+                ),
+                SizedBox(height: mc.space.xs),
+                Wrap(
+                  spacing: mc.space.xs,
+                  runSpacing: mc.space.xxs,
+                  children: [
+                    const VerificationBadge(),
+                    StatusChip(label: l.v2bSampleLabel),
+                  ],
+                ),
+                SizedBox(height: mc.space.xs),
+                Container(
+                  padding: EdgeInsets.all(mc.space.xs + 2),
+                  decoration: BoxDecoration(
+                    color: mc.colors.primaryContainer.withValues(alpha: 0.55),
+                    borderRadius: BorderRadius.circular(mc.radii.sm),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 16,
+                        color: mc.colors.onPrimaryContainer,
+                      ),
+                      SizedBox(width: mc.space.xs),
+                      Expanded(
+                        child: Text(
+                          why,
+                          style: mc.text.bodySmall.copyWith(
+                            color: mc.colors.onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+// ---------------------------------------------------------------------------
+// 2. Phone
+// ---------------------------------------------------------------------------
+
+String _friendlyAuthError(
+  AppLocalizations l,
+  OnboardingState s, {
+  required String validation,
+}) {
+  final f = s.failure!;
+  return switch (f.code) {
+    'validation_error' when s.inviteRejected => l.adoptInviteNeeded,
+    'validation_error' => validation,
+    _ => failureMessage(l, f),
+  };
 }
 
 class PhoneScreen extends ConsumerStatefulWidget {
@@ -137,42 +419,139 @@ class _PhoneScreenState extends ConsumerState<PhoneScreen> {
     super.dispose();
   }
 
+  String? get _e164 => ugE164(_ctrl.text);
+
   Future<void> _submit() async {
-    final ok = await ref
-        .read(onboardingProvider.notifier)
-        .submitPhone(_ctrl.text.trim());
+    final phone = _e164;
+    if (phone == null) return;
+    final ok = await ref.read(onboardingProvider.notifier).submitPhone(phone);
     if (ok && mounted) context.go('/onboarding/otp');
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final mc = context.mc;
     final s = ref.watch(onboardingProvider);
-    final valid = _ctrl.text.replaceAll(RegExp(r'\D'), '').length >= 9;
-    return _Page(
-      title: l.phoneTitle,
-      children: [
-        Text(l.phoneBody),
-        const SizedBox(height: 16),
-        McTextField(
-          controller: _ctrl,
-          keyboardType: TextInputType.phone,
-          autofillHints: const [AutofillHints.telephoneNumber],
-          hint: l.phoneHint,
-          label: l.phoneTitle,
-          onChanged: (_) => setState(() {}),
-        ),
-        _ErrorText(s),
-        const SizedBox(height: 16),
-        McButton(
-          label: l.phoneSend,
+    final valid = _e164 != null;
+    return OnbScaffold(
+      onBack: () => context.go('/onboarding'),
+      bottom: SafeArea(
+        top: false,
+        child: McButton(
+          label: l.v2bSendCode,
           loading: s.loading,
           onPressed: valid && !s.loading ? _submit : null,
         ),
+      ),
+      children: [
+        Semantics(
+          header: true,
+          child: Text(l.v2bPhoneTitle, style: mc.text.headline),
+        ),
+        SizedBox(height: mc.space.xs),
+        Text(
+          l.v2bPhoneSub,
+          style: mc.text.body.copyWith(color: mc.colors.onSurfaceMuted),
+        ),
+        SizedBox(height: mc.space.lg),
+        TextField(
+          controller: _ctrl,
+          autofocus: true,
+          keyboardType: TextInputType.phone,
+          textInputAction: TextInputAction.done,
+          autofillHints: const [AutofillHints.telephoneNumberNational],
+          inputFormatters: const [UgPhoneFormatter()],
+          onChanged: (_) {
+            setState(() {});
+            ref.read(onboardingProvider.notifier).clearFailure();
+          },
+          onSubmitted: (_) {
+            if (valid && !s.loading) unawaited(_submit());
+          },
+          style: mc.text.title.copyWith(
+            fontFamily: McFonts.body,
+            fontSize: 26,
+            letterSpacing: 1.2,
+          ),
+          decoration: InputDecoration(
+            labelText: l.v2bPhoneLabel,
+            hintText: l.v2bPhoneHint,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            prefixIcon: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: mc.space.md,
+                end: mc.space.xs,
+              ),
+              child: Semantics(
+                label: l.v2bPhonePrefixSemantics,
+                excludeSemantics: true,
+                child: Center(
+                  widthFactor: 1,
+                  child: Text(
+                    ugCallingCode,
+                    style: mc.text.title.copyWith(
+                      fontFamily: McFonts.body,
+                      fontSize: 26,
+                      color: mc.colors.onSurfaceMuted,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            filled: true,
+            fillColor: mc.colors.surface,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: mc.space.md,
+              vertical: mc.space.md,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(mc.radii.md),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(mc.radii.md),
+              borderSide: BorderSide(color: mc.colors.outline),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(mc.radii.md),
+              borderSide: BorderSide(color: mc.colors.primary, width: 2),
+            ),
+          ),
+        ),
+        SizedBox(height: mc.space.sm),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.lock_outline,
+              size: 18,
+              color: mc.colors.onSurfaceMuted,
+            ),
+            SizedBox(width: mc.space.xs),
+            Expanded(
+              child: Text(
+                l.v2bPhoneReassure,
+                style: mc.text.bodySmall.copyWith(
+                  color: mc.colors.onSurfaceMuted,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (s.failure != null) ...[
+          SizedBox(height: mc.space.md),
+          InlineError(
+            _friendlyAuthError(l, s, validation: l.v2bPhoneInvalid),
+          ),
+        ],
       ],
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// 3. Code
+// ---------------------------------------------------------------------------
 
 class OtpScreen extends ConsumerStatefulWidget {
   const OtpScreen({super.key});
@@ -183,19 +562,44 @@ class OtpScreen extends ConsumerStatefulWidget {
 
 class _OtpScreenState extends ConsumerState<OtpScreen> {
   final _ctrl = TextEditingController();
+  final _focus = FocusNode();
   final _invite = TextEditingController();
   bool _inviteOpen = false;
+  bool _resent = false;
   Timer? _tick;
+  StreamSubscription<String>? _sms;
+  late final SmsAutofill _autofill;
 
   @override
   void initState() {
     super.initState();
-    // Re-draws the "ask for a new code in Ns" countdown once a second.
+    // Re-draws the "send a new code in 0:23" countdown once a second.
     _tick = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted && ref.read(onboardingProvider).resendAvailableAt != null) {
         setState(() {});
       }
     });
+    _autofill = ref.read(smsAutofillProvider);
+    _sms = _autofill.listen().listen(_onSms);
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    unawaited(_sms?.cancel());
+    unawaited(_autofill.stop());
+    _ctrl.dispose();
+    _focus.dispose();
+    _invite.dispose();
+    super.dispose();
+  }
+
+  void _onSms(String code) {
+    final digits = code.replaceAll(RegExp(r'\D'), '');
+    if (digits.length != 6 || !mounted) return;
+    _ctrl.text = digits;
+    setState(() {});
+    unawaited(_verify());
   }
 
   /// Whole seconds until a new code may be requested (0 when allowed now).
@@ -206,40 +610,96 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     return ms <= 0 ? 0 : (ms / 1000).ceil();
   }
 
-  @override
-  void dispose() {
-    _tick?.cancel();
-    _ctrl.dispose();
-    _invite.dispose();
-    super.dispose();
+  Future<void> _verify() async {
+    final ctrl = ref.read(onboardingProvider.notifier);
+    final code = _ctrl.text.trim();
+    if (code.length != 6 || ref.read(onboardingProvider).loading) return;
+    final ok = await ctrl.submitCode(code, inviteCode: _invite.text);
+    if (!mounted) return;
+    if (!ok) {
+      // A failed code never dead-ends: clear it and let them type again.
+      _ctrl.clear();
+      setState(() {});
+      _focus.requestFocus();
+      return;
+    }
+    // Let the router decide on real server state: About you for a new
+    // account, straight into the app for a returning member.
+    await ref.read(meProvider.notifier).reload();
+    if (mounted) context.go('/home');
   }
 
-  Future<void> _verify() async {
-    final ok = await ref
-        .read(onboardingProvider.notifier)
-        .submitCode(_ctrl.text.trim(), inviteCode: _invite.text);
-    if (ok && mounted) context.go('/onboarding/consents');
+  Future<void> _resend() async {
+    final s = ref.read(onboardingProvider);
+    final ok = await ref.read(onboardingProvider.notifier).submitPhone(s.phone);
+    if (ok && mounted) setState(() => _resent = true);
   }
+
+  String _mmss(int seconds) =>
+      '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}';
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final mc = context.mc;
     final s = ref.watch(onboardingProvider);
-    return _Page(
-      title: l.otpTitle,
+    final wait = _remaining(s);
+    final hasError = s.failure != null;
+    return OnbScaffold(
+      onBack: () => context.go('/onboarding/phone'),
       children: [
-        Text(l.otpBody(s.phone)),
-        const SizedBox(height: 16),
-        McTextField(
-          controller: _ctrl,
-          keyboardType: TextInputType.number,
-          maxLength: 6,
-          autofillHints: const [AutofillHints.oneTimeCode],
-          label: l.otpTitle,
-          onChanged: (_) => setState(() {}),
+        Semantics(
+          header: true,
+          child: Text(l.v2bCodeTitle, style: mc.text.headline),
         ),
+        SizedBox(height: mc.space.xs),
+        Text(
+          l.v2bCodeSent(displayUgPhone(s.phone)),
+          style: mc.text.body.copyWith(color: mc.colors.onSurfaceMuted),
+        ),
+        LinkButton(
+          label: l.v2bWrongNumber,
+          onPressed: () => context.go('/onboarding/phone'),
+        ),
+        SizedBox(height: mc.space.sm),
+        _CodeBoxes(
+          controller: _ctrl,
+          focusNode: _focus,
+          error: hasError,
+          enabled: !s.loading,
+          semanticLabel: l.v2bCodeFieldLabel(_ctrl.text.length),
+          onChanged: (v) {
+            ref.read(onboardingProvider.notifier).clearFailure();
+            setState(() {});
+            if (v.length == 6) unawaited(_verify());
+          },
+        ),
+        SizedBox(height: mc.space.md),
+        if (s.loading)
+          Semantics(
+            liveRegion: true,
+            child: Row(
+              children: [
+                const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                SizedBox(width: mc.space.xs),
+                Text(l.v2bCodeChecking, style: mc.text.bodySmall),
+              ],
+            ),
+          )
+        else if (hasError)
+          InlineError(
+            _friendlyAuthError(l, s, validation: l.v2bCodeWrong),
+          )
+        else if (_resent)
+          Semantics(
+            liveRegion: true,
+            child: Text(l.v2bCodeResent, style: mc.text.bodySmall),
+          ),
+        SizedBox(height: mc.space.md),
         if (_inviteOpen || s.inviteRejected) ...[
-          const SizedBox(height: 8),
           McTextField(
             key: const Key('invite-code'),
             controller: _invite,
@@ -249,100 +709,557 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
             maxLength: 20,
             onChanged: (_) => setState(() {}),
           ),
-        ] else
-          McButton(
+          SizedBox(height: mc.space.xs),
+        ],
+        McButton(
+          label: wait > 0 ? l.v2bCodeResendIn(_mmss(wait)) : l.v2bCodeResend,
+          kind: McButtonKind.secondary,
+          onPressed: s.loading || wait > 0 ? null : _resend,
+        ),
+        SizedBox(height: mc.space.xs),
+        Text(
+          l.v2bCodeSlow,
+          style: mc.text.bodySmall.copyWith(color: mc.colors.onSurfaceMuted),
+        ),
+        if (!(_inviteOpen || s.inviteRejected))
+          LinkButton(
             key: const Key('invite-toggle'),
             label: l.adoptInviteToggle,
-            kind: McButtonKind.text,
-            expand: false,
             onPressed: () => setState(() => _inviteOpen = true),
           ),
-        _ErrorText(s, validation: l.otpInvalid),
-        const SizedBox(height: 16),
-        McButton(
-          label: l.otpVerify,
-          loading: s.loading,
-          onPressed: _ctrl.text.length == 6 && !s.loading ? _verify : null,
-        ),
-        Builder(
-          builder: (context) {
-            final wait = _remaining(s);
-            return McButton(
-              label: wait > 0 ? l.otpResendIn(wait) : l.otpResend,
-              onPressed: s.loading || wait > 0
-                  ? null
-                  : () => ref
-                      .read(onboardingProvider.notifier)
-                      .submitPhone(s.phone),
-              kind: McButtonKind.text,
-              expand: false,
-            );
-          },
-        ),
       ],
     );
   }
 }
 
-class ConsentsScreen extends ConsumerStatefulWidget {
-  const ConsentsScreen({super.key});
+/// Six boxes drawn over ONE real text field, so the keyboard's one-time-code
+/// suggestion, paste and screen readers all work like a normal field; the
+/// boxes only show what was typed. The field's own text is invisible.
+class _CodeBoxes extends StatelessWidget {
+  const _CodeBoxes({
+    required this.controller,
+    required this.focusNode,
+    required this.onChanged,
+    required this.semanticLabel,
+    required this.error,
+    required this.enabled,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final ValueChanged<String> onChanged;
+  final String semanticLabel;
+  final bool error;
+  final bool enabled;
 
   @override
-  ConsumerState<ConsentsScreen> createState() => _ConsentsScreenState();
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    final text = controller.text;
+    final scale = MediaQuery.textScalerOf(context).clamp(maxScaleFactor: 1.4);
+    final boxHeight = scale.scale(56).clamp(56.0, 80.0);
+    return SizedBox(
+      height: boxHeight,
+      child: Stack(
+        children: [
+          ExcludeSemantics(
+            child: Row(
+              children: [
+                for (var i = 0; i < 6; i++) ...[
+                  if (i > 0) SizedBox(width: mc.space.xs),
+                  Expanded(
+                    child: AnimatedBuilder(
+                      animation: focusNode,
+                      builder: (context, _) {
+                        final focused =
+                            focusNode.hasFocus && i == text.length.clamp(0, 5);
+                        return Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: mc.colors.surface,
+                            borderRadius:
+                                BorderRadius.circular(mc.radii.sm + 2),
+                            border: Border.all(
+                              color: error
+                                  ? mc.colors.error
+                                  : focused
+                                      ? mc.colors.primary
+                                      : mc.colors.outline,
+                              width: focused || error ? 2 : 1,
+                            ),
+                          ),
+                          child: Text(
+                            i < text.length ? text[i] : '',
+                            textScaler: scale,
+                            style: mc.text.headline.copyWith(
+                              fontFamily: McFonts.body,
+                              fontSize: 26,
+                              fontWeight: FontWeight.w700,
+                              color: enabled
+                                  ? mc.colors.onSurface
+                                  : mc.colors.onSurfaceMuted,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Positioned.fill(
+            child: Semantics(
+              label: semanticLabel,
+              textField: true,
+              child: TextField(
+                controller: controller,
+                focusNode: focusNode,
+                enabled: enabled,
+                autofocus: true,
+                showCursor: false,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                autofillHints: const [AutofillHints.oneTimeCode],
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(6),
+                ],
+                style: const TextStyle(color: Colors.transparent),
+                cursorColor: Colors.transparent,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  counterText: '',
+                  fillColor: Colors.transparent,
+                  filled: false,
+                ),
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class _ConsentsScreenState extends ConsumerState<ConsentsScreen> {
-  // Nothing is pre-ticked: consent must be an explicit act (no dark patterns).
-  final _granted = {for (final k in requiredConsentKinds) k: false};
+// ---------------------------------------------------------------------------
+// 4. About you
+// ---------------------------------------------------------------------------
+
+/// Native date picker; replaceable in tests. Opens on the year list because
+/// a birth date is far in the past.
+typedef BirthDatePicker = Future<DateTime?> Function(
+  BuildContext context, {
+  required DateTime initial,
+  required DateTime first,
+  required DateTime last,
+});
+
+final birthDatePickerProvider = Provider<BirthDatePicker>(
+  (ref) => (context, {required initial, required first, required last}) =>
+      showDatePicker(
+        context: context,
+        initialDate: initial,
+        firstDate: first,
+        lastDate: last,
+        initialDatePickerMode: DatePickerMode.year,
+        helpText: AppLocalizations.of(context).v2bBirthDateChoose,
+      ),
+);
+
+class AboutYouScreen extends ConsumerStatefulWidget {
+  const AboutYouScreen({super.key});
+
+  @override
+  ConsumerState<AboutYouScreen> createState() => _AboutYouScreenState();
+}
+
+class _AboutYouScreenState extends ConsumerState<AboutYouScreen> {
+  final _name = TextEditingController();
+
+  @override
+  void dispose() {
+    _name.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickDate() async {
+    final now = ref.read(clockProvider)();
+    final s = ref.read(aboutYouProvider);
+    final picked = await ref.read(birthDatePickerProvider)(
+      context,
+      initial: s.birthDate ?? DateTime(now.year - 25, 6, 15),
+      first: DateTime(now.year - 100),
+      last: DateTime(now.year, now.month, now.day),
+    );
+    if (picked != null) {
+      ref.read(aboutYouProvider.notifier).setBirthDate(picked);
+    }
+  }
 
   Future<void> _submit() async {
-    final ok =
-        await ref.read(onboardingProvider.notifier).submitConsents(_granted);
-    if (!ok || !mounted) return;
-    // The guard routes on server state: re-read /me, then let it pick the
-    // next step (verification, builder or home).
-    // Wait for the fresh /me before navigating: going to /home on the stale
-    // snapshot makes the guard bounce straight back to consents.
-    await ref.read(meProvider.notifier).reload();
-    if (mounted) context.go('/home');
+    final ok = await ref.read(aboutYouProvider.notifier).submit();
+    // The router sends a member with a profile into the app by itself; this
+    // is the explicit path for the same decision.
+    if (ok && mounted) context.go('/home');
   }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final s = ref.watch(onboardingProvider);
-    final labels = {
-      'terms': l.consentTerms,
-      'privacy': l.consentPrivacy,
-      'data_transfer': l.consentTransfer,
-    };
-    return _Page(
-      title: l.consentsTitle,
-      // Someone who does not want to agree can still reach sign out and
-      // account deletion (the guard keeps /settings open).
+    final mc = context.mc;
+    final s = ref.watch(aboutYouProvider);
+    final ctrl = ref.read(aboutYouProvider.notifier);
+    final locale = Localizations.localeOf(context).toString();
+    final missing = <String>[
+      if (!s.nameOk) l.v2bNeedName,
+      if (!s.birthOk && !s.under18) l.v2bNeedBirth,
+      if (!s.genderOk) l.v2bNeedGender,
+      if (!s.consentsOk) l.v2bNeedConsents,
+    ];
+    final failure = s.failure;
+    return OnbScaffold(
       actions: [
+        // Someone who does not want to agree can still reach sign out and
+        // account deletion (the router keeps /settings open).
         IconButton(
           icon: const Icon(Icons.settings_outlined),
           tooltip: l.homeSettings,
           onPressed: () => context.push('/settings'),
         ),
       ],
-      children: [
-        for (final k in requiredConsentKinds)
-          ConsentTile(
-            value: _granted[k] ?? false,
-            onChanged: (v) => setState(() => _granted[k] = v),
-            title: labels[k]!,
-          ),
-        Text(l.consentsNote),
-        _ErrorText(s),
-        const SizedBox(height: 16),
-        McButton(
-          label: l.consentsAgree,
-          onPressed:
-              _granted.values.every((v) => v) && !s.loading ? _submit : null,
+      bottom: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            McButton(
+              label: l.v2bAboutCta,
+              loading: s.saving,
+              onPressed: s.valid && !s.saving ? _submit : null,
+            ),
+            if (!s.valid && !s.under18) ...[
+              SizedBox(height: mc.space.xs),
+              Text(
+                l.v2bAboutMissing(missing.join(', ')),
+                textAlign: TextAlign.center,
+                style: mc.text.caption.copyWith(
+                  color: mc.colors.onSurfaceMuted,
+                ),
+              ),
+            ],
+          ],
         ),
+      ),
+      children: [
+        StepProgress(
+          step: 2,
+          total: 2,
+          label: l.v2bStepOf(2, 2),
+        ),
+        SizedBox(height: mc.space.md),
+        Semantics(
+          header: true,
+          child: Text(l.v2bAboutTitle, style: mc.text.headline),
+        ),
+        SizedBox(height: mc.space.xxs),
+        Text(
+          l.v2bAboutSub,
+          style: mc.text.body.copyWith(color: mc.colors.onSurfaceMuted),
+        ),
+        SizedBox(height: mc.space.lg),
+        McTextField(
+          controller: _name,
+          label: l.v2bFirstName,
+          helper: l.v2bFirstNameHelp,
+          maxLength: 30,
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.next,
+          autofillHints: const [AutofillHints.givenName],
+          onChanged: ctrl.setName,
+        ),
+        SizedBox(height: mc.space.md),
+        _DateField(
+          label: l.v2bBirthDate,
+          value: s.birthDate == null
+              ? null
+              : l.v2bBirthDateValue(
+                  DateFormat.yMMMMd(locale).format(s.birthDate!),
+                  s.age ?? 0,
+                ),
+          placeholder: l.v2bBirthDateChoose,
+          helper: l.v2bBirthDateHelp,
+          error: s.under18,
+          onTap: _pickDate,
+        ),
+        if (s.under18) ...[
+          SizedBox(height: mc.space.sm),
+          _KindMessage(
+            title: l.v2bUnder18Title,
+            body: l.v2bUnder18Body,
+          ),
+        ],
+        SizedBox(height: mc.space.md),
+        Semantics(
+          container: true,
+          label: l.v2bIAm,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.v2bIAm, style: mc.text.label),
+              SizedBox(height: mc.space.xs),
+              _GenderChoice(
+                value: s.gender,
+                onChanged: ctrl.setGender,
+              ),
+              SizedBox(height: mc.space.xs),
+              Text(
+                l.v2bGenderNote,
+                style: mc.text.caption.copyWith(
+                  color: mc.colors.onSurfaceMuted,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: mc.space.lg),
+        const Divider(),
+        SizedBox(height: mc.space.xs),
+        ConsentsPanel(
+          values: s.consents,
+          onChanged: ctrl.setConsent,
+          onSelectAll: ctrl.selectAll,
+        ),
+        if (failure != null) ...[
+          SizedBox(height: mc.space.md),
+          InlineError(
+            failure.code == 'validation_error' &&
+                    failure.extra.containsKey('display_name')
+                ? l.v2bNameRejected
+                : failureMessage(l, failure),
+          ),
+        ],
       ],
+    );
+  }
+}
+
+class _DateField extends StatelessWidget {
+  const _DateField({
+    required this.label,
+    required this.placeholder,
+    required this.helper,
+    required this.onTap,
+    this.value,
+    this.error = false,
+  });
+
+  final String label;
+  final String? value;
+  final String placeholder;
+  final String helper;
+  final bool error;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    return Semantics(
+      button: true,
+      label: '$label. ${value ?? placeholder}',
+      excludeSemantics: true,
+      onTap: onTap,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(mc.radii.md),
+        child: InputDecorator(
+          isEmpty: value == null,
+          decoration: InputDecoration(
+            labelText: label,
+            helperText: helper,
+            helperMaxLines: 3,
+            filled: true,
+            fillColor: mc.colors.surface,
+            floatingLabelBehavior: FloatingLabelBehavior.always,
+            suffixIcon: const Icon(Icons.calendar_month_outlined),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: mc.space.md,
+              vertical: mc.space.md,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(mc.radii.md),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(mc.radii.md),
+              borderSide: BorderSide(
+                color: error ? mc.colors.error : mc.colors.outline,
+                width: error ? 2 : 1,
+              ),
+            ),
+          ),
+          child: Text(
+            value ?? placeholder,
+            style: mc.text.body.copyWith(
+              color: value == null
+                  ? mc.colors.onSurfaceMuted
+                  : mc.colors.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _KindMessage extends StatelessWidget {
+  const _KindMessage({required this.title, required this.body});
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    return Semantics(
+      liveRegion: true,
+      container: true,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: mc.colors.warningContainer,
+          borderRadius: BorderRadius.circular(mc.radii.md),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(mc.space.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: mc.text.subtitle.copyWith(
+                  color: mc.colors.onWarningContainer,
+                ),
+              ),
+              SizedBox(height: mc.space.xxs),
+              Text(
+                body,
+                style: mc.text.body.copyWith(
+                  color: mc.colors.onWarningContainer,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GenderChoice extends StatelessWidget {
+  const _GenderChoice({required this.value, required this.onChanged});
+  final String value;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final mc = context.mc;
+    final narrow = MediaQuery.textScalerOf(context).scale(16) > 24 ||
+        MediaQuery.sizeOf(context).width < 340;
+    final man = _GenderTile(
+      label: l.v2bIAmMan,
+      icon: Icons.man,
+      selected: value == 'male',
+      onTap: () => onChanged('male'),
+    );
+    final woman = _GenderTile(
+      label: l.v2bIAmWoman,
+      icon: Icons.woman,
+      selected: value == 'female',
+      onTap: () => onChanged('female'),
+    );
+    if (narrow) {
+      return Column(
+        children: [man, SizedBox(height: mc.space.xs), woman],
+      );
+    }
+    return Row(
+      children: [
+        Expanded(child: man),
+        SizedBox(width: mc.space.sm),
+        Expanded(child: woman),
+      ],
+    );
+  }
+}
+
+class _GenderTile extends StatelessWidget {
+  const _GenderTile({
+    required this.label,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    final c = mc.colors;
+    return Semantics(
+      inMutuallyExclusiveGroup: true,
+      checked: selected,
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: Material(
+        color: selected ? c.primaryContainer : c.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(mc.radii.md),
+          side: BorderSide(
+            color: selected ? c.primary : c.outline,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(mc.radii.md),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: mc.space.minTarget + 8),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: mc.space.sm,
+                vertical: mc.space.sm,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    selected ? Icons.check_circle : icon,
+                    color: selected ? c.primary : c.onSurfaceMuted,
+                  ),
+                  SizedBox(width: mc.space.xs),
+                  Flexible(
+                    child: Text(
+                      label,
+                      textAlign: TextAlign.center,
+                      style: mc.text.subtitle.copyWith(
+                        color: selected ? c.onPrimaryContainer : c.onSurface,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

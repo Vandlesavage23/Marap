@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/core/storage/app_database.dart';
 import 'package:marriage_connect/src/features/chat/data/api_chat_repository.dart';
 import 'package:marriage_connect/src/features/chat/domain/chat_message.dart';
@@ -201,7 +202,8 @@ void main() {
         ),
       );
       await t.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+          find.byType(SkeletonRows), findsOneWidget); // skeleton, not a spinner
       repo.gate!.complete();
       await t.pumpAndSettle();
       expect(find.text('Amani, 29'), findsOneWidget);

@@ -21,6 +21,9 @@ const educations = [
   'postgraduate',
 ];
 
+/// Who may see a member's photos (`photo_visibility`).
+const photoVisibilities = ['everyone', 'verified_only'];
+
 /// ISO 639 codes offered for `languages` (server accepts any 2-3 letter code,
 /// max 8).
 const languageCodes = ['en', 'lg', 'sw', 'nyn', 'ach', 'teo'];
@@ -73,6 +76,8 @@ class OwnProfile {
     this.languages = const [],
     this.occupation = '',
     this.education = '',
+    this.birthDate,
+    this.photoVisibility = 'everyone',
   });
 
   factory OwnProfile.fromJson(Map<String, dynamic> j) => OwnProfile(
@@ -97,6 +102,10 @@ class OwnProfile {
         ],
         occupation: j['occupation'] as String? ?? '',
         education: j['education'] as String? ?? '',
+        birthDate: j['birth_date'] as String?,
+        photoVisibility: photoVisibilities.contains(j['photo_visibility'])
+            ? j['photo_visibility'] as String
+            : 'everyone',
       );
 
   final String id;
@@ -117,6 +126,10 @@ class OwnProfile {
   final List<String> languages;
   final String occupation;
   final String education;
+  final String? birthDate;
+
+  /// `everyone` (default) or `verified_only`.
+  final String photoVisibility;
 
   bool get isLive => status == 'live';
 }

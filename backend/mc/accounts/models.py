@@ -147,3 +147,20 @@ class RecoverySession(BaseModel):
             models.Index(fields=["account", "-created_at"]),
             models.Index(fields=["biometric_job_id"]),
         ]
+
+
+class FunnelEvent(BaseModel):
+    """One row per (actor, funnel step): the first time an app install (or signed-in member) reached that step.
+    No account link, no phone, no IP, no device details: `actor_hmac` is an HMAC of the client-generated random
+    install id (or of the account id when a signed-in client sent none), so rows can be counted but not traced
+    back to a person. Append-only (a DB trigger forbids UPDATE, and DELETE outside the retention job)."""
+
+    name = models.CharField(max_length=24)
+    actor_hmac = models.BinaryField()
+    authenticated = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["actor_hmac", "name"], name="uniq_funnel_actor_step")
+        ]
+        indexes = [models.Index(fields=["name", "created_at"])]

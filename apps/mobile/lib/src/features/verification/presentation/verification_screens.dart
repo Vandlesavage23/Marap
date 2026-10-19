@@ -6,12 +6,17 @@ import 'package:go_router/go_router.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/failure_copy.dart';
+import 'package:marriage_connect/src/core/storage/local_prefs.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
+import 'package:marriage_connect/src/features/me/application/me_controller.dart';
+import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/consents_panel.dart';
 import 'package:marriage_connect/src/features/verification/application/verification_controller.dart';
 import 'package:marriage_connect/src/features/verification/data/identity_capture.dart';
 import 'package:marriage_connect/src/features/verification/data/screen_security.dart';
 import 'package:marriage_connect/src/features/verification/data/verification_models.dart';
+import 'package:marriage_connect/src/features/verification/presentation/verify_widgets.dart';
 
 String idTypeLabel(AppLocalizations l, String idType) => switch (idType) {
       'PASSPORT' => l.verifIdPassport,
@@ -55,15 +60,14 @@ class _Page extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: Text(title),
-          actions: [
-            // Sign out / delete account must be reachable before the account
-            // is verified (the guard keeps /settings open at every stage).
-            IconButton(
-              icon: const Icon(Icons.settings_outlined),
-              tooltip: AppLocalizations.of(context).homeSettings,
-              onPressed: () => context.push('/settings'),
-            ),
-          ],
+          // Verification is reached from a sheet or a banner, never forced:
+          // there is always a way back to browsing.
+          leading: IconButton(
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () =>
+                context.canPop() ? context.pop() : context.go('/home'),
+          ),
         ),
         body: SafeArea(child: child),
       );
@@ -151,34 +155,51 @@ class _PassedView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const VerificationBadge(),
-            const SizedBox(height: 16),
-            Text(
-              l.verifPassedTitle,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(l.verifPassedBody, textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            McButton(
-              label: l.verifPassedContinue,
-              onPressed: () async {
-                await ref
-                    .read(verificationProvider.notifier)
-                    .continueAfterPassed();
-                if (context.mounted) context.go('/profile/builder');
-              },
-            ),
-          ],
+    final mc = context.mc;
+    return ListView(
+      padding: EdgeInsets.all(mc.space.lg),
+      children: [
+        const VerifyStepper(step: 4),
+        SizedBox(height: mc.space.xl),
+        const Center(child: VerificationBadge()),
+        SizedBox(height: mc.space.md),
+        Text(
+          l.verifPassedTitle,
+          style: mc.text.headline,
+          textAlign: TextAlign.center,
         ),
-      ),
+        SizedBox(height: mc.space.xs),
+        Text(
+          l.verifPassedBody,
+          style: mc.text.body,
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: mc.space.lg),
+        McButton(
+          label: l.verifPassedContinue,
+          onPressed: () async {
+            final profileLive =
+                ref.read(meProvider).valueOrNull?.profileLive ?? false;
+            await ref.read(verificationProvider.notifier).continueAfterPassed();
+            if (!context.mounted) return;
+            // A member who already has a live profile goes straight back to
+            // what they were doing; everyone else builds it now (about 3 min).
+            final live =
+                ref.read(meProvider).valueOrNull?.profileLive ?? profileLive;
+            if (live) {
+              context.canPop() ? context.pop() : context.go('/home');
+            } else {
+              context.go('/profile/make');
+            }
+          },
+        ),
+        SizedBox(height: mc.space.xs),
+        McButton(
+          label: l.v2bKeepBrowsing,
+          kind: McButtonKind.secondary,
+          onPressed: () => context.go('/home'),
+        ),
+      ],
     );
   }
 }
@@ -217,31 +238,45 @@ class _PendingViewState extends ConsumerState<_PendingView> {
     final l = AppLocalizations.of(context);
     final review = widget.state.status.state == VerificationStage.needsReview;
     final failure = widget.state.failure;
+    final mc = context.mc;
     return RefreshIndicator(
       onRefresh: ref.read(verificationProvider.notifier).refresh,
       child: ListView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(mc.space.lg),
         children: [
-          const SizedBox(height: 24),
+          const VerifyStepper(step: 4),
+          SizedBox(height: mc.space.xl),
           Icon(
             Icons.hourglass_top,
             size: 56,
-            color: Theme.of(context).colorScheme.primary,
+            color: mc.colors.primary,
             semanticLabel: l.verifPendingTitle,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: mc.space.md),
           Text(
             review ? l.verifReviewTitle : l.verifPendingTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: mc.text.headline,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: mc.space.xs),
           Text(
             review ? l.verifReviewBody : l.verifPendingBody,
             textAlign: TextAlign.center,
           ),
+          SizedBox(height: mc.space.xs),
+          // A pending review never blocks browsing.
+          Text(
+            l.v2bVerifyPoint3,
+            textAlign: TextAlign.center,
+            style: mc.text.body.copyWith(fontWeight: FontWeight.w600),
+          ),
           if (failure != null) _ErrorBanner(failure),
-          const SizedBox(height: 24),
+          SizedBox(height: mc.space.lg),
+          McButton(
+            label: l.v2bKeepBrowsing,
+            onPressed: () => context.go('/home'),
+          ),
+          SizedBox(height: mc.space.xs),
           McButton(
             label: l.verifCheckAgain,
             onPressed: ref.read(verificationProvider.notifier).refresh,
@@ -261,62 +296,122 @@ class _StartView extends ConsumerStatefulWidget {
   ConsumerState<_StartView> createState() => _StartViewState();
 }
 
+const _idTypePrefKey = 'mc.verify.id_type';
+
+/// Reason-specific advice for the next try (never a bare "failed").
+List<String> verifyTips(AppLocalizations l, String? reason) => switch (reason) {
+      'doc_unreadable' => [l.v2bTipFlat, l.v2bTipGlare, l.v2bTipFrame],
+      'face_mismatch' => [l.v2bTipGlasses, l.v2bTipFace, l.v2bTipDifferentId],
+      'liveness_failed' => [l.v2bTipFace, l.v2bTipSteady, l.v2bTipSlow],
+      'doc_expired' => [l.v2bTipValid],
+      'dob_missing' || 'id_number_missing' => [l.v2bTipFrame, l.v2bTipValid],
+      _ => [l.v2bTipGlare, l.v2bTipFrame, l.v2bTipDifferentId],
+    };
+
 class _StartViewState extends ConsumerState<_StartView> {
-  String _idType = verificationIdTypes.first;
+  late String _idType;
+
+  @override
+  void initState() {
+    super.initState();
+    // Resume where they left off: the ID type they picked last time.
+    final saved = ref.read(localPrefsProvider).getString(_idTypePrefKey);
+    _idType = verificationIdTypes.contains(saved)
+        ? saved!
+        : verificationIdTypes.first;
+  }
+
+  void _pick(String v) {
+    setState(() => _idType = v);
+    unawaited(ref.read(localPrefsProvider).setString(_idTypePrefKey, v));
+  }
 
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final mc = context.mc;
     final status = widget.state.status;
     final failed = status.state == VerificationStage.failed;
     final note = switch (status.state) {
       VerificationStage.expired => l.verifExpiredNote,
       VerificationStage.error => l.verifErrorNote,
+      VerificationStage.created => l.v2bVerifyResume,
       _ => null,
     };
+    final canRetry = !failed || status.reason != 'underage';
     return ListView(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(mc.space.lg),
       children: [
+        const VerifyStepper(step: 1),
+        SizedBox(height: mc.space.lg),
         if (failed) ...[
           _FailureCard(status: status),
-          const SizedBox(height: 16),
-        ] else ...[
-          Text(
-            l.verifIntroTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(l.verifIntroBody),
-          const SizedBox(height: 8),
-          Text(l.verifIntroPrivacy),
-          if (note != null) ...[
-            const SizedBox(height: 12),
-            Text(note, style: Theme.of(context).textTheme.titleSmall),
+          if (canRetry) ...[
+            SizedBox(height: mc.space.md),
+            Text(l.v2bTipsHeading, style: mc.text.subtitle),
+            SizedBox(height: mc.space.xxs),
+            for (final tip in verifyTips(l, status.reason))
+              Padding(
+                padding: EdgeInsets.only(top: mc.space.xxs),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.lightbulb_outline,
+                      size: 20,
+                      color: mc.colors.accent,
+                    ),
+                    SizedBox(width: mc.space.xs),
+                    Expanded(child: Text(tip)),
+                  ],
+                ),
+              ),
           ],
-          const SizedBox(height: 16),
+          SizedBox(height: mc.space.md),
+        ] else ...[
+          Text(l.verifIntroTitle, style: mc.text.headline),
+          SizedBox(height: mc.space.xs),
+          Text(l.verifIntroBody),
+          SizedBox(height: mc.space.xs),
+          Text(
+            l.verifIntroPrivacy,
+            style: mc.text.bodySmall.copyWith(color: mc.colors.onSurfaceMuted),
+          ),
+          if (note != null) ...[
+            SizedBox(height: mc.space.sm),
+            Text(note, style: mc.text.subtitle),
+          ],
+          SizedBox(height: mc.space.md),
         ],
-        if (!failed || status.reason != 'underage')
+        if (canRetry)
           RadioGroupLike(
             heading: l.verifIdTypeHeading,
             value: _idType,
             options: {
               for (final t in verificationIdTypes) t: idTypeLabel(l, t),
             },
-            onChanged: (v) => setState(() => _idType = v),
+            onChanged: _pick,
           ),
         if (widget.state.consentsMissing) ...[
-          const SizedBox(height: 16),
-          _ConsentsCard(),
+          SizedBox(height: mc.space.md),
+          const _ConsentsCard(),
         ],
-        const SizedBox(height: 16),
-        if (!failed || status.reason != 'underage')
+        SizedBox(height: mc.space.md),
+        if (canRetry)
           McButton(
             label: failed ? l.verifTryAgain : l.verifStartCapture,
             onPressed: () =>
                 context.push('/verification/capture', extra: _idType),
           ),
+        SizedBox(height: mc.space.xs),
+        McButton(
+          label: l.v2bNotNow,
+          kind: McButtonKind.secondary,
+          onPressed: () =>
+              context.canPop() ? context.pop() : context.go('/home'),
+        ),
         if (failed) ...[
-          const SizedBox(height: 24),
+          SizedBox(height: mc.space.lg),
           _AppealSection(state: widget.state),
         ],
       ],
@@ -367,26 +462,49 @@ class RadioGroupLike extends StatelessWidget {
       );
 }
 
-class _ConsentsCard extends StatelessWidget {
+/// Accounts created before the agreements moved to "About you" may still lack
+/// them; the server then refuses to start. They are collected right here,
+/// unticked, instead of sending the member to another screen.
+class _ConsentsCard extends ConsumerStatefulWidget {
+  const _ConsentsCard();
+
+  @override
+  ConsumerState<_ConsentsCard> createState() => _ConsentsCardState();
+}
+
+class _ConsentsCardState extends ConsumerState<_ConsentsCard> {
+  final _values = {for (final k in requiredConsentKinds) k: false};
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final mc = context.mc;
     return McCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            l.verifConsentsTitle,
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          const SizedBox(height: 4),
+          Text(l.verifConsentsTitle, style: mc.text.subtitle),
+          SizedBox(height: mc.space.xxs),
           Text(l.verifConsentsBody),
-          const SizedBox(height: 8),
+          SizedBox(height: mc.space.xs),
+          ConsentsPanel(
+            values: _values,
+            onChanged: (k, {required value}) =>
+                setState(() => _values[k] = value),
+            onSelectAll: () => setState(() {
+              for (final k in requiredConsentKinds) {
+                _values[k] = true;
+              }
+            }),
+          ),
+          SizedBox(height: mc.space.xs),
           McButton(
-            label: l.verifConsentsAction,
-            onPressed: () => context.go('/onboarding/consents'),
-            kind: McButtonKind.text,
-            expand: false,
+            label: l.v2bConsentsAcceptContinue,
+            onPressed: _values.values.every((v) => v)
+                ? () => ref
+                    .read(verificationProvider.notifier)
+                    .acceptConsents(_values)
+                : null,
           ),
         ],
       ),
@@ -495,17 +613,28 @@ class _VerificationCaptureScreenState
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final s = ref.watch(verificationProvider).valueOrNull;
+    final mc = context.mc;
     final phase = s?.phase ?? VerificationPhase.idle;
     final failure = s?.failure;
     final Widget body;
     if (phase != VerificationPhase.idle &&
         phase != VerificationPhase.appealing) {
-      body = _Busy(
-        label: switch (phase) {
-          VerificationPhase.starting => l.verifCaptureStarting,
-          VerificationPhase.submitting => l.verifCaptureSubmitting,
-          _ => l.verifCaptureCapturing,
-        },
+      body = Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.all(mc.space.lg),
+            child: const VerifyStepper(step: 2, through: 3),
+          ),
+          Expanded(
+            child: _Busy(
+              label: switch (phase) {
+                VerificationPhase.starting => l.verifCaptureStarting,
+                VerificationPhase.submitting => l.verifCaptureSubmitting,
+                _ => l.verifCaptureCapturing,
+              },
+            ),
+          ),
+        ],
       );
     } else if (failure != null && failure.isOffline) {
       body = OfflineState(onRetry: _run);
@@ -513,18 +642,44 @@ class _VerificationCaptureScreenState
       body = RestrictedState(reason: l.verifCaptureUnavailable);
     } else {
       body = ListView(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(mc.space.lg),
         children: [
-          Text(
-            idTypeLabel(l, widget.idType),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
+          const VerifyStepper(step: 2, through: 3),
+          SizedBox(height: mc.space.lg),
+          Text(idTypeLabel(l, widget.idType), style: mc.text.headline),
+          SizedBox(height: mc.space.xs),
           Text(l.verifCaptureBody),
+          SizedBox(height: mc.space.md),
+          Text(l.v2bCapturePrepHeading, style: mc.text.subtitle),
+          for (final (i, t) in [
+            l.v2bCapturePrep1,
+            l.v2bCapturePrep2,
+            l.v2bCapturePrep3,
+          ].indexed)
+            Padding(
+              padding: EdgeInsets.only(top: mc.space.xs),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 12,
+                    backgroundColor: mc.colors.primaryContainer,
+                    foregroundColor: mc.colors.onPrimaryContainer,
+                    child: Text(
+                      '${i + 1}',
+                      textScaler: TextScaler.noScaling,
+                      style: mc.text.label,
+                    ),
+                  ),
+                  SizedBox(width: mc.space.xs),
+                  Expanded(child: Text(t)),
+                ],
+              ),
+            ),
           if (failure != null) _ErrorBanner(failure),
           if (s?.consentsMissing ?? false) ...[
             const SizedBox(height: 16),
-            _ConsentsCard(),
+            const _ConsentsCard(),
           ],
           const SizedBox(height: 24),
           McButton(

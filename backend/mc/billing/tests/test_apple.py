@@ -247,7 +247,7 @@ def test_scenario_07_refund_after_activation_revokes_and_balances(pki):
     p = Purchase.objects.get()
     assert p.status == "refunded" and services.ledger_balance(p) == 0
     assert ent.entitlement_summary(who[2]).state != "member" and not ent.has_capability(
-        who[2], "send_interest"
+        who[2], "higher_interest_cap"  # v2: a refund ends the membership perks (free sending stays)
     )
     # a refund replay or late renewal event changes nothing
     webhook(anon(), notification_payload(pki, ntype="REFUND", txn_payload=txn, uuid_="again"))

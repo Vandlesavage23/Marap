@@ -2,4 +2,8 @@
 <form method="get">From <input type="date" name="from" value="{{ rng.first|date:'Y-m-d' }}"> to <input type="date" name="to" value="{{ rng.last|date:'Y-m-d' }}"> <button>Show</button></form>
 <p class="muted">Members who registered between {{ rng.first|date:'j M Y' }} and {{ rng.last|date:'j M Y' }} (Kampala time), and how many have reached each step since. Totals only: no member details. A figure under 5 is hidden ({{ min_cell }}). "Live profile" includes members who paused their profile; "Paying member" counts un-refunded purchases (trials and staff grants excluded). Members who deleted their account are not counted.</p>
 <table><tr><th>Step</th><th class="num">Members</th><th class="num">Of registered</th><th class="num">Of previous step</th></tr>
-{% for r in rows %}<tr><td>{{ r.title }}</td><td class="num">{{ r.text }}</td><td class="num">{{ r.of_registered|default:"" }}</td><td class="num">{{ r.of_previous|default:"" }}</td></tr>{% endfor %}</table>{% endblock %}
+{% for r in rows %}<tr><td>{{ r.title }}</td><td class="num">{{ r.text }}</td><td class="num">{{ r.of_registered|default:"" }}</td><td class="num">{{ r.of_previous|default:"" }}</td></tr>{% endfor %}</table>
+<h2>In the app</h2>
+<p class="muted">The first time each install reached a step, between the same dates. Steps are counted from the app itself (anonymous installs are identified only by a random id kept as a hash), so these are not the same people as the table above and steps can be reached in any order. A figure under 5 is hidden ({{ min_cell }}).</p>
+<table><tr><th>Step</th><th class="num">Installs</th><th class="num">Of first step</th><th class="num">Of previous step</th></tr>
+{% for r in app_rows %}<tr><td>{{ r.title }}</td><td class="num">{{ r.text }}</td><td class="num">{{ r.of_first|default:"" }}</td><td class="num">{{ r.of_previous|default:"" }}</td></tr>{% endfor %}</table>{% endblock %}

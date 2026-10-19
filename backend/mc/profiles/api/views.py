@@ -1,7 +1,7 @@
 import json
 
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.response import Response
 from rest_framework.utils.encoders import JSONEncoder
 from rest_framework.views import APIView
@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from mc.accounts.permissions import IsActiveMember
 from mc.common.errors import NotFound
 from mc.common.idempotency import IdempotentMixin
+from mc.common.net import client_ip, request_install_id
 from mc.common.serializers import reject_unknown_fields
 from mc.profiles import photos, policies, preferences, services
 from mc.profiles.models import Profile
@@ -16,16 +17,29 @@ from mc.profiles.models import Profile
 from . import serializers as s
 
 
+class ProfilePatchBody(s.ProfileUpdateSerializer):
+    """PATCH body. `birth_date` ("About you") is accepted only until the identity check passes; from then on the
+    ID's date of birth is the only truth. It is declared here, in the request-only serializer, and not in
+    `serializers.py` where `test_serializers_never_expose_identity_fields` guards the output allowlists."""
+
+    birth_date = serializers.DateField(required=False)
+
+
 class MyProfileView(APIView):
     permission_classes = [IsActiveMember]
 
     @extend_schema(responses={200: dict})
     def get(self, request):  # type: ignore[no-untyped-def]
-        return Response(s.own_profile(services.get_or_create_profile(account=request.user)))
+        # An unverified member who finished "About you" can read their draft (readiness lists `verification`).
+        return Response(
+            s.own_profile(
+                services.get_or_create_profile(account=request.user, allow_unverified=True)
+            )
+        )
 
-    @extend_schema(request=s.ProfileUpdateSerializer, responses={200: dict})
+    @extend_schema(request=ProfilePatchBody, responses={200: dict})
     def patch(self, request):  # type: ignore[no-untyped-def]
-        data = s.ProfileUpdateSerializer(data=request.data, partial=True)
+        data = ProfilePatchBody(data=request.data, partial=True)
         reject_unknown_fields(data, request.data)
         data.is_valid(raise_exception=True)
         profile = services.update_profile(account=request.user, data=dict(data.validated_data))
@@ -41,7 +55,13 @@ class PublicProfileView(APIView):
         # Same 404 whether it doesn't exist or you may not see it (no existence oracle).
         if target is None or not policies.can_view_profile(request.user, target):
             raise NotFound()
-        return Response(s.public_profile(target, request.user))
+        locked = services.open_profile(
+            viewer=request.user,
+            target=target,
+            ip=client_ip(request),
+            install_id=request_install_id(request),
+        )
+        return Response(s.public_profile(target, request.user, locked=locked))
 
 
 class DescriptionsView(IdempotentMixin):

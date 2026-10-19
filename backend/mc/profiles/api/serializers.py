@@ -43,6 +43,7 @@ class ProfileUpdateSerializer(serializers.Serializer):
     )
     occupation = serializers.CharField(max_length=60, required=False, allow_blank=True)
     education = serializers.CharField(max_length=24, required=False, allow_blank=True)
+    photo_visibility = serializers.CharField(max_length=13, required=False)  # everyone | verified_only
 
 
 def own_profile(profile: Profile) -> dict[str, object]:
@@ -74,15 +75,42 @@ def own_profile(profile: Profile) -> dict[str, object]:
         "religion_practice": profile.religion_practice,
         "occupation": profile.occupation,
         "education": profile.education,
+        "photo_visibility": profile.photo_visibility,
     }
 
 
-def public_profile(profile: Profile, viewer=None) -> dict[str, object]:  # type: ignore[no-untyped-def]
-    """What other members may see. No religion text, no birth date (age only), no location point."""
+def public_profile(profile: Profile, viewer=None, *, locked: bool = False) -> dict[str, object]:  # type: ignore[no-untyped-def]
+    """What other members may see. No religion text, no birth date (age only), no location point.
+
+    `locked=True` is the payload for a viewer who has not verified their identity: first name, age, district,
+    intention, the badges and the primary photo (none if the owner chose `verified_only`) with `locked: true`.
+    Description, extra photos, timeline, marital label, children, languages, occupation and education are never
+    put into it, so the app cannot reveal them."""
+    from mc.profiles.policies import photo_visible_to
+
     photos = list(selectors.approved_photos(profile))
     has_photos = bool(photos)
+    if locked:
+        shown = [
+            p
+            for n, p in enumerate(photos)
+            if photo_visible_to(viewer_verified=False, target=profile, is_primary=n == 0)
+        ]
+        return {
+            "profile_id": str(profile.id),
+            "display_name": profile.display_name,
+            "age": selectors.age_of(profile),
+            "district": profile.district,
+            "intention": profile.intention,
+            "photos": [photo_payload(p, viewer) for p in shown] if viewer is not None else [],
+            "badges": selectors.badges(has_photos),
+            "locked": True,
+            "locked_reason": "verify_to_see_more",
+        }
     desc = profile.current_description
     return {
+        "locked": False,
+        "locked_reason": None,
         "photos": [photo_payload(p, viewer) for p in photos] if viewer is not None else [],
         "description": desc.text if desc else None,
         "profile_id": str(profile.id),
@@ -102,11 +130,7 @@ def public_profile(profile: Profile, viewer=None) -> dict[str, object]:  # type:
         "languages": profile.languages,
         "occupation": profile.occupation,
         "education": profile.education,
-        "badges": [
-            "age_verified",
-            "identity_verified",
-            *(["photo_verified"] if has_photos else []),
-        ],
+        "badges": selectors.badges(has_photos),
     }
 
 

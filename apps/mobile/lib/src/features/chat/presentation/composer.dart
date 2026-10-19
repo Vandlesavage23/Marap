@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_controller.dart';
 import 'package:marriage_connect/src/features/chat/application/chat_providers.dart';
@@ -197,65 +198,96 @@ class _ComposerState extends ConsumerState<Composer> {
       );
     }
     final hasText = _text.text.trim().isNotEmpty;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (busy)
+    final mc = context.mc;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: mc.colors.surface,
+        border: Border(
+          top: BorderSide(color: mc.colors.outline.withValues(alpha: 0.18)),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (busy)
+              Row(
+                children: [
+                  const SizedBox.square(
+                    dimension: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(l.chatUploading),
+                ],
+              ),
             Row(
               children: [
-                const SizedBox.square(
-                  dimension: 14,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                IconButton(
+                  tooltip: l.chatAttach,
+                  onPressed: busy ? null : _attach,
+                  icon: const Icon(Icons.add_photo_alternate_outlined),
                 ),
-                const SizedBox(width: 8),
-                Text(l.chatUploading),
-              ],
-            ),
-          Row(
-            children: [
-              IconButton(
-                tooltip: l.chatAttach,
-                onPressed: busy ? null : _attach,
-                icon: const Icon(Icons.add_photo_alternate_outlined),
-              ),
-              Expanded(
-                child: TextField(
-                  controller: _text,
-                  minLines: 1,
-                  maxLines: 4,
-                  maxLength: ChatRules.maxTextLength,
-                  buildCounter: (
-                    _, {
-                    required currentLength,
-                    required isFocused,
-                    maxLength,
-                  }) =>
-                      null,
-                  textCapitalization: TextCapitalization.sentences,
-                  decoration: InputDecoration(
-                    hintText: l.chatComposerHint,
-                    border: const OutlineInputBorder(),
-                    isDense: true,
+                Expanded(
+                  child: TextField(
+                    controller: _text,
+                    minLines: 1,
+                    maxLines: 4,
+                    maxLength: ChatRules.maxTextLength,
+                    buildCounter: (
+                      _, {
+                      required currentLength,
+                      required isFocused,
+                      maxLength,
+                    }) =>
+                        null,
+                    textCapitalization: TextCapitalization.sentences,
+                    style: mc.text.body.copyWith(color: mc.colors.onSurface),
+                    decoration: InputDecoration(
+                      hintText: l.chatComposerHint,
+                      hintStyle: mc.text.body
+                          .copyWith(color: mc.colors.onSurfaceMuted),
+                      filled: true,
+                      fillColor: mc.colors.surfaceVariant,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(mc.radii.lg),
+                        borderSide: BorderSide.none,
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(mc.radii.lg),
+                        borderSide:
+                            BorderSide(color: mc.colors.primary, width: 2),
+                      ),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              if (hasText)
-                IconButton.filled(
-                  tooltip: l.chatSend,
-                  onPressed: _send,
-                  icon: const Icon(Icons.send),
-                )
-              else
-                IconButton(
-                  tooltip: l.chatVoiceStart,
-                  onPressed: busy ? null : _startRecording,
-                  icon: const Icon(Icons.mic_none),
-                ),
-            ],
-          ),
-        ],
+                if (hasText)
+                  IconButton.filled(
+                    tooltip: l.chatSend,
+                    onPressed: _send,
+                    style: IconButton.styleFrom(
+                      backgroundColor: mc.colors.primary,
+                      foregroundColor: mc.colors.onPrimary,
+                      minimumSize: const Size(48, 48),
+                    ),
+                    icon: const Icon(Icons.send),
+                  )
+                else
+                  IconButton(
+                    tooltip: l.chatVoiceStart,
+                    onPressed: busy ? null : _startRecording,
+                    icon: const Icon(Icons.mic_none),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

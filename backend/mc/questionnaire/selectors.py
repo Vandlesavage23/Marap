@@ -35,6 +35,19 @@ def core_complete(account_id: uuid.UUID) -> bool:
     return all(qid in answered for qid, _ in core)
 
 
+def core_progress(account_id: uuid.UUID) -> tuple[int, int]:
+    """`(answered, total)` for the active core questions, counting only answers at the question's current version."""
+    core = dict(active_questions().filter(is_core=True).values_list("id", "version"))
+    answered = sum(
+        1
+        for qid, version in Answer.objects.filter(
+            account_id=account_id, question_id__in=list(core)
+        ).values_list("question_id", "question_version")
+        if core.get(qid) == version
+    )
+    return answered, len(core)
+
+
 def answer_value(answer: Answer) -> Any:
     return json.loads(answer.value_enc) if answer.value_enc is not None else answer.value
 

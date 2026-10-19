@@ -1,7 +1,7 @@
 """Single source of truth for what an account may do (Bible §10.7)."""
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 
 from django.conf import settings
@@ -13,12 +13,17 @@ from mc.verification import selectors as verification_selectors
 from .models import Entitlement, Trial
 
 CAPABILITIES = (
-    "browse",
-    "send_interest",
+    "browse",  # everyone signed in; unverified viewers get limited payloads (see `view_full_profile`)
+    "view_full_profile",
+    "send_interest",  # verified; free accounts are held to a rolling weekly quota by interests.services
     "receive_interest",
     "accept_interest",
-    "send_message",
+    "send_message",  # inside a match
     "read_conversations",
+    "priority_placement",  # membership/trial reach perks (flags only: payment never feeds ranking, Bible §10.6)
+    "extra_filters",
+    "higher_interest_cap",
+    "account_controls",
 )
 
 
@@ -31,6 +36,8 @@ class EntitlementState:
     membership_ends_at: datetime | None
     membership_source: str | None
     capabilities: dict[str, bool]
+    trial_started_at: datetime | None = None
+    trial_available: bool = False  # verified, and neither this account nor this person has used the trial
 
 
 def _active(account_id: uuid.UUID, now: datetime) -> QuerySet[Entitlement]:
@@ -40,17 +47,22 @@ def _active(account_id: uuid.UUID, now: datetime) -> QuerySet[Entitlement]:
 
 
 def _capabilities(state: str, verified: bool) -> dict[str, bool]:
-    if not verified:
-        return dict.fromkeys(CAPABILITIES, False)
-    full = state in ("trial", "member")
-    accept = full or settings.NONMEMBER_CAN_ACCEPT_INTEREST
+    """Capabilities v2 (docs/design/user-flow-v2.md §3). Signed-in members can always browse and use account
+    controls; an unverified member sees limited payloads and can't affect anyone else; a verified one can send
+    (quota for free/expired), receive, accept and chat; trial/member add reach perks."""
+    full = verified and state in ("trial", "member")
     return {
-        "browse": full,
-        "send_interest": full,
-        "receive_interest": True,
-        "accept_interest": accept,
-        "send_message": full,
-        "read_conversations": True,
+        "browse": True,
+        "view_full_profile": verified,
+        "send_interest": verified,
+        "receive_interest": verified,
+        "accept_interest": verified and (full or settings.NONMEMBER_CAN_ACCEPT_INTEREST),
+        "send_message": verified and (full or settings.FREE_CHAT_IN_MATCH),
+        "read_conversations": verified,
+        "priority_placement": full,
+        "extra_filters": full,
+        "higher_interest_cap": full,
+        "account_controls": True,
     }
 
 
@@ -78,6 +90,7 @@ def state_for(
         membership_ends_at=membership_ends_at(account_id, now) if member else None,
         membership_source=member.source if member else None,
         capabilities=_capabilities(state, verified),
+        trial_started_at=trial.started_at if trial else None,
     )
 
 
@@ -89,7 +102,46 @@ def capabilities_for(account, now: datetime | None = None) -> dict[str, bool]:  
 
 def entitlement_summary(account, now: datetime | None = None) -> EntitlementState:  # type: ignore[no-untyped-def]
     verified = verification_selectors.is_verified_adult(account)
-    return state_for(account.id, verified=verified, now=now)
+    st = state_for(account.id, verified=verified, now=now)
+    return replace(st, trial_available=verified and _trial_unused(account, st))
+
+
+def _trial_unused(account, st: EntitlementState) -> bool:  # type: ignore[no-untyped-def]
+    """One trial per account AND per person (identity hash survives account deletion)."""
+    if st.trial_used:
+        return False
+    identity = verification_selectors.identity_hmac(account)
+    return identity is not None and not Trial.objects.filter(identity_hmac=identity).exists()
+
+
+def can_start_trial(account, now: datetime | None = None) -> bool:  # type: ignore[no-untyped-def]
+    return entitlement_summary(account, now).trial_available
+
+
+def is_unlimited_interest_sender(state: str) -> bool:
+    """Trial and membership are bounded by the daily cap only; free and expired accounts by the weekly quota."""
+    return state in ("trial", "member")
+
+
+def browse_card_limit(st: EntitlementState) -> int | None:
+    """Cards per Kampala day, or None for no daily cap (trial/member; exposure caps still apply)."""
+    if st.state in ("trial", "member") and st.verified:
+        return None
+    return (
+        settings.BROWSE_CARDS_PER_DAY_FREE if st.verified else settings.BROWSE_CARDS_PER_DAY_UNVERIFIED
+    )
+
+
+def profile_open_limit(st: EntitlementState) -> int | None:
+    """Full or limited profile opens per Kampala day; only unverified viewers are capped."""
+    return None if st.verified else settings.PROFILE_OPENS_PER_DAY_UNVERIFIED
+
+
+def browse_allowed(account) -> bool:  # type: ignore[no-untyped-def]
+    """`browse` in capabilities v2 holds for every signed-in member whatever their state (verification only
+    limits WHAT they see). Hot paths that only need this one answer (batched card building) call it instead of
+    resolving the whole capability set; `capabilities_for` stays the single definition (`_capabilities`)."""
+    return _capabilities("none", False)["browse"]
 
 
 def has_capability(account, capability: str, now: datetime | None = None) -> bool:  # type: ignore[no-untyped-def]

@@ -2,10 +2,22 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
+
+/// Localisation delegates for screenshot hosts (kept here so the harness does
+/// not depend on another track's test support).
+const shotLocalizations = <LocalizationsDelegate<dynamic>>[
+  AppLocalizations.delegate,
+  GlobalMaterialLocalizations.delegate,
+  GlobalWidgetsLocalizations.delegate,
+];
 
 /// Screenshot support for UX audits: loads real fonts (the test default, Ahem, renders text as boxes) and writes
 /// PNGs of the widget tree to `$SHOT_DIR` (default /tmp/shots). Run with `flutter test test/journeys`.
@@ -27,9 +39,13 @@ Future<void> loadRealFonts() async {
 }
 
 /// Phone-sized surface (390x844 logical px at 2x).
-void phoneSurface(WidgetTester t, {double textScale = 1}) {
+void phoneSurface(
+  WidgetTester t, {
+  double textScale = 1,
+  Size logical = const Size(390, 844),
+}) {
   t.view
-    ..physicalSize = const Size(390 * 2, 844 * 2)
+    ..physicalSize = logical * 2
     ..devicePixelRatio = 2;
   t.platformDispatcher.textScaleFactorTestValue = textScale;
   addTearDown(() {
@@ -53,3 +69,22 @@ Future<void> snap(WidgetTester t, String name) async {
     await file.writeAsBytes(bytes.buffer.asUint8List());
   });
 }
+
+/// Wraps [child] in a themed, localised app for screenshots.
+Widget shotHost(
+  Widget child, {
+  Brightness brightness = Brightness.light,
+  List<Override> overrides = const [],
+}) =>
+    capturable(
+      ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: buildTheme(brightness),
+          localizationsDelegates: shotLocalizations,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: child,
+        ),
+      ),
+    );

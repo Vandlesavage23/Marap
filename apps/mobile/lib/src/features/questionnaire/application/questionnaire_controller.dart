@@ -162,25 +162,34 @@ class QuestionnaireController extends AsyncNotifier<QuestionnaireState> {
     }
   }
 
-  /// Saves every changed answer in one request.
+  /// Saves every changed answer in one request. Answers changed while the
+  /// request is in flight stay as unsaved edits (the quick flow keeps
+  /// answering while an earlier answer is still being saved).
   Future<bool> save() async {
     final s = _cur;
     if (s == null || s.saving || s.edits.isEmpty) return false;
+    final sent = {...s.edits};
     state = AsyncData(s.copyWith(saving: true, clearFailure: true));
     try {
-      final result = await _repo.save([...s.edits.values]);
+      final result = await _repo.save([...sent.values]);
+      final now = _cur ?? s;
+      final remaining = {
+        for (final e in now.edits.entries)
+          if (!identical(sent[e.key], e.value)) e.key: e.value,
+      };
       state = AsyncData(
         QuestionnaireState(
           questions: s.questions,
           saved: {for (final a in result.items) a.question: a},
           coreComplete: result.coreComplete,
-          grantedConsents: s.grantedConsents,
-          justSaved: true,
+          edits: remaining,
+          grantedConsents: now.grantedConsents,
+          justSaved: remaining.isEmpty,
         ),
       );
       return true;
     } on AppFailure catch (e) {
-      state = AsyncData(s.copyWith(saving: false, failure: e));
+      state = AsyncData((_cur ?? s).copyWith(saving: false, failure: e));
       return false;
     }
   }

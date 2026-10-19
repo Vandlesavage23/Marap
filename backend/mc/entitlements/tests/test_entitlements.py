@@ -31,13 +31,16 @@ def unverified(phone="+256772000009"):
     return c, r, Account.objects.get(phone_e164=phone)
 
 
-# state -> capability matrix (Bible §10.7): browse, send_interest, receive_interest, accept_interest, send_message, read_conversations
+# state -> capability matrix (docs/design/user-flow-v2.md §3). Column order = CAPABILITIES:
+# browse, view_full_profile, send_interest, receive_interest, accept_interest, send_message, read_conversations,
+# priority_placement, extra_filters, higher_interest_cap, account_controls
+T, F = True, False
 MATRIX = {
-    "not_verified": (False, False, False, False, False, False),
-    "none": (False, False, True, True, False, True),
-    "trial": (True, True, True, True, True, True),
-    "member": (True, True, True, True, True, True),
-    "expired": (False, False, True, True, False, True),
+    "not_verified": (T, F, F, F, F, F, F, F, F, F, T),
+    "none": (T, T, T, T, T, T, T, F, F, F, T),
+    "trial": (T, T, T, T, T, T, T, T, T, T, T),
+    "member": (T, T, T, T, T, T, T, T, T, T, T),
+    "expired": (T, T, T, T, T, T, T, F, F, F, T),
 }
 
 
@@ -73,7 +76,24 @@ def test_capability_matrix(state):
     assert set(caps) == set(CAPS)
 
 
-def test_unverified_with_entitlement_row_still_has_nothing():
+def test_capability_names_are_the_documented_set():
+    assert CAPS == (
+        "browse", "view_full_profile", "send_interest", "receive_interest", "accept_interest",
+        "send_message", "read_conversations", "priority_placement", "extra_filters",
+        "higher_interest_cap", "account_controls",
+    )  # fmt: skip
+
+
+@pytest.mark.parametrize("state", ["none", "expired"])
+def test_free_chat_flag_off_restores_the_old_send_message_gate(state, settings):
+    _, _, acct = verified()
+    put_in_state(acct, state)
+    settings.FREE_CHAT_IN_MATCH = False
+    caps = selectors.capabilities_for(acct)
+    assert caps["send_message"] is False and caps["read_conversations"] is True
+
+
+def test_unverified_with_entitlement_row_still_has_nothing_beyond_browse_and_account_controls():
     _, _, acct = unverified()
     Entitlement.objects.create(
         account=acct,
@@ -81,7 +101,9 @@ def test_unverified_with_entitlement_row_still_has_nothing():
         starts_at=timezone.now() - timedelta(hours=1),
         ends_at=timezone.now() + timedelta(days=1),
     )
-    assert not any(selectors.capabilities_for(acct).values())
+    caps = selectors.capabilities_for(acct)
+    assert {k for k, v in caps.items() if v} == {"browse", "account_controls"}
+    assert selectors.entitlement_summary(acct).trial_available is False
 
 
 def test_revoked_entitlement_gives_no_access():
@@ -93,9 +115,9 @@ def test_revoked_entitlement_gives_no_access():
         actor_id=__import__("uuid").uuid4(),
         actor_role="support",
     )
-    assert selectors.has_capability(acct, "browse")
+    assert selectors.has_capability(acct, "higher_interest_cap")
     services.revoke(entitlement=ent, reason="abuse", actor_type="system", actor_id=None)
-    assert not selectors.has_capability(acct, "browse")
+    assert not selectors.has_capability(acct, "higher_interest_cap")
 
 
 def test_nonmember_accept_interest_is_configurable(settings):
@@ -114,7 +136,8 @@ def test_membership_beats_trial_and_window_boundaries():
         assert selectors.entitlement_summary(acct).state == "trial"
     with freeze_time("2026-01-02 10:00:00"):  # exactly 24 h: ends_at is exclusive
         assert selectors.entitlement_summary(acct).state == "expired"
-        assert not selectors.has_capability(acct, "send_message")
+        assert not selectors.has_capability(acct, "higher_interest_cap")  # the perks end with the window
+        assert selectors.has_capability(acct, "send_message")  # v2: chat inside a match stays free
         assert selectors.has_capability(acct, "read_conversations")
 
 
@@ -122,7 +145,8 @@ def test_membership_beats_trial_and_window_boundaries():
 def test_entitlements_endpoint_shape_and_server_time():
     c, r, _ = verified()
     body = c.get("/api/v1/me/entitlements", **bearer(r)).json()
-    assert body["state"] == "none" and body["trial"] == {"used": False, "ends_at": None}
+    assert body["state"] == "none"
+    assert body["trial"] == {"used": False, "available": True, "started_at": None, "ends_at": None}
     assert body["membership"] is None and body["server_time"].endswith("Z")
     assert set(body["capabilities"]) == set(CAPS)
     assert Client(headers={"host": "api.mc.test"}).get("/api/v1/me/entitlements").status_code == 401

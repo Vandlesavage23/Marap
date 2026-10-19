@@ -47,13 +47,22 @@ class ProfileCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(mc.radii.sm),
+            borderRadius: BorderRadius.circular(mc.radii.md),
             child: SizedBox.square(
               dimension: 72,
               child: photo == null
-                  ? ColoredBox(
-                      color: c.primaryContainer,
-                      child: Icon(Icons.person, color: c.onPrimaryContainer),
+                  ? DecoratedBox(
+                      decoration: BoxDecoration(gradient: c.brandGradient),
+                      child: Center(
+                        child: Text(
+                          displayName.trim().isEmpty
+                              ? '?'
+                              : String.fromCharCode(
+                                  displayName.trim().runes.first,
+                                ).toUpperCase(),
+                          style: mc.text.headline.copyWith(color: c.onPrimary),
+                        ),
+                      ),
                     )
                   : Image(image: photo!, fit: BoxFit.cover),
             ),

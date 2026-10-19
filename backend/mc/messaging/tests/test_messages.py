@@ -89,7 +89,20 @@ def test_membership_and_auth_enforced():
     assert say(m, str(uuid.uuid4())).status_code == 404
 
 
-def test_send_requires_capability_but_reading_does_not():
+def test_chat_in_a_match_stays_free_after_the_trial_lapses():
+    """v2 (ADR-0009): a verified member keeps chatting inside a match without a trial or membership."""
+    m, f, mid = matched()
+    say(m, mid, "before expiry")
+    from mc.entitlements.models import Entitlement
+
+    Entitlement.objects.filter(account=f[2]).delete()  # her trial lapses
+    assert say(f, mid, "can I reply?").status_code == 201
+    texts = [i["body"] for i in history(f, mid).json()["items"] if i["kind"] == "text"]
+    assert sorted(texts) == ["before expiry", "can I reply?"]
+
+
+def test_send_requires_capability_when_free_chat_is_switched_off(settings):
+    settings.FREE_CHAT_IN_MATCH = False
     m, f, mid = matched()
     say(m, mid, "before expiry")
     from mc.entitlements.models import Entitlement
@@ -97,6 +110,7 @@ def test_send_requires_capability_but_reading_does_not():
     Entitlement.objects.filter(account=f[2]).delete()  # her trial lapses
     resp = say(f, mid, "can I reply?")
     assert resp.status_code == 403 and resp.json()["capability"] == "send_message"
+    assert resp.json()["code"] == "entitlement_required"
     assert [i["body"] for i in history(f, mid).json()["items"] if i["kind"] == "text"] == [
         "before expiry"
     ]  # read-only, no data loss

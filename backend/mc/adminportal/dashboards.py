@@ -101,6 +101,45 @@ def funnel(rng: DateRange) -> list[dict[str, Any]]:
     return rows
 
 
+APP_STEP_TITLES = {
+    "welcome_seen": "Saw the welcome screen",
+    "otp_sent": "Asked for a sign-in code",
+    "otp_verified": "Signed in",
+    "about_done": "Finished About you",
+    "first_card_seen": "Saw a first member card",
+    "profile_opened": "Opened a profile",
+    "verify_started": "Started verification",
+    "verify_passed": "Passed verification",
+    "golive_done": "Went live",
+    "first_interest": "Sent a first interest",
+    "paywall_seen": "Saw the membership offer",
+    "trial_started": "Started the free trial",
+}
+
+
+def app_funnel(rng: DateRange) -> list[dict[str, Any]]:
+    """The in-app step funnel: distinct installs that reached each step for the first time in the range (anonymous
+    installs identified only by an HMAC of a random id). Same small-cell suppression as the cohort funnel; the
+    percentage compares with the first step shown, only when both cells are visible."""
+    counts = account_selectors.funnel_step_counts(start=rng.start, end=rng.end)
+    first = next(iter(counts.values()), None)
+    rows: list[dict[str, Any]] = []
+    previous: int | None = None
+    for i, (key, n) in enumerate(counts.items()):
+        rows.append(
+            {
+                "key": key,
+                "title": APP_STEP_TITLES.get(key, key),
+                "count": n,
+                "text": aggregates.label(n),
+                "of_first": _pct(n, first) if i else None,
+                "of_previous": _pct(n, previous) if i else None,
+            }
+        )
+        previous = n
+    return rows
+
+
 def _pct(n: int | None, base: int | None) -> str | None:
     if n is None or not base:
         return None

@@ -17,8 +17,10 @@ from mc.common.errors import (
     MarriedNotEligible,
     NotVerified,
     ProfileIncomplete,
+    Underage,
     ValidationFailed,
 )
+from mc.common.timeutil import age_on, kampala_date
 from mc.verification import selectors as verification_selectors
 
 from . import preferences, readiness, selectors
@@ -49,40 +51,157 @@ EDITABLE = (
     "display_name", "gender", "district", "diaspora_country", "intention", "marriage_timeline",
     "marital_status", "marriage_form_preference", "show_married_profiles", "has_children",
     "wants_children", "languages", "religion", "religion_practice", "occupation", "education",
+    "photo_visibility",
 )  # fmt: skip
+MAX_DECLARED_AGE = 100
 
 
-def get_or_create_profile(*, account: "Account") -> Profile:
-    """Profiles exist only for verified adults; birth_date comes from the passed verification."""
+def get_or_create_profile(*, account: "Account", allow_unverified: bool = False) -> Profile:
+    """Profile building needs a verified adult: `birth_date` comes from the passed verification (and replaces any
+    date declared earlier). `allow_unverified=True` only RETURNS the "About you" profile an unverified member
+    already has; it never creates one (that is `update_profile`'s job, with a declared birth date)."""
     dob = verification_selectors.verified_date_of_birth(account)
     if dob is None:
-        raise NotVerified("Verify your identity before building your profile.")
-    profile, _ = Profile.objects.get_or_create(
+        existing = Profile.objects.filter(account=account).first() if allow_unverified else None
+        if existing is None:
+            raise NotVerified("Verify your identity before building your profile.")
+        return existing
+    profile, created = Profile.objects.get_or_create(
         account=account,
         defaults={
             "birth_date": dob,
             "show_married_profiles": settings.MARRIED_VISIBILITY_DEFAULT,
         },
     )
+    if not created and profile.birth_date != dob:
+        profile.birth_date = dob
+        profile.save(update_fields=["birth_date", "updated_at"])
     return profile
+
+
+def open_profile(
+    *,
+    viewer: "Account",
+    target: Profile,
+    now: Any = None,
+    ip: str | None = None,
+    install_id: str | None = None,
+) -> bool:
+    """Gate and count one profile open. Returns True when the viewer gets the LIMITED (locked) payload, i.e. they
+    have not verified their identity. Unverified viewers need the required consents, are held to
+    PROFILE_OPENS_PER_DAY_UNVERIFIED distinct profiles per Kampala day (429 `limit_reached` + `resets_at`) and to
+    per-IP/device caps. Opening your own profile or being verified costs nothing."""
+    from mc.accounts import services as account_services
+    from mc.common import quota, ratelimit
+    from mc.common.errors import LimitReached
+    from mc.common.timeutil import iso_z, next_kampala_midnight
+    from mc.entitlements import selectors as entitlement_selectors
+
+    if target.account_id == viewer.id:
+        return False
+    now = now or timezone.now()
+    summary = entitlement_selectors.entitlement_summary(viewer, now)
+    if summary.capabilities["view_full_profile"]:
+        return False
+    account_services.require_verification_consents(viewer)
+    ratelimit.hit_client(
+        "open",
+        ip=ip,
+        install_id=install_id,
+        limit=settings.PROFILE_OPENS_PER_IP_PER_DAY_UNVERIFIED,
+        window_seconds=24 * 3600,
+    )
+    limit = entitlement_selectors.profile_open_limit(summary)
+    if limit is not None and not quota.consume_unique(
+        quota.day_key("open", viewer.id, now), member=target.id, limit=limit, now=now
+    ):
+        resets = next_kampala_midnight(now)
+        raise LimitReached(
+            "You've opened as many profiles as you can today without verifying. "
+            "Verify your identity to see more, or come back tomorrow.",
+            resets_at=iso_z(resets),
+            limit=limit,
+            retry_after=max(int((resets - now).total_seconds()), 1),
+        )
+    return True
+
+
+def adopt_verified_birth_date(*, account_id: uuid.UUID) -> None:
+    """The identity check passed: the ID's date of birth replaces whatever the member declared at sign-up."""
+    from mc.accounts.selectors import get_account
+
+    account = get_account(account_id)
+    dob = verification_selectors.verified_date_of_birth(account) if account else None
+    if dob is not None:
+        Profile.objects.filter(account_id=account_id).exclude(birth_date=dob).update(
+            birth_date=dob, updated_at=timezone.now()
+        )
+
+
+def _check_declared_birth_date(value: Any) -> None:
+    age = age_on(value, kampala_date(timezone.now()))
+    if age < settings.MIN_AGE:
+        raise Underage(
+            f"Marriage Connect is for adults aged {settings.MIN_AGE} or over. "
+            "Please check the date you entered."
+        )
+    if age > MAX_DECLARED_AGE:
+        raise ValidationFailed("Please check your birth date.")
 
 
 def _coarse(value: Any, places: str = "0.01") -> Decimal:
     return Decimal(str(value)).quantize(Decimal(places), rounding=ROUND_HALF_UP)
 
 
+def _ensure_profile_for_update(account: "Account", data: dict[str, Any]) -> bool:
+    """Create the draft profile if needed (outside the update txn: a rejected PATCH keeps the draft). Verified
+    members get it with their ID's birth date; an unverified member creates it with the birth date they declare in
+    "About you" (18+ only). Returns whether the account is verified."""
+    verified = verification_selectors.verified_date_of_birth(account) is not None
+    if verified:
+        get_or_create_profile(account=account)
+        return True
+    if Profile.objects.filter(account=account).exists():
+        return False
+    declared = data.get("birth_date")
+    if declared is None:
+        raise ValidationFailed("Tell us your birth date to get started.", missing=["birth_date"])
+    _check_declared_birth_date(declared)
+    Profile.objects.get_or_create(
+        account=account,
+        defaults={
+            "birth_date": declared,
+            "show_married_profiles": settings.MARRIED_VISIBILITY_DEFAULT,
+        },
+    )
+    return False
+
+
 def update_profile(*, account: "Account", data: dict[str, Any]) -> Profile:
     """Apply a partial update, validating every rule in §7.3. All-or-nothing."""
-    unknown = set(data) - set(EDITABLE) - {"married_declaration", "location"}
+    unknown = set(data) - set(EDITABLE) - {"married_declaration", "location", "birth_date"}
     if unknown:
         raise ValidationFailed(f"Unknown fields: {', '.join(sorted(unknown))}")
-    get_or_create_profile(
-        account=account
-    )  # outside the update txn: a rejected PATCH keeps the draft
+    verified = _ensure_profile_for_update(account, data)
     with transaction.atomic():
         profile = Profile.objects.select_for_update().get(account=account)
         if profile.status == Profile.Status.SUSPENDED:
             raise Conflict("This profile is suspended.")
+
+        if "birth_date" in data:
+            declared = data.pop("birth_date")
+            if verified:
+                if declared != profile.birth_date:
+                    raise ValidationFailed(
+                        "Your birth date comes from your ID and can't be changed.", locked=True
+                    )
+            else:
+                _check_declared_birth_date(declared)
+                profile.birth_date = declared
+        if "photo_visibility" in data and data["photo_visibility"] not in (
+            Profile.PhotoVisibility.values
+        ):
+            raise ValidationFailed("Choose who can see your photos: everyone or verified members.")
 
         for field, enum in ENUM_FIELDS.items():
             if field in data and data[field] not in (*enum.values, ""):
@@ -283,7 +402,7 @@ def refresh(profile: Profile) -> Profile:
 
 def go_live(*, account: "Account") -> Profile:
     """Draft → live only when every §10.3 rule holds; otherwise `profile_incomplete` lists what's missing."""
-    profile = get_or_create_profile(account=account)
+    profile = get_or_create_profile(account=account)  # NotVerified until the identity check has passed
     with transaction.atomic():
         profile = Profile.objects.select_for_update().get(pk=profile.pk)
         if profile.status == Profile.Status.SUSPENDED:

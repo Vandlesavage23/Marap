@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from mc.accounts.constants import FUNNEL_STEPS
 from mc.accounts.models import ConsentRecord, Device
 
 
@@ -74,3 +75,10 @@ class RecoverNewPhoneSerializer(RecoveryTokenSerializer):
 
 class RecoverCompleteSerializer(RecoveryTokenSerializer):
     code = serializers.RegexField(r"^\d{6}$", max_length=6)
+
+
+class FunnelEventSerializer(serializers.Serializer):
+    """Nothing but a step name and the client's random install id: no free text, so no PII can be sent."""
+
+    name = serializers.ChoiceField(choices=list(FUNNEL_STEPS))
+    install_id = serializers.UUIDField(required=False)

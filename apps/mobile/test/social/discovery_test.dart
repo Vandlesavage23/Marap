@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
+import 'package:marriage_connect/src/core/widgets/widgets.dart';
 import 'package:marriage_connect/src/features/discovery/application/discovery_controller.dart';
 import 'package:marriage_connect/src/features/discovery/application/media_prefs.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
@@ -156,12 +158,15 @@ void main() {
       )..gate = Completer<void>();
       await t.pumpWidget(discoveryApp(repo));
       await t.pump();
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(
+          find.byType(DeckSkeleton), findsOneWidget); // skeleton, not a spinner
+      expect(find.byType(CircularProgressIndicator), findsNothing);
       repo.gate!.complete();
       await t.pumpAndSettle();
       expect(find.text('Amani, 29'), findsOneWidget);
       expect(find.text('Strong match'), findsOneWidget);
-      expect(find.text('Age verified'), findsOneWidget);
+      // The verified seal replaces the old text chips on the card.
+      expect(find.byType(VerifiedBadgeArt), findsOneWidget);
       expect(find.text('Marriage soon · In 1 to 2 years'), findsOneWidget);
       expect(find.byKey(const Key('img:https://img/a/1.webp')), findsOneWidget);
     });
@@ -308,10 +313,10 @@ void main() {
       );
       await t.pumpWidget(discoveryApp(repo));
       await t.pumpAndSettle();
-      await t.drag(find.byType(Card).first, const Offset(40, 0));
+      await t.drag(find.byType(PhotoProfileCard).first, const Offset(40, 0));
       await t.pumpAndSettle();
       expect(repo.feedbackCalls, isEmpty);
-      await t.drag(find.byType(Card).first, const Offset(-400, 0));
+      await t.drag(find.byType(PhotoProfileCard).first, const Offset(-400, 0));
       await t.pumpAndSettle();
       expect(repo.feedbackCalls, [('a', DiscoveryFeedback.pass)]);
     });
@@ -325,7 +330,7 @@ void main() {
       );
       await t.pumpWidget(discoveryApp(repo));
       await t.pumpAndSettle();
-      await t.drag(find.byType(Card).first, const Offset(400, 0));
+      await t.drag(find.byType(PhotoProfileCard).first, const Offset(400, 0));
       await t.pumpAndSettle();
       expect(find.text('Send an interest'), findsOneWidget);
       expect(find.text('I teach and I love hiking.'), findsOneWidget);
@@ -469,6 +474,11 @@ void main() {
         );
 
     testWidgets('shows the allowlisted profile fields', (t) async {
+      // The profile is a long scrolling page: a tall surface builds it all.
+      t.view
+        ..physicalSize = const Size(800, 2400)
+        ..devicePixelRatio = 1;
+      addTearDown(t.view.reset);
       await t.pumpWidget(profileApp(FakeDiscovery()..profileResult = profile));
       await t.pumpAndSettle();
       expect(find.text('Amani, 29'), findsOneWidget);

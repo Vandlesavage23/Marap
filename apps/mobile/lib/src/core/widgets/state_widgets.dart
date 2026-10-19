@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/mc_button.dart';
@@ -6,14 +7,17 @@ import 'package:marriage_connect/src/core/widgets/mc_button.dart';
 /// Shared, explicit UI states (Bible §5.5): empty / error / restricted / offline.
 class _StateView extends StatelessWidget {
   const _StateView({
-    required this.icon,
     required this.title,
+    this.kind,
+    this.icon,
     this.body,
     this.actionLabel,
     this.onAction,
   });
 
-  final IconData icon;
+  /// Illustration (preferred) or a plain [icon] (restricted state).
+  final EmptyKind? kind;
+  final IconData? icon;
   final String title;
   final String? body;
   final String? actionLabel;
@@ -31,7 +35,25 @@ class _StateView extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ExcludeSemantics(child: Icon(icon, size: 48, color: c.primary)),
+              if (kind != null)
+                EmptyIllustration(kind: kind!)
+              else
+                ExcludeSemantics(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: c.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(mc.space.lg),
+                      child: Icon(
+                        icon,
+                        size: 48,
+                        color: c.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+                ),
               SizedBox(height: mc.space.md),
               Semantics(
                 header: true,
@@ -66,15 +88,31 @@ class _StateView extends StatelessWidget {
 }
 
 class EmptyState extends StatelessWidget {
-  const EmptyState({this.title, this.body, super.key});
+  const EmptyState({
+    this.title,
+    this.body,
+    this.kind = EmptyKind.noCandidates,
+    this.actionLabel,
+    this.onAction,
+    super.key,
+  });
   final String? title;
   final String? body;
 
+  /// Which illustration to show (decorative).
+  final EmptyKind kind;
+
+  /// Optional clear next action ("Edit my filters", "Browse people").
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
   @override
   Widget build(BuildContext context) => _StateView(
-        icon: Icons.inbox_outlined,
+        kind: kind,
         title: title ?? AppLocalizations.of(context).stateEmptyTitle,
         body: body,
+        actionLabel: onAction == null ? null : actionLabel,
+        onAction: onAction,
       );
 }
 
@@ -87,7 +125,7 @@ class ErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return _StateView(
-      icon: Icons.error_outline,
+      kind: EmptyKind.error,
       title: l.stateErrorTitle,
       body: message ?? l.stateErrorBody,
       actionLabel: onRetry == null ? null : l.retry,
@@ -104,7 +142,7 @@ class OfflineState extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     return _StateView(
-      icon: Icons.wifi_off,
+      kind: EmptyKind.offline,
       title: l.stateOfflineTitle,
       body: l.stateOfflineBody,
       actionLabel: onRetry == null ? null : l.retry,

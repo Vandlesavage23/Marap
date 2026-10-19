@@ -67,6 +67,13 @@ class MeSnapshot {
   /// A profile that has never gone live still needs the builder.
   bool get profileIncomplete =>
       profileStatus == 'none' || profileStatus == 'draft';
+
+  /// The server has no profile row for this account yet: the only thing the
+  /// router insists on (the "About you" screen, user-flow v2 §5). Everything
+  /// else (verification, photos, intro, answers) is contextual.
+  bool get basicProfileMissing => profileStatus == 'none';
+
+  bool get profileLive => profileStatus == 'live';
 }
 
 // ignore: one_member_abstracts

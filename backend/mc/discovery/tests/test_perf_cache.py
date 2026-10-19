@@ -105,8 +105,11 @@ def test_card_photos_still_follow_the_media_policy():
     assert profile_selectors.card_data([pid], me)[pid]["photos"][0]["url"] is None
     safety_services.unblock(blocker=me, profile_id=pid)
     assert profile_selectors.card_data([pid], me)[pid]["photos"][0]["url"]
-    nobody = create_member(gender="male", age=30)  # no trial → no `browse` → photos not visible
-    assert profile_selectors.card_data([pid], nobody)[pid]["photos"][0]["url"] is None
+    # v2: a verified member without a trial can browse and see photos; the opposite-gender rule still holds.
+    free = create_member(gender="male", age=30)
+    assert profile_selectors.card_data([pid], free)[pid]["photos"][0]["url"]
+    same_gender = create_member(gender="female", age=30)
+    assert profile_selectors.card_data([pid], same_gender)[pid]["photos"][0]["url"] is None
 
 
 # ------------------------------------------------------------------ same ranking as a full rebuild

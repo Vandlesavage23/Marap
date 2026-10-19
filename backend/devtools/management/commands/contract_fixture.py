@@ -8,10 +8,16 @@ Creates (does NOT migrate; run `migrate` first so the seeded questions exist):
   peter   verified live man with a membership; has a PENDING interest to amina
   grace   verified live woman, discoverable by ben (target for "send interest")
   joy     verified live woman, target for block/report
-  newbie  verified live man WITHOUT any membership (trial start, restricted states)
+  newbie  verified live man WITHOUT any membership: a free member (v2: browses, 3 interests / week, trial start)
+  unverif a signed-in UNVERIFIED man: consents given, "About you" done (name, gender, birth date, district),
+          no description/photos/answers, account `pending_verification` (limited cards, locked profiles,
+          verification_required on send_interest)
+  quota   verified live FREE man with 2 of his 3 weekly interests already used (pending, to qpeer1/qpeer2);
+          one more send works, then `interest_quota_reached`; qpeer3/qpeer4 are his targets
+  qpeer1..qpeer4  verified live women (quota member's targets)
   scout   verified live man with a membership that only browses discovery
   bulka/bulkb  a matched pair with an empty conversation (pagination, rate limit)
-  lapsed/lapsedpeer  a match whose member's membership ended (read-only conversation)
+  lapsed/lapsedpeer  a match whose member's membership ended (v2: the conversation stays writable)
   locka/lockb  a matched pair with no messages and photos locked
   picka/pickb  a matched pair with 10 messages each (photos unlocked)
 and prints one JSON document with access/refresh tokens, account and profile ids.
@@ -36,7 +42,7 @@ from mc.entitlements.models import Entitlement
 from mc.interests import services as interest_services
 from mc.messaging import services as messaging_services
 from mc.notifications import services as notification_services
-from mc.profiles.models import Profile
+from mc.profiles.models import Description, Preference, Profile
 from mc.questionnaire.models import Question
 
 ALLOWED = (
@@ -60,7 +66,7 @@ MEMBERS = {
     # A matched pair with an empty conversation, for pagination / rate-limit tests.
     "bulka": ("+256771000008", "male", 34, "Bulk A Contract", True),
     "bulkb": ("+256771000009", "female", 30, "Bulk B Contract", True),
-    # A member whose membership has ended (read-only chat, no browsing) and their match partner.
+    # A member whose membership has ended (v2: chat in the match stays free) and their match partner.
     "lapsed": ("+256771000014", "male", 37, "Lapsed Contract", True),
     "lapsedpeer": ("+256771000015", "female", 33, "Lapsed Peer Contract", True),
     # A matched pair that never exchanges messages here: photos stay locked.
@@ -69,7 +75,15 @@ MEMBERS = {
     # A matched pair that has already exchanged enough messages to unlock photos.
     "picka": ("+256771000010", "male", 35, "Pick A Contract", True),
     "pickb": ("+256771000011", "female", 31, "Pick B Contract", True),
+    # v2 states: a free member with the weekly quota nearly used and the women he can still / cannot yet send to.
+    "quota": ("+256771000017", "male", 30, "Quota Contract", False),
+    "qpeer1": ("+256771000018", "female", 28, "Quota Peer One", False),
+    "qpeer2": ("+256771000019", "female", 29, "Quota Peer Two", False),
+    "qpeer3": ("+256771000020", "female", 27, "Quota Peer Three", False),
+    "qpeer4": ("+256771000021", "female", 28, "Quota Peer Four", False),
 }
+# A signed-in member who has not verified: built by hand below (no live profile, no answers).
+UNVERIFIED = ("unverif", "+256771000016", "male", 29, "Unverified Contract")
 
 
 def _cid(label: str) -> uuid.UUID:
@@ -78,6 +92,34 @@ def _cid(label: str) -> uuid.UUID:
 
 class Command(BaseCommand):
     help = "Create the deterministic contract-test fixture and print tokens as JSON."
+
+    def _unverified_member(self, now) -> Account:  # type: ignore[no-untyped-def]
+        """Signed in, consents given, "About you" done; nothing else (no description, photos, answers)."""
+        _key, phone, gender, age, name = UNVERIFIED
+        account = factories.create_member(
+            gender=gender,
+            age=age,
+            name=name,
+            phone=phone,
+            district="Kampala",
+            verified=False,
+            live=False,
+            photos=0,
+            with_answers=False,
+            last_seen_at=now,
+        )
+        Profile.objects.filter(account=account).update(current_description=None, completeness=0)
+        Description.objects.filter(profile__account=account).delete()
+        Preference.objects.filter(profile__account=account).delete()
+        account_services.record_consent(
+            account=account,
+            items=[
+                {"kind": kind, "version": "2026-01", "granted": True}
+                for kind in ("terms", "privacy", "data_transfer")
+            ],
+            source="app",
+        )
+        return account
 
     def add_arguments(self, parser) -> None:  # type: ignore[no-untyped-def]
         parser.add_argument("--reset", action="store_true", help="Delete a previous fixture first.")
@@ -90,7 +132,7 @@ class Command(BaseCommand):
             raise CommandError("contract_fixture only runs in local/dev/test.")
         if not Question.objects.filter(is_core=True).exists():
             raise CommandError("Run migrate first (questions are missing).")
-        phones = [m[0] for m in MEMBERS.values()]
+        phones = [m[0] for m in MEMBERS.values()] + [UNVERIFIED[1]]
         if (
             settings.REVIEW_ACCOUNT_PHONE
         ):  # created by the onboarding contract test via the review OTP
@@ -127,7 +169,15 @@ class Command(BaseCommand):
                         reason="contract fixture",
                     )
 
+        accounts["unverif"] = self._unverified_member(now)
         ben, amina, peter = accounts["ben"], accounts["amina"], accounts["peter"]
+        quota = accounts["quota"]
+        for peer in ("qpeer1", "qpeer2"):  # 2 of the 3 free weekly interests are already spent
+            interest_services.send_interest(
+                sender=quota,
+                recipient_profile_id=Profile.objects.get(account=accounts[peer]).id,
+                idempotency_key=f"fixture-quota-{peer}",
+            )
         # ben <-> amina: mutual interest -> match.
         interest_services.send_interest(
             sender=ben,
@@ -272,7 +322,7 @@ class Command(BaseCommand):
             members[key] = {
                 "second_session_id": str(other.id),
                 "expired_slots": slots,
-                "name": MEMBERS[key][3],
+                "name": MEMBERS[key][3] if key in MEMBERS else UNVERIFIED[4],
                 "phone": account.phone_e164,
                 "account_id": str(account.id),
                 "profile_id": str(Profile.objects.get(account=account).id),

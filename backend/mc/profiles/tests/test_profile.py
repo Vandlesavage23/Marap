@@ -15,11 +15,15 @@ from .helpers import BASIC, consent, patch, verified_client
 pytestmark = pytest.mark.django_db
 
 
-def test_unverified_user_cannot_have_a_profile():
+def test_unverified_user_has_no_profile_until_about_you():
+    """v2: before the identity check a member creates a draft ("About you") by declaring a birth date; without
+    it nothing is created. Everything else about profile building still needs verification."""
     c, r = new_user()
     resp = c.get("/api/v1/me/profile", **bearer(r))
     assert resp.status_code == 403 and resp.json()["code"] == "not_verified"
-    assert patch(c, r, **BASIC).status_code == 403
+    resp = patch(c, r, **BASIC)  # no birth date → nothing to create the draft from
+    assert resp.status_code == 422 and resp.json()["missing"] == ["birth_date"]
+    assert Profile.objects.count() == 0
     assert Client(headers={"host": "api.mc.test"}).get("/api/v1/me/profile").status_code == 401
 
 
@@ -36,7 +40,7 @@ def test_patch_valid_and_completeness():
     resp = patch(c, r, **BASIC)
     assert resp.status_code == 200
     body = resp.json()
-    assert body["display_name"] == "Amani" and body["completeness"] == 30
+    assert body["display_name"] == "Amani" and body["completeness"] == 21
     body = patch(
         c,
         r,
@@ -47,7 +51,7 @@ def test_patch_valid_and_completeness():
         wants_children="yes",
         marriage_form_preference="monogamous_only",
     ).json()
-    assert body["languages"] == ["en", "lg"] and body["completeness"] == 40
+    assert body["languages"] == ["en", "lg"] and body["completeness"] == 30
 
 
 def test_birth_date_and_unknown_fields_are_not_editable():

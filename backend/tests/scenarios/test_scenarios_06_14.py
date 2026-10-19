@@ -18,7 +18,10 @@ from mc.notifications.providers.push import FakePush
 pytestmark = pytest.mark.django_db
 
 
-def test_scenario_06_membership_expires_mid_conversation_read_only_no_data_loss():
+def test_scenario_06_membership_expires_mid_conversation_read_only_no_data_loss(settings):
+    """Bible §13.2 scenario 06. v2 (ADR-0009): chat inside a match stays free after the membership ends
+    (`FREE_CHAT_IN_MATCH`); the original read-only behaviour is what the flag-off setting still gives."""
+    settings.FREE_CHAT_IN_MATCH = False
     m, f, mid = matched()
     assert say(m, mid, "before expiry").status_code == 201
     now = timezone.now()
@@ -34,6 +37,8 @@ def test_scenario_06_membership_expires_mid_conversation_read_only_no_data_loss(
     bodies = [x.get("body") for x in history(f, mid).json()["items"]]
     assert "before expiry" in bodies
     assert say(f, mid, "still here").status_code == 201
+    settings.FREE_CHAT_IN_MATCH = True  # v2 default: the expired member may keep talking
+    assert say(m, mid, "after expiry, free chat").status_code == 201
 
 
 @pytest.mark.skip(

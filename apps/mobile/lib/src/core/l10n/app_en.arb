@@ -905,9 +905,9 @@
   "profileMissingTimeline": "Your timeline",
   "profileMissingMarital": "Your marital status",
   "profileMissingVerification": "Identity verification",
-  "profileMissingPhotos": "At least two approved photos",
+  "profileMissingPhotos": "An approved photo",
   "profileMissingDescription": "An approved description",
-  "profileMissingQuestionnaire": "The core questions",
+  "profileMissingQuestionnaire": "Eight quick questions",
   "profileFix": "Fix",
   "profileErrorIncomplete": "Your profile isn't ready yet. See what's left below.",
   "profileErrorConflict": "That change couldn't be saved. Please reload and try again.",
@@ -1091,5 +1091,461 @@
         "type": "int"
       }
     }
-  }
+  },
+  "v2aNavDiscover": "Discover",
+  "v2aNavInterests": "Interests",
+  "v2aNavMatches": "Matches",
+  "v2aNavProfile": "Profile",
+  "v2aNavInterestsBadge": "{count, plural, =1{1 new interest} other{{count} new interests}}",
+  "@v2aNavInterestsBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "v2aNavMatchesBadge": "{count, plural, =1{1 unread message} other{{count} unread messages}}",
+  "@v2aNavMatchesBadge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "v2aProfileTitle": "Your profile",
+  "v2aProfileRingLabel": "{percent}% complete",
+  "@v2aProfileRingLabel": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "v2aProfileYou": "You",
+  "v2aProfileNextTitle": "Your next step",
+  "v2aProfileNextPlaceholder": "A complete profile gets noticed more. Add a photo and a few words about yourself.",
+  "v2aProfileNextCta": "Continue",
+  "v2aProfileEdit": "Edit my profile",
+  "v2aProfileEditHint": "Photos, intro and details",
+  "v2aProfileMembership": "Membership",
+  "v2aProfileMembershipHint": "Your plan, free trial and receipts",
+  "v2aProfileSettings": "Settings",
+  "v2aProfileSettingsHint": "Account, privacy and notifications",
+  "v2aProfileSafety": "Safety centre",
+  "v2aProfileSafetyHint": "Tips, blocking and reporting",
+  "v2aProfileNotifications": "Notifications",
+  "v2aProfileNotificationsHint": "Replies, matches and updates",
+  "v2aProfileVerified": "Verified",
+  "v2bWelcomeTitle": "Find a partner for marriage",
+  "v2bWelcomeSub": "Meet verified adults who are serious about marriage.",
+  "v2bValueSeriousTitle": "Serious about marriage",
+  "v2bValueSeriousBody": "Everyone here wants a life partner, not a casual chat.",
+  "v2bValueVerifiedTitle": "Everyone is verified",
+  "v2bValueVerifiedBody": "Members confirm their age and identity before they contact anyone.",
+  "v2bValuePrivacyTitle": "Your privacy comes first",
+  "v2bValuePrivacyBody": "We never show your phone number. You choose who sees your photos.",
+  "v2bGetStarted": "Get started",
+  "v2bLookAround": "Look around first",
+  "v2bWelcomeLegal": "You will read and agree to our Terms of Use and Privacy Notice when you join.",
+  "v2bLookTitle": "Look around",
+  "v2bLookBanner": "These are samples. Real members appear when you join.",
+  "v2bSampleLabel": "Sample",
+  "v2bSampleSemantics": "Sample profile: {name}, {facts}. {why}",
+  "@v2bSampleSemantics": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "facts": {
+        "type": "String"
+      },
+      "why": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bWhyLabel": "Why we matched you",
+  "v2bLookNote": "Verified members have this badge. Everyone you meet here has passed an identity and age check.",
+  "v2bSample1Name": "Amara, 27",
+  "v2bSample1Facts": "Kampala · Marriage within a year",
+  "v2bSample1Why": "You both want to marry within a year.",
+  "v2bSample2Name": "Joel, 31",
+  "v2bSample2Facts": "Mbarara · Open on timing",
+  "v2bSample2Why": "You both want children and live in the same region.",
+  "v2bSample3Name": "Esther, 24",
+  "v2bSample3Facts": "Gulu · Marriage within a year",
+  "v2bSample3Why": "You answered alike about family and how to settle disagreements.",
+  "v2bSample4Name": "Ronald, 35",
+  "v2bSample4Facts": "Jinja · Open on timing",
+  "v2bSample4Why": "You are both looking for a serious, long-term partner.",
+  "v2bSample5Name": "Harriet, 29",
+  "v2bSample5Facts": "Entebbe · Marriage within a year",
+  "v2bSample5Why": "Your age ranges and where you live fit each other.",
+  "v2bSample6Name": "Samuel, 41",
+  "v2bSample6Facts": "Mbale · Open on timing",
+  "v2bSample6Why": "You both want to settle close to family.",
+  "v2bPhoneTitle": "What is your phone number?",
+  "v2bPhoneSub": "We will text you a 6-digit code to sign in. There is no password.",
+  "v2bPhoneLabel": "Phone number",
+  "v2bPhoneHint": "772 000 000",
+  "v2bPhonePrefixSemantics": "Uganda, country code plus 256",
+  "v2bPhoneReassure": "We never show your number to anyone.",
+  "v2bPhoneInvalid": "Enter your 9-digit number, for example 772 000 000.",
+  "v2bSendCode": "Send code",
+  "v2bCodeTitle": "Enter the 6-digit code",
+  "v2bCodeSent": "We sent it by SMS to {phone}.",
+  "@v2bCodeSent": {
+    "placeholders": {
+      "phone": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bWrongNumber": "Wrong number?",
+  "v2bCodeResendIn": "Send a new code in {time}",
+  "@v2bCodeResendIn": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bCodeResend": "Send a new code",
+  "v2bCodeResent": "A new code is on its way.",
+  "v2bCodeWrong": "That code didn't work. Check the SMS and try again.",
+  "v2bCodeSlow": "SMS can take a minute or two. Check that the number above is right.",
+  "v2bCodeChecking": "Checking your code",
+  "v2bCodeFieldLabel": "6-digit code. {count} of 6 digits entered.",
+  "@v2bCodeFieldLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bAboutTitle": "About you",
+  "v2bStepOf": "Step {n} of {total}",
+  "@v2bStepOf": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bAboutSub": "Three quick things and you can start looking. It takes about 30 seconds.",
+  "v2bFirstName": "First name",
+  "v2bFirstNameHelp": "Other members will see this. Your first name is enough.",
+  "v2bBirthDate": "Birth date",
+  "v2bBirthDateChoose": "Choose your birth date",
+  "v2bBirthDateHelp": "We show your age, never your birth date.",
+  "v2bBirthDateValue": "{date} ({age} years old)",
+  "@v2bBirthDateValue": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "age": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bUnder18Title": "Marriage Connect is for adults aged 18 and over",
+  "v2bUnder18Body": "We're sorry, we can't set you up yet. We would be glad to see you when you turn 18. Take care until then.",
+  "v2bIAm": "I am",
+  "v2bIAmMan": "I am a man",
+  "v2bIAmWoman": "I am a woman",
+  "v2bGenderNote": "This can't be changed later, so please choose carefully.",
+  "v2bConsentsHeading": "Before you join",
+  "v2bSelectAll": "Select all",
+  "v2bAboutCta": "Continue",
+  "v2bAboutMissing": "Still needed: {items}.",
+  "@v2bAboutMissing": {
+    "placeholders": {
+      "items": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bNeedName": "your first name",
+  "v2bNeedBirth": "your birth date",
+  "v2bNeedGender": "who you are",
+  "v2bNeedConsents": "the three agreements",
+  "v2bNameRejected": "We couldn't use that name. Please use letters only, for example Grace.",
+  "v2bAboutSaving": "Setting up your account",
+  "v2bBack": "Back",
+  "v2aVerifyMoreTitle": "Verify to read more",
+  "v2aVerifyMoreBody": "Verified members can read full intros and see every photo. It takes about 2 minutes.",
+  "v2aVerifyMoreCta": "Verify now",
+  "v2aDiscoverLoading": "Finding people for you",
+  "v2aEditFilters": "Edit my filters",
+  "v2aLimitAction": "See my interests",
+  "v2aCoachTitle": "How Discover works",
+  "v2aCoachBody": "Tap the heart to send an interest, or the cross to pass. Tap a card for the full profile.",
+  "v2aGotIt": "Got it",
+  "v2aCheckAgain": "Check again",
+  "v2aProfileWhyTitle": "Why we matched you",
+  "v2aProfileFactsTitle": "Good to know",
+  "v2aToday": "Today",
+  "v2aYesterday": "Yesterday",
+  "v2aMatchTitle": "It's a match!",
+  "v2aMatchBody": "You and {name} both like each other. Say hello when you are ready.",
+  "@v2aMatchBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "v2aMatchSayHello": "Say hello",
+  "v2aMatchLater": "Maybe later",
+  "v2aInterestsEmptyAction": "Browse people",
+  "v2aMatchesEmptyAction": "Find people to meet",
+  "v2aInterestReadReply": "Read and reply",
+  "v2aInterestWrote": "{name} sent you an interest",
+  "@v2aInterestWrote": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "v2aMatchedOn": "Matched {date}",
+  "@v2aMatchedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "v2aYouSent": "You: ",
+  "v2bVerifySheetTitleInterest": "Verify to send your interest",
+  "v2bVerifySheetTitleRead": "Verify to read the full profile",
+  "v2bVerifySheetTitleProfile": "Verify to be seen by others",
+  "v2bVerifySheetTitleGeneric": "Verify your identity",
+  "v2bVerifyWhyInterest": "People who contact others are verified, to keep everyone safe. It takes about 2 minutes.",
+  "v2bVerifyWhyRead": "Full profiles are for verified members. It stops strangers copying people's profiles. It takes about 2 minutes.",
+  "v2bVerifyWhyProfile": "Everyone you meet here is verified, and so is everyone who sees you. It takes about 2 minutes.",
+  "v2bVerifyWhyGeneric": "Verified members keep this a safe place for marriage. It takes about 2 minutes.",
+  "v2bVerifyPoint1": "Have your ID ready: National ID, passport or driving permit.",
+  "v2bVerifyPoint2": "Our verification partner checks it. Your ID is never shown to any member.",
+  "v2bVerifyPoint3": "You can keep browsing while we check.",
+  "v2bNotNow": "Not now",
+  "v2bKeepBrowsing": "Keep browsing",
+  "v2bVerifyPendingTitle": "We're checking your ID",
+  "v2bVerifyPendingBody": "You can keep browsing. We'll tell you when it's done. It usually takes a few minutes.",
+  "v2bVerifySeeStatus": "See status",
+  "v2bVerifyDoneTitle": "You're verified",
+  "v2bVerifyDoneBody": "You can go ahead now.",
+  "v2bContinue": "Continue",
+  "v2bVStepId": "ID type",
+  "v2bVStepScan": "Scan ID",
+  "v2bVStepSelfie": "Selfie",
+  "v2bVStepResult": "Result",
+  "v2bVStepSemantics": "Step {n} of {total}: {name}",
+  "@v2bVStepSemantics": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bVerifyTimeNote": "About 2 minutes",
+  "v2bCapturePrepHeading": "What happens next",
+  "v2bCapturePrep1": "Scan the front of your ID.",
+  "v2bCapturePrep2": "Take a short selfie video.",
+  "v2bCapturePrep3": "We tell you the result here.",
+  "v2bTipsHeading": "Tips for the next try",
+  "v2bTipFlat": "Put the ID flat on a plain, dark surface.",
+  "v2bTipGlare": "Avoid glare and shadows. Daylight near a window works well.",
+  "v2bTipFrame": "Fill the frame and wait until the text looks sharp.",
+  "v2bTipGlasses": "Take off glasses and hats.",
+  "v2bTipFace": "Face the camera straight on, in good light.",
+  "v2bTipSteady": "Hold the phone steady at eye level.",
+  "v2bTipSlow": "Follow the moves on screen slowly.",
+  "v2bTipValid": "Use an ID that is still valid, or choose a different ID type.",
+  "v2bTipDifferentId": "If it keeps failing, try a different ID type.",
+  "v2bBannerVerifyTitle": "Verify to send interests",
+  "v2bBannerVerifyBody": "About 2 minutes. Your ID is never shown to anyone.",
+  "v2bBannerVerifyAction": "Verify now",
+  "v2bBannerPendingTitle": "We're checking your ID",
+  "v2bBannerPendingBody": "You can keep browsing. We'll tell you the result.",
+  "v2bBannerPendingAction": "See status",
+  "v2bBannerFailedTitle": "We couldn't verify you yet",
+  "v2bBannerFailedBody": "See what to try next.",
+  "v2bBannerFailedAction": "See what to do",
+  "v2bConsentsAcceptContinue": "Accept and continue",
+  "v2bVerifyResume": "You started verifying earlier. Pick up where you left off.",
+  "v2bMakeTitle": "Make your profile",
+  "v2bMakeTime": "About 3 minutes",
+  "v2bCompleteLater": "Complete later",
+  "v2bMakeStepPhoto": "Add a photo",
+  "v2bMakeStepPhotoSub": "A clear photo of your face gets many more replies.",
+  "v2bMakeStepLooking": "Where you live and what you want",
+  "v2bMakeStepLookingSub": "This helps us show you people who fit.",
+  "v2bMakeStepIntro": "A few words about you",
+  "v2bMakeStepIntroSub": "Other members read this when you send them an interest.",
+  "v2bMakeStepQuestions": "Eight quick questions",
+  "v2bMakeStepQuestionsSub": "Tap an answer. You can change them later.",
+  "v2bMakeStepReady": "You're nearly there",
+  "v2bPhotoEmpty": "Add a clear photo of your face",
+  "v2bPhotoTake": "Take a photo",
+  "v2bPhotoPick": "Choose from gallery",
+  "v2bPhotoTip1": "Show your face clearly, on your own.",
+  "v2bPhotoTip2": "Use good light and no sunglasses.",
+  "v2bPhotoTip3": "Every photo is checked before others see it.",
+  "v2bPhotoChecking": "We're checking your photo. You can carry on.",
+  "v2bPhotoApproved": "Photo approved",
+  "v2bPhotoRejected": "We couldn't use this photo. Please try another.",
+  "v2bPhotoUploading": "Uploading your photo...",
+  "v2bPhotoChange": "Use a different photo",
+  "v2bVisibilityTitle": "Who can see your photos?",
+  "v2bVisibilityEveryone": "Everyone on Marriage Connect",
+  "v2bVisibilityEveryoneHint": "Members who are browsing can see your photos.",
+  "v2bVisibilityVerified": "Verified members only",
+  "v2bVisibilityVerifiedHint": "Only members who have verified their ID can see your photos.",
+  "v2bVisibilityChange": "You can change this any time in your profile.",
+  "v2bDistrictChoose": "Choose your district",
+  "v2bDistrictSearch": "Search districts",
+  "v2bDistrictNoMatch": "No district matches that.",
+  "v2bLookingLabel": "What are you looking for?",
+  "v2bIntroHelp": "Write a few lines about yourself. Be warm and honest.",
+  "v2bIntroChipsLabel": "Tap to start a sentence",
+  "v2bIntroChip1": "I work as",
+  "v2bIntroChip2": "In my free time I like to",
+  "v2bIntroChip3": "My family is",
+  "v2bIntroChip4": "I'm looking for someone who",
+  "v2bIntroChip5": "In a marriage I value",
+  "v2bIntroExampleLabel": "Example",
+  "v2bIntroExample": "I'm Grace, a nurse in Kampala. I enjoy cooking, music and long Sunday walks. My family is very close and I'm a calm, hardworking person. I'm looking for a kind, faithful man who wants a peaceful home and children one day.",
+  "v2bIntroCount": "{count} of {min} characters to start",
+  "@v2bIntroCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "min": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bIntroEnough": "That's enough to continue. Add more if you like.",
+  "v2bIntroSubmitted": "Thank you. A team checks every intro. You can carry on.",
+  "v2bQuestionOf": "Question {n} of {total}",
+  "@v2bQuestionOf": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bQuestionMultiHint": "Choose all that apply, then tap Next.",
+  "v2bNext": "Next",
+  "v2bQuestionsSaveFailed": "We couldn't save {count} of your answers. Check your connection and try again.",
+  "@v2bQuestionsSaveFailed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bQuestionsLoadFailed": "We couldn't load the questions.",
+  "v2bReadyTitle": "Your profile is ready",
+  "v2bReadyBody": "This is what other members will see.",
+  "v2bReadyVerifyTitle": "One last step: verify to go live",
+  "v2bReadyVerifyBody": "Only verified members can be seen and send interests. It takes about 2 minutes.",
+  "v2bReadyVerifyCta": "Verify to go live",
+  "v2bReadyPending": "Your photo or intro is still being checked. You can go live as soon as they are approved.",
+  "v2bLiveTitle": "You're live!",
+  "v2bLiveBody": "Members can now see your profile. Add the extras in your profile whenever you like. Nothing else is needed.",
+  "v2bLiveCta": "Start browsing",
+  "v2bNextPhotoTitle": "Add your photo",
+  "v2bNextPhotoBody": "Profiles with a clear photo get far more replies. It takes a minute.",
+  "v2bNextLookingTitle": "Say where you live",
+  "v2bNextLookingBody": "Tell us your district and what you are looking for.",
+  "v2bNextIntroTitle": "Write a few words about you",
+  "v2bNextIntroBody": "Other members read this when you send them an interest.",
+  "v2bNextQuestionsTitle": "Answer {count} quick questions",
+  "@v2bNextQuestionsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bNextQuestionsBody": "They help us show you people who fit.",
+  "v2bNextVerifyTitle": "Verify to go live",
+  "v2bNextVerifyBody": "It takes about 2 minutes. Your ID is never shown to anyone.",
+  "v2bNextGoLiveTitle": "Go live",
+  "v2bNextGoLiveBody": "Your profile is ready. Let members see it.",
+  "v2bNextMorePhotosTitle": "Add more photos",
+  "v2bNextMorePhotosBody": "Two or three photos help people get to know you.",
+  "v2bNextMoreQuestionsTitle": "Answer more questions",
+  "v2bNextMoreQuestionsBody": "Each answer improves who we show you. Skip any you like.",
+  "v2bNextDetailsTitle": "Add a few more details",
+  "v2bNextDetailsBody": "Work, education and languages. All optional.",
+  "v2bNextDoneTitle": "Your profile is complete",
+  "v2bNextDoneBody": "Nothing left to add. Nice work.",
+  "v2bVisibilityCardTitle": "Who can see your photos",
+  "v2bVisibilityEveryoneShort": "Everyone",
+  "v2bVisibilityVerifiedShort": "Verified only",
+  "v2bVisibilitySaved": "Saved. Your photos are visible to {who}.",
+  "@v2bVisibilitySaved": {
+    "placeholders": {
+      "who": {
+        "type": "String"
+      }
+    }
+  },
+  "v2bVisibilityWhoEveryone": "everyone",
+  "v2bVisibilityWhoVerified": "verified members only",
+  "v2bEditTitle": "Edit your profile",
+  "v2bEditIntro": "Change anything, any time. Your profile keeps working while you edit.",
+  "v2bEditPhotos": "Photos",
+  "v2bEditPhotosHint": "{count} of {max} added",
+  "@v2bEditPhotosHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bEditIntroItem": "Your intro",
+  "v2bEditIntroHint": "What others read when you send an interest",
+  "v2bEditLooking": "Where you live and what you want",
+  "v2bEditLookingHint": "District, intention and who you'd like to meet",
+  "v2bEditQuestions": "Questions",
+  "v2bEditQuestionsHint": "{count} of {total} answered",
+  "@v2bEditQuestionsHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "v2bEditDetails": "More about you",
+  "v2bEditDetailsHint": "Work, education, languages. All optional",
+  "v2bEditBasics": "Name and marital status",
+  "v2bEditBasicsHint": "Your first name as members see it",
+  "v2bEditPreview": "See how others see you",
+  "v2bEditPreviewHint": "Preview and go live",
+  "v2bEditDone": "Done",
+  "v2bEditSaved": "Saved"
 }

@@ -1,7 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/providers.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
+import 'package:marriage_connect/src/features/membership/application/membership_providers.dart';
+import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
 import 'package:marriage_connect/src/features/verification/data/identity_capture.dart';
 import 'package:marriage_connect/src/features/verification/data/screen_security.dart';
 import 'package:marriage_connect/src/features/verification/data/verification_models.dart';
@@ -101,6 +104,17 @@ class VerificationController extends AsyncNotifier<VerificationState> {
 
   void _set(VerificationState s) => state = AsyncData(s);
 
+  /// Funnel + follow-ups whenever a fresh server status arrives: a pass
+  /// changes what the account may do, so `/me` and the entitlements are
+  /// re-read (the router and the gates must never show stale "unverified").
+  void _noteStatus(VerificationStatus status) {
+    if (status.state != VerificationStage.passed) return;
+    ref.read(analyticsProvider).track(AnalyticsEvent.verifyPassed, once: true);
+    ref
+      ..invalidate(meProvider)
+      ..invalidate(entitlementProvider);
+  }
+
   /// Re-reads the status. A failure while data is on screen keeps the data and
   /// records the failure (a banner), it never blanks the screen.
   Future<void> refresh() async {
@@ -113,9 +127,7 @@ class VerificationController extends AsyncNotifier<VerificationState> {
     try {
       final status = await _repo.status();
       _set(prev.copyWith(status: status, clearFailure: true));
-      if (status.state == VerificationStage.passed) {
-        ref.invalidate(meProvider);
-      }
+      _noteStatus(status);
     } on AppFailure catch (e) {
       _set(prev.copyWith(failure: e));
     }
@@ -144,6 +156,7 @@ class VerificationController extends AsyncNotifier<VerificationState> {
           key: _sessionKey!,
         );
         _sessionKey = null;
+        ref.read(analyticsProvider).track(AnalyticsEvent.verifyStarted);
         _set(_current.copyWith(phase: VerificationPhase.capturing));
         final outcome =
             await ref.read(identityCaptureLauncherProvider).capture(_session!);
@@ -181,6 +194,7 @@ class VerificationController extends AsyncNotifier<VerificationState> {
           awaitingSubmit: false,
         ),
       );
+      _noteStatus(status);
       return CaptureOutcome.completed;
     } on AppFailure catch (e) {
       // A refusal is final for this key; a transient failure keeps it so the
@@ -228,9 +242,26 @@ class VerificationController extends AsyncNotifier<VerificationState> {
     }
   }
 
-  /// The user acknowledged "passed": re-read `/me` so the guard lets them on
-  /// to the profile builder.
-  Future<void> continueAfterPassed() => ref.read(meProvider.notifier).reload();
+  /// Records the three agreements when the server refuses to start because
+  /// they are missing (accounts created before the consents moved to "About
+  /// you"). Returns true when the capture can be tried again.
+  Future<bool> acceptConsents(Map<String, bool> granted) async {
+    try {
+      await ref.read(authRepositoryProvider).recordConsents(granted: granted);
+      _set(_current.copyWith(consentsMissing: false, clearFailure: true));
+      return true;
+    } on AppFailure catch (e) {
+      _set(_current.copyWith(failure: e));
+      return false;
+    }
+  }
+
+  /// The user acknowledged "passed": re-read `/me` and the entitlements so
+  /// every gate sees the verified account.
+  Future<void> continueAfterPassed() async {
+    ref.invalidate(entitlementProvider);
+    await ref.read(meProvider.notifier).reload();
+  }
 }
 
 final verificationProvider =

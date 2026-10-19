@@ -31,21 +31,22 @@ def test_requires_auth():
     assert Client(headers={"host": "api.mc.test"}).get("/api/v1/discovery").status_code == 401
 
 
-def test_browse_capability_enforced():
-    c, r, acct = member_client(gender="male", age=30)
-    resp = discover(c, r)
-    assert resp.status_code == 403
-    body = resp.json()
-    assert body["code"] == "entitlement_required" and body["capability"] == "browse"
-    ent.start_trial(account=acct)
-    assert discover(c, r).status_code == 200
-
-
-def test_viewer_must_have_live_profile():
+def test_browsing_needs_no_trial_and_no_live_profile():
+    """v2 (ADR-0009): a verified member without a trial, even with only a draft profile, can browse."""
     c, r, acct = member_client(gender="male", age=30, live=False)
-    ent.start_trial(account=acct)
+    create_member(gender="female", age=28)
+    resp = discover(c, r)
+    assert resp.status_code == 200 and len(resp.json()["items"]) == 1
+
+
+def test_viewer_without_a_profile_is_asked_for_the_about_you_basics():
+    from mc.profiles.models import Profile
+
+    c, r, acct = member_client(gender="male", age=30)
+    Profile.objects.filter(account=acct).delete()
     resp = discover(c, r)
     assert resp.status_code == 422 and resp.json()["code"] == "profile_incomplete"
+    assert resp.json()["missing"] == ["birth_date", "gender"]
 
 
 def test_card_shape_has_no_numeric_score_and_never_leaks_private_data():
@@ -65,6 +66,7 @@ def test_card_shape_has_no_numeric_score_and_never_leaks_private_data():
         "marriage_timeline",
         "marital_status_label",
         "badges",
+        "limited",
         "why",
         "discuss",
         "score_band",

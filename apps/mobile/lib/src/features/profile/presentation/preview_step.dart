@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
+import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
+import 'package:marriage_connect/src/features/me/application/me_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/description_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/photos_controller.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_controller.dart';
@@ -9,6 +11,7 @@ import 'package:marriage_connect/src/features/profile/application/profile_provid
 import 'package:marriage_connect/src/features/profile/data/profile_models.dart';
 import 'package:marriage_connect/src/features/profile/presentation/profile_labels.dart';
 import 'package:marriage_connect/src/features/profile/presentation/profile_widgets.dart';
+import 'package:marriage_connect/src/features/verification/presentation/verify_widgets.dart';
 
 /// "As others see you": built from the same allowlist the server exposes in
 /// public profiles (no legal name, phone, birth date or exact location).
@@ -134,6 +137,14 @@ class PreviewStep extends ConsumerWidget {
     final missing = {...profile.readiness.missing, ...?ps?.missing}
         .where((m) => m != 'verification')
         .toList();
+    final verified = ref.watch(meProvider).valueOrNull?.verified ?? true;
+    // A photo or intro that was sent but is not approved yet is waiting on a
+    // person, not on the member.
+    final waitingOnReview = (missing.contains('photos') &&
+            photos.isNotEmpty &&
+            !photos.any((p) => p.approved)) ||
+        (missing.contains('description') &&
+            (history?.latest?.pending ?? false));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -178,18 +189,62 @@ class PreviewStep extends ConsumerWidget {
         const SizedBox(height: 8),
         Text(l.profileGoLiveHelp),
         const SizedBox(height: 12),
-        SaveButton(
-          label: l.profileGoLive,
-          saving: ps?.saving ?? false,
-          onPressed: missing.isEmpty
-              ? () async {
-                  final ok =
-                      await ref.read(ownProfileProvider.notifier).goLive();
-                  if (ok) onLive();
-                }
-              : null,
-        ),
+        if (!verified)
+          const _VerifyToGoLive()
+        else ...[
+          if (missing.isNotEmpty && waitingOnReview) ...[
+            Text(l.v2bReadyPending),
+            const SizedBox(height: 12),
+          ],
+          SaveButton(
+            label: l.profileGoLive,
+            saving: ps?.saving ?? false,
+            onPressed: missing.isEmpty
+                ? () async {
+                    final ok =
+                        await ref.read(ownProfileProvider.notifier).goLive();
+                    if (ok) onLive();
+                  }
+                : null,
+          ),
+        ],
       ],
+    );
+  }
+}
+
+/// Going live needs a verified account: said plainly, with the way to do it.
+class _VerifyToGoLive extends StatelessWidget {
+  const _VerifyToGoLive();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final mc = context.mc;
+    return McCard(
+      color: mc.colors.primaryContainer,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l.v2bReadyVerifyTitle,
+            style: mc.text.subtitle.copyWith(
+              color: mc.colors.onPrimaryContainer,
+            ),
+          ),
+          SizedBox(height: mc.space.xxs),
+          Text(
+            l.v2bReadyVerifyBody,
+            style: mc.text.body.copyWith(color: mc.colors.onPrimaryContainer),
+          ),
+          SizedBox(height: mc.space.sm),
+          McButton(
+            label: l.v2bReadyVerifyCta,
+            onPressed: () =>
+                showVerifySheet(context, reason: VerifyReason.profile),
+          ),
+        ],
+      ),
     );
   }
 }

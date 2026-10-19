@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from mc.accounts.permissions import IsActiveMember
+from mc.common.net import client_ip, request_install_id
 from mc.common.pagination import parse_limit
 from mc.common.serializers import reject_unknown_fields
 from mc.discovery import services
@@ -20,6 +21,8 @@ class DiscoveryView(APIView):
             request.user,
             cursor=request.query_params.get("cursor") or None,
             limit=parse_limit(request.query_params.get("limit")),
+            ip=client_ip(request),
+            install_id=request_install_id(request),
         )
         return Response(page)
 

@@ -35,6 +35,8 @@ class Candidate {
     this.why = const [],
     this.discuss = const [],
     this.scoreBand,
+    this.locked = false,
+    this.lockedReason,
   });
 
   factory Candidate.fromJson(Map<String, dynamic> j) => Candidate(
@@ -50,6 +52,8 @@ class Candidate {
         why: j.strings('why'),
         discuss: j.strings('discuss'),
         scoreBand: j.strOrNull('score_band'),
+        locked: j.flag('locked'),
+        lockedReason: j.strOrNull('locked_reason'),
       );
 
   final String profileId;
@@ -64,6 +68,15 @@ class Candidate {
   final List<String> why;
   final List<String> discuss;
   final String? scoreBand;
+
+  /// The server sent a limited card for an unverified viewer
+  /// (`locked: true`, `locked_reason: "verify_to_see_more"`). The UI shows an
+  /// inline "Verify to read more" prompt; it cannot reveal anything more.
+  final bool locked;
+  final String? lockedReason;
+
+  /// One-line "why we matched you" (the first backend reason), if any.
+  String? get whyLine => why.isEmpty ? null : why.first;
 }
 
 /// `GET /profiles/<id>`: only what the backend's allowlist serializer returns.
@@ -84,6 +97,9 @@ class PublicProfile {
     this.occupation,
     this.education,
     this.badges = const [],
+    this.why = const [],
+    this.locked = false,
+    this.lockedReason,
   });
 
   factory PublicProfile.fromJson(Map<String, dynamic> j) => PublicProfile(
@@ -102,6 +118,9 @@ class PublicProfile {
         occupation: j.strOrNull('occupation'),
         education: j.strOrNull('education'),
         badges: j.strings('badges'),
+        why: j.strings('why'),
+        locked: j.flag('locked'),
+        lockedReason: j.strOrNull('locked_reason'),
       );
 
   final String profileId;
@@ -119,6 +138,12 @@ class PublicProfile {
   final String? occupation;
   final String? education;
   final List<String> badges;
+  final List<String> why;
+
+  /// Limited payload for an unverified viewer: description and answers are
+  /// absent and the UI shows "Verify to read more" instead.
+  final bool locked;
+  final String? lockedReason;
 }
 
 enum DiscoveryFeedback {

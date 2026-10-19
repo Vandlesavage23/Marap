@@ -46,6 +46,9 @@ def run(*, now: datetime | None = None) -> dict[str, object]:
         "terminal_interests": interest_services.purge_terminal(
             before=_before(now, settings.RETENTION_TERMINAL_INTERESTS_DAYS)
         ),
+        "funnel_events": account_services.purge_funnel_events(
+            before=_before(now, settings.RETENTION_FUNNEL_EVENTS_DAYS)
+        ),
         "export_files": export.purge_expired(now=now),
         "deletions": services.run_hard_deletions(now=now),
     }

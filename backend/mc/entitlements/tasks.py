@@ -18,4 +18,9 @@ def send_trial_reminder(account_id: str, kind: str) -> None:
         return
     if kind == "ended" and trial.ends_at > timezone.now():
         return
+    if trial.account_id is not None:
+        from . import selectors
+
+        if selectors.membership_ends_at(trial.account_id) is not None:
+            return  # they became a member meanwhile: "your trial has ended" would be noise
     events.publish(TrialReminderDue(account_id=uuid.UUID(account_id), kind=kind))

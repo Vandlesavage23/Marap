@@ -13,16 +13,16 @@ from django.core import signing
 from django.db import transaction
 from django.utils import timezone
 
-from mc.common import ratelimit
+from mc.accounts import services as account_services
+from mc.common import quota, ratelimit
 from mc.common.errors import (
-    EntitlementRequired,
     LimitReached,
     NotFound,
     ProfileIncomplete,
     ValidationFailed,
 )
 from mc.common.redis import get_redis
-from mc.common.timeutil import start_of_kampala_day
+from mc.common.timeutil import iso_z, next_kampala_midnight, start_of_kampala_day
 from mc.entitlements import selectors as entitlement_selectors
 from mc.interests import selectors as interest_selectors
 from mc.matches import selectors as match_selectors
@@ -38,6 +38,7 @@ if TYPE_CHECKING:
     from mc.accounts.models import Account
 
 SALT = "discovery.cursor"
+_ABOUT_YOU = "Tell us a little about you (your first name, birth date and whether you are a man or a woman) to see members."
 
 
 @dataclass(frozen=True)
@@ -176,9 +177,9 @@ def build_ranked_pool(
 ) -> tuple[list[RankedEntry], str]:
     """Full rebuild (no reuse): the reference behaviour that the cached first page must reproduce."""
     now = now or timezone.now()
-    ctx = profile_selectors.viewer_context_for(viewer)
+    ctx = profile_selectors.browse_context_for(viewer)
     if ctx is None:
-        raise ProfileIncomplete("Finish your profile to start discovering matches.")
+        raise ProfileIncomplete(_ABOUT_YOU, missing=["birth_date", "gender"])
     return _rank_pool(_score_pool(viewer, ctx, now=now), now=now), active_model().name
 
 
@@ -230,9 +231,9 @@ def _save_pool(key: str, pool: list[PoolEntry], model: str) -> None:
 
 
 def first_page_pool(viewer: "Account", *, now: datetime) -> tuple[list[RankedEntry], str]:
-    ctx = profile_selectors.viewer_context_for(viewer)
+    ctx = profile_selectors.browse_context_for(viewer)
     if ctx is None:
-        raise ProfileIncomplete("Finish your profile to start discovering matches.")
+        raise ProfileIncomplete(_ABOUT_YOU, missing=["birth_date", "gender"])
     ttl = settings.DISCOVERY_SNAPSHOT_REUSE_SECONDS
     key = _pool_key(viewer.id, ctx) if ttl > 0 else ""
     if key and (cached := _load_pool(key)) is not None:
@@ -281,15 +282,48 @@ def _read_cursor(viewer_id: uuid.UUID, cursor: str) -> tuple[list[dict[str, Any]
     return snap["entries"], snap["model"], int(data["o"]), data["t"]
 
 
+def _browse_quota(
+    summary: "entitlement_selectors.EntitlementState", viewer: "Account", now: datetime
+) -> tuple[int | None, str]:
+    limit = entitlement_selectors.browse_card_limit(summary)
+    return limit, quota.day_key("cards", viewer.id, now)
+
+
+def browse_usage(viewer: "Account", summary: "entitlement_selectors.EntitlementState", now: datetime) -> dict[str, Any]:
+    """`{limit, used, resets_at}` for today's card allowance (limit None = no daily cap)."""
+    limit, key = _browse_quota(summary, viewer, now)
+    return {
+        "limit": limit,
+        "used": quota.used(key),
+        "resets_at": next_kampala_midnight(now),
+    }
+
+
 def next_candidates(
-    viewer: "Account", *, cursor: str | None, limit: int | None = None
+    viewer: "Account",
+    *,
+    cursor: str | None,
+    limit: int | None = None,
+    ip: str | None = None,
+    install_id: str | None = None,
 ) -> dict[str, Any]:
-    """One page of CandidateCards + `next_cursor`. Enforces capability `browse`, rate and daily-view limits."""
+    """One page of CandidateCards + `next_cursor`. Any signed-in member may browse (capability `browse`); a member
+    who has not verified their identity gets LIMITED cards. Enforces the rate limit, the daily card allowance
+    (unverified 30, verified free 60, trial/member none: 429 `limit_reached` with `resets_at`) and, for unverified
+    viewers, the per-IP and per-device caps."""
     now = timezone.now()
     limit = max(1, min(limit or settings.DISCOVERY_PAGE_SIZE, 50))
-    if not entitlement_selectors.has_capability(viewer, "browse", now):
-        raise EntitlementRequired(
-            "Browsing needs an active trial or membership.", capability="browse"
+    summary = entitlement_selectors.entitlement_summary(viewer, now)
+    if not summary.capabilities["browse"]:  # pragma: no cover - browse is granted to every signed-in member
+        raise LimitReached("Browsing isn't available right now.")
+    if not summary.verified:
+        account_services.require_verification_consents(viewer)
+        ratelimit.hit_client(
+            "browse",
+            ip=ip,
+            install_id=install_id,
+            limit=settings.BROWSE_PAGES_PER_IP_PER_DAY_UNVERIFIED,
+            window_seconds=24 * 3600,
         )
     ratelimit.hit(
         f"discovery:{viewer.id}", limit=settings.DISCOVERY_REQUESTS_PER_HOUR, window_seconds=3600
@@ -301,6 +335,9 @@ def next_candidates(
         raise LimitReached(
             "You've seen plenty of profiles today. Come back tomorrow.", retry_after=3600
         )
+    card_limit, card_key = _browse_quota(summary, viewer, now)
+    if card_limit is not None and quota.used(card_key) >= card_limit:
+        raise _cards_exhausted(card_limit, now)
 
     if cursor:
         raw_entries, model, offset, token = _read_cursor(viewer.id, cursor)
@@ -319,22 +356,36 @@ def next_candidates(
         window = [e for e in window if uuid.UUID(e["account_id"]) not in gone]
     cards = profile_selectors.card_data([uuid.UUID(e["profile_id"]) for e in window], viewer)
 
-    items: list[dict[str, Any]] = []
-    impressions = []
+    shown: list[tuple[int, dict[str, Any], dict[str, Any]]] = []
     for n, e in enumerate(window):
         card = cards.get(uuid.UUID(e["profile_id"]))
         if card is None:
             continue  # went offline since the snapshot
-        items.append(
-            {
-                **card,
-                "why": e["why"],
-                "discuss": e["discuss"],
-                "score_band": explain.band(
-                    e["score"], strong=settings.SCORE_BAND_STRONG, good=settings.SCORE_BAND_GOOD
-                ),
-            }
-        )
+        shown.append((n, e, card))
+    truncated = False
+    if card_limit is not None:
+        granted = quota.consume_upto(card_key, want=len(shown), limit=card_limit, now=now)
+        if granted == 0 and shown:
+            raise _cards_exhausted(card_limit, now)
+        truncated = granted < len(shown)
+        shown = shown[:granted]
+
+    items: list[dict[str, Any]] = []
+    impressions = []
+    for n, e, card in shown:
+        if card["limited"]:
+            items.append(card)  # nothing about compatibility is disclosed to an unverified viewer
+        else:
+            items.append(
+                {
+                    **card,
+                    "why": e["why"],
+                    "discuss": e["discuss"],
+                    "score_band": explain.band(
+                        e["score"], strong=settings.SCORE_BAND_STRONG, good=settings.SCORE_BAND_GOOD
+                    ),
+                }
+            )
         impressions.append(
             Impression(
                 viewer=viewer,
@@ -348,12 +399,24 @@ def next_candidates(
     with transaction.atomic():
         Impression.objects.bulk_create(impressions)
     next_offset = offset + limit
+    usage = browse_usage(viewer, summary, now)
     return {
         "items": items,
         "next_cursor": _make_cursor(viewer.id, token, next_offset)
-        if next_offset < len(raw_entries)
+        if next_offset < len(raw_entries) and not truncated
         else None,
+        "browse": {**usage, "resets_at": iso_z(usage["resets_at"])},
     }
+
+
+def _cards_exhausted(card_limit: int, now: datetime) -> LimitReached:
+    resets = next_kampala_midnight(now)
+    return LimitReached(
+        "You've seen today's profiles. New ones are waiting tomorrow.",
+        resets_at=iso_z(resets),
+        limit=card_limit,
+        retry_after=max(int((resets - now).total_seconds()), 1),
+    )
 
 
 def record_feedback(*, viewer: "Account", profile_id: uuid.UUID, action: str) -> None:

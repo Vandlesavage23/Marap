@@ -54,6 +54,7 @@ class SendInterestView(IdempotentMixin):
                 "expires_at": interest.expires_at,
                 "created_at": interest.created_at,
                 "remaining_today": result["remaining_today"],
+                "remaining_quota": result["remaining_quota"],
             }
         )
 

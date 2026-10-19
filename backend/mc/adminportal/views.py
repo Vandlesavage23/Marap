@@ -421,6 +421,7 @@ def funnel_dashboard(request: StaffRequest) -> HttpResponse:
         "funnel.html",
         rng=rng,
         rows=dashboards.funnel(rng),
+        app_rows=dashboards.app_funnel(rng),
         min_cell=aggregates.label(None),
         msg=rng.error,
     )

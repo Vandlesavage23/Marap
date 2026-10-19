@@ -89,6 +89,77 @@ ThemeData buildTheme(Brightness brightness) {
     textTheme: textTheme,
     visualDensity: VisualDensity.standard,
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    appBarTheme: AppBarTheme(
+      backgroundColor: c.background,
+      foregroundColor: c.onBackground,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: false,
+      titleTextStyle: mc.text.headline.copyWith(color: c.onBackground),
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: c.surface,
+      surfaceTintColor: Colors.transparent,
+      indicatorColor: c.primaryContainer,
+      elevation: 0,
+      height: 72,
+      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      iconTheme: WidgetStateProperty.resolveWith(
+        (states) => IconThemeData(
+          size: 26,
+          color: states.contains(WidgetState.selected)
+              ? c.onPrimaryContainer
+              : c.onSurfaceMuted,
+        ),
+      ),
+      labelTextStyle: WidgetStateProperty.resolveWith(
+        (states) => mc.text.label.copyWith(
+          fontSize: 13,
+          fontWeight: states.contains(WidgetState.selected)
+              ? FontWeight.w700
+              : FontWeight.w500,
+          color: states.contains(WidgetState.selected)
+              ? c.onSurface
+              : c.onSurfaceMuted,
+        ),
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: c.onSurface,
+      contentTextStyle: mc.text.body.copyWith(color: c.surface),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(mc.radii.md),
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: c.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(mc.radii.lg),
+      ),
+      titleTextStyle: mc.text.title.copyWith(color: c.onSurface),
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: c.surface,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(mc.radii.lg)),
+      ),
+    ),
+    dividerTheme: DividerThemeData(
+      color: c.outline.withValues(alpha: 0.2),
+      space: 1,
+    ),
+    tabBarTheme: TabBarThemeData(
+      labelColor: c.primary,
+      unselectedLabelColor: c.onSurfaceMuted,
+      indicatorColor: c.primary,
+      dividerColor: c.outline.withValues(alpha: 0.2),
+      labelStyle: mc.text.label.copyWith(fontSize: 15),
+      unselectedLabelStyle: mc.text.label.copyWith(fontSize: 15),
+    ),
     extensions: [mc, AppTokens.fromMc(mc)],
   );
 }

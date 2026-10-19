@@ -14,15 +14,24 @@ if TYPE_CHECKING:
 FIELDS = ("age_min", "age_max", "max_distance_km", "include_diaspora", "accept_has_children")
 
 
-def get_or_create_preference(*, profile: Profile) -> Preference:
+def default_age_window(profile: Profile) -> dict[str, int]:
+    """The age range a member gets until they choose one: a few years younger to a few older, clamped to 18-80."""
     age = selectors.age_of(profile)
-    pref, _ = Preference.objects.get_or_create(
-        profile=profile,
-        defaults={
-            "age_min": max(18, age - settings.PREFERENCE_DEFAULT_AGE_BELOW),
-            "age_max": min(80, age + settings.PREFERENCE_DEFAULT_AGE_ABOVE),
-        },
-    )
+    age_max = min(80, max(18, age + settings.PREFERENCE_DEFAULT_AGE_ABOVE))
+    return {
+        "age_min": min(max(18, age - settings.PREFERENCE_DEFAULT_AGE_BELOW), age_max),
+        "age_max": age_max,
+    }
+
+
+def derived_preference(profile: Profile) -> Preference:
+    """Unsaved default preference (opposite gender is implicit in discovery; age window from the birth date) for a
+    viewer who has not set preferences, e.g. a member browsing before they have a live profile."""
+    return Preference(profile=profile, **default_age_window(profile))
+
+
+def get_or_create_preference(*, profile: Profile) -> Preference:
+    pref, _ = Preference.objects.get_or_create(profile=profile, defaults=default_age_window(profile))
     return pref
 
 

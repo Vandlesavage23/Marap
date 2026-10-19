@@ -156,10 +156,24 @@ class _Done extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Icon(
-          result.matched ? Icons.favorite : Icons.check_circle_outline,
-          size: 48,
-          color: t.colorScheme.primary,
+        Center(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: result.matched ? context.mc.colors.brandGradient : null,
+              color: result.matched ? null : context.mc.colors.successContainer,
+              shape: BoxShape.circle,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Icon(
+                result.matched ? Icons.favorite : Icons.check_circle_outline,
+                size: 44,
+                color: result.matched
+                    ? context.mc.colors.onPrimary
+                    : context.mc.colors.onSuccessContainer,
+              ),
+            ),
+          ),
         ),
         const SizedBox(height: 8),
         Text(

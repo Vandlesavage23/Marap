@@ -3367,7 +3367,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileMissingPhotos.
   ///
   /// In en, this message translates to:
-  /// **'At least two approved photos'**
+  /// **'An approved photo'**
   String get profileMissingPhotos;
 
   /// No description provided for @profileMissingDescription.
@@ -3379,7 +3379,7 @@ abstract class AppLocalizations {
   /// No description provided for @profileMissingQuestionnaire.
   ///
   /// In en, this message translates to:
-  /// **'The core questions'**
+  /// **'Eight quick questions'**
   String get profileMissingQuestionnaire;
 
   /// No description provided for @profileFix.
@@ -4065,6 +4065,1680 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 unread message} other{{count} unread messages}}'**
   String adoptMatchUnread(int count);
+
+  /// No description provided for @v2aNavDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Discover'**
+  String get v2aNavDiscover;
+
+  /// No description provided for @v2aNavInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests'**
+  String get v2aNavInterests;
+
+  /// No description provided for @v2aNavMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get v2aNavMatches;
+
+  /// No description provided for @v2aNavProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get v2aNavProfile;
+
+  /// No description provided for @v2aNavInterestsBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 new interest} other{{count} new interests}}'**
+  String v2aNavInterestsBadge(int count);
+
+  /// No description provided for @v2aNavMatchesBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unread message} other{{count} unread messages}}'**
+  String v2aNavMatchesBadge(int count);
+
+  /// No description provided for @v2aProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile'**
+  String get v2aProfileTitle;
+
+  /// No description provided for @v2aProfileRingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% complete'**
+  String v2aProfileRingLabel(int percent);
+
+  /// No description provided for @v2aProfileYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get v2aProfileYou;
+
+  /// No description provided for @v2aProfileNextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next step'**
+  String get v2aProfileNextTitle;
+
+  /// No description provided for @v2aProfileNextPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'A complete profile gets noticed more. Add a photo and a few words about yourself.'**
+  String get v2aProfileNextPlaceholder;
+
+  /// No description provided for @v2aProfileNextCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get v2aProfileNextCta;
+
+  /// No description provided for @v2aProfileEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit my profile'**
+  String get v2aProfileEdit;
+
+  /// No description provided for @v2aProfileEditHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos, intro and details'**
+  String get v2aProfileEditHint;
+
+  /// No description provided for @v2aProfileMembership.
+  ///
+  /// In en, this message translates to:
+  /// **'Membership'**
+  String get v2aProfileMembership;
+
+  /// No description provided for @v2aProfileMembershipHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your plan, free trial and receipts'**
+  String get v2aProfileMembershipHint;
+
+  /// No description provided for @v2aProfileSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get v2aProfileSettings;
+
+  /// No description provided for @v2aProfileSettingsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Account, privacy and notifications'**
+  String get v2aProfileSettingsHint;
+
+  /// No description provided for @v2aProfileSafety.
+  ///
+  /// In en, this message translates to:
+  /// **'Safety centre'**
+  String get v2aProfileSafety;
+
+  /// No description provided for @v2aProfileSafetyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips, blocking and reporting'**
+  String get v2aProfileSafetyHint;
+
+  /// No description provided for @v2aProfileNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get v2aProfileNotifications;
+
+  /// No description provided for @v2aProfileNotificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Replies, matches and updates'**
+  String get v2aProfileNotificationsHint;
+
+  /// No description provided for @v2aProfileVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified'**
+  String get v2aProfileVerified;
+
+  /// No description provided for @v2bWelcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a partner for marriage'**
+  String get v2bWelcomeTitle;
+
+  /// No description provided for @v2bWelcomeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Meet verified adults who are serious about marriage.'**
+  String get v2bWelcomeSub;
+
+  /// No description provided for @v2bValueSeriousTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Serious about marriage'**
+  String get v2bValueSeriousTitle;
+
+  /// No description provided for @v2bValueSeriousBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone here wants a life partner, not a casual chat.'**
+  String get v2bValueSeriousBody;
+
+  /// No description provided for @v2bValueVerifiedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone is verified'**
+  String get v2bValueVerifiedTitle;
+
+  /// No description provided for @v2bValueVerifiedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Members confirm their age and identity before they contact anyone.'**
+  String get v2bValueVerifiedBody;
+
+  /// No description provided for @v2bValuePrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your privacy comes first'**
+  String get v2bValuePrivacyTitle;
+
+  /// No description provided for @v2bValuePrivacyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'We never show your phone number. You choose who sees your photos.'**
+  String get v2bValuePrivacyBody;
+
+  /// No description provided for @v2bGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Get started'**
+  String get v2bGetStarted;
+
+  /// No description provided for @v2bLookAround.
+  ///
+  /// In en, this message translates to:
+  /// **'Look around first'**
+  String get v2bLookAround;
+
+  /// No description provided for @v2bWelcomeLegal.
+  ///
+  /// In en, this message translates to:
+  /// **'You will read and agree to our Terms of Use and Privacy Notice when you join.'**
+  String get v2bWelcomeLegal;
+
+  /// No description provided for @v2bLookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Look around'**
+  String get v2bLookTitle;
+
+  /// No description provided for @v2bLookBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'These are samples. Real members appear when you join.'**
+  String get v2bLookBanner;
+
+  /// No description provided for @v2bSampleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample'**
+  String get v2bSampleLabel;
+
+  /// No description provided for @v2bSampleSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample profile: {name}, {facts}. {why}'**
+  String v2bSampleSemantics(String name, String facts, String why);
+
+  /// No description provided for @v2bWhyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Why we matched you'**
+  String get v2bWhyLabel;
+
+  /// No description provided for @v2bLookNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified members have this badge. Everyone you meet here has passed an identity and age check.'**
+  String get v2bLookNote;
+
+  /// No description provided for @v2bSample1Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Amara, 27'**
+  String get v2bSample1Name;
+
+  /// No description provided for @v2bSample1Facts.
+  ///
+  /// In en, this message translates to:
+  /// **'Kampala · Marriage within a year'**
+  String get v2bSample1Facts;
+
+  /// No description provided for @v2bSample1Why.
+  ///
+  /// In en, this message translates to:
+  /// **'You both want to marry within a year.'**
+  String get v2bSample1Why;
+
+  /// No description provided for @v2bSample2Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Joel, 31'**
+  String get v2bSample2Name;
+
+  /// No description provided for @v2bSample2Facts.
+  ///
+  /// In en, this message translates to:
+  /// **'Mbarara · Open on timing'**
+  String get v2bSample2Facts;
+
+  /// No description provided for @v2bSample2Why.
+  ///
+  /// In en, this message translates to:
+  /// **'You both want children and live in the same region.'**
+  String get v2bSample2Why;
+
+  /// No description provided for @v2bSample3Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Esther, 24'**
+  String get v2bSample3Name;
+
+  /// No description provided for @v2bSample3Facts.
+  ///
+  /// In en, this message translates to:
+  /// **'Gulu · Marriage within a year'**
+  String get v2bSample3Facts;
+
+  /// No description provided for @v2bSample3Why.
+  ///
+  /// In en, this message translates to:
+  /// **'You answered alike about family and how to settle disagreements.'**
+  String get v2bSample3Why;
+
+  /// No description provided for @v2bSample4Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Ronald, 35'**
+  String get v2bSample4Name;
+
+  /// No description provided for @v2bSample4Facts.
+  ///
+  /// In en, this message translates to:
+  /// **'Jinja · Open on timing'**
+  String get v2bSample4Facts;
+
+  /// No description provided for @v2bSample4Why.
+  ///
+  /// In en, this message translates to:
+  /// **'You are both looking for a serious, long-term partner.'**
+  String get v2bSample4Why;
+
+  /// No description provided for @v2bSample5Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Harriet, 29'**
+  String get v2bSample5Name;
+
+  /// No description provided for @v2bSample5Facts.
+  ///
+  /// In en, this message translates to:
+  /// **'Entebbe · Marriage within a year'**
+  String get v2bSample5Facts;
+
+  /// No description provided for @v2bSample5Why.
+  ///
+  /// In en, this message translates to:
+  /// **'Your age ranges and where you live fit each other.'**
+  String get v2bSample5Why;
+
+  /// No description provided for @v2bSample6Name.
+  ///
+  /// In en, this message translates to:
+  /// **'Samuel, 41'**
+  String get v2bSample6Name;
+
+  /// No description provided for @v2bSample6Facts.
+  ///
+  /// In en, this message translates to:
+  /// **'Mbale · Open on timing'**
+  String get v2bSample6Facts;
+
+  /// No description provided for @v2bSample6Why.
+  ///
+  /// In en, this message translates to:
+  /// **'You both want to settle close to family.'**
+  String get v2bSample6Why;
+
+  /// No description provided for @v2bPhoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'What is your phone number?'**
+  String get v2bPhoneTitle;
+
+  /// No description provided for @v2bPhoneSub.
+  ///
+  /// In en, this message translates to:
+  /// **'We will text you a 6-digit code to sign in. There is no password.'**
+  String get v2bPhoneSub;
+
+  /// No description provided for @v2bPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number'**
+  String get v2bPhoneLabel;
+
+  /// No description provided for @v2bPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'772 000 000'**
+  String get v2bPhoneHint;
+
+  /// No description provided for @v2bPhonePrefixSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Uganda, country code plus 256'**
+  String get v2bPhonePrefixSemantics;
+
+  /// No description provided for @v2bPhoneReassure.
+  ///
+  /// In en, this message translates to:
+  /// **'We never show your number to anyone.'**
+  String get v2bPhoneReassure;
+
+  /// No description provided for @v2bPhoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your 9-digit number, for example 772 000 000.'**
+  String get v2bPhoneInvalid;
+
+  /// No description provided for @v2bSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Send code'**
+  String get v2bSendCode;
+
+  /// No description provided for @v2bCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit code'**
+  String get v2bCodeTitle;
+
+  /// No description provided for @v2bCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent it by SMS to {phone}.'**
+  String v2bCodeSent(String phone);
+
+  /// No description provided for @v2bWrongNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Wrong number?'**
+  String get v2bWrongNumber;
+
+  /// No description provided for @v2bCodeResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a new code in {time}'**
+  String v2bCodeResendIn(String time);
+
+  /// No description provided for @v2bCodeResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a new code'**
+  String get v2bCodeResend;
+
+  /// No description provided for @v2bCodeResent.
+  ///
+  /// In en, this message translates to:
+  /// **'A new code is on its way.'**
+  String get v2bCodeResent;
+
+  /// No description provided for @v2bCodeWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'That code didn\'t work. Check the SMS and try again.'**
+  String get v2bCodeWrong;
+
+  /// No description provided for @v2bCodeSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS can take a minute or two. Check that the number above is right.'**
+  String get v2bCodeSlow;
+
+  /// No description provided for @v2bCodeChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking your code'**
+  String get v2bCodeChecking;
+
+  /// No description provided for @v2bCodeFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'6-digit code. {count} of 6 digits entered.'**
+  String v2bCodeFieldLabel(int count);
+
+  /// No description provided for @v2bAboutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'About you'**
+  String get v2bAboutTitle;
+
+  /// No description provided for @v2bStepOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {n} of {total}'**
+  String v2bStepOf(int n, int total);
+
+  /// No description provided for @v2bAboutSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Three quick things and you can start looking. It takes about 30 seconds.'**
+  String get v2bAboutSub;
+
+  /// No description provided for @v2bFirstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get v2bFirstName;
+
+  /// No description provided for @v2bFirstNameHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Other members will see this. Your first name is enough.'**
+  String get v2bFirstNameHelp;
+
+  /// No description provided for @v2bBirthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth date'**
+  String get v2bBirthDate;
+
+  /// No description provided for @v2bBirthDateChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your birth date'**
+  String get v2bBirthDateChoose;
+
+  /// No description provided for @v2bBirthDateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'We show your age, never your birth date.'**
+  String get v2bBirthDateHelp;
+
+  /// No description provided for @v2bBirthDateValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} ({age} years old)'**
+  String v2bBirthDateValue(String date, int age);
+
+  /// No description provided for @v2bUnder18Title.
+  ///
+  /// In en, this message translates to:
+  /// **'Marriage Connect is for adults aged 18 and over'**
+  String get v2bUnder18Title;
+
+  /// No description provided for @v2bUnder18Body.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re sorry, we can\'t set you up yet. We would be glad to see you when you turn 18. Take care until then.'**
+  String get v2bUnder18Body;
+
+  /// No description provided for @v2bIAm.
+  ///
+  /// In en, this message translates to:
+  /// **'I am'**
+  String get v2bIAm;
+
+  /// No description provided for @v2bIAmMan.
+  ///
+  /// In en, this message translates to:
+  /// **'I am a man'**
+  String get v2bIAmMan;
+
+  /// No description provided for @v2bIAmWoman.
+  ///
+  /// In en, this message translates to:
+  /// **'I am a woman'**
+  String get v2bIAmWoman;
+
+  /// No description provided for @v2bGenderNote.
+  ///
+  /// In en, this message translates to:
+  /// **'This can\'t be changed later, so please choose carefully.'**
+  String get v2bGenderNote;
+
+  /// No description provided for @v2bConsentsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you join'**
+  String get v2bConsentsHeading;
+
+  /// No description provided for @v2bSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get v2bSelectAll;
+
+  /// No description provided for @v2bAboutCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get v2bAboutCta;
+
+  /// No description provided for @v2bAboutMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Still needed: {items}.'**
+  String v2bAboutMissing(String items);
+
+  /// No description provided for @v2bNeedName.
+  ///
+  /// In en, this message translates to:
+  /// **'your first name'**
+  String get v2bNeedName;
+
+  /// No description provided for @v2bNeedBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'your birth date'**
+  String get v2bNeedBirth;
+
+  /// No description provided for @v2bNeedGender.
+  ///
+  /// In en, this message translates to:
+  /// **'who you are'**
+  String get v2bNeedGender;
+
+  /// No description provided for @v2bNeedConsents.
+  ///
+  /// In en, this message translates to:
+  /// **'the three agreements'**
+  String get v2bNeedConsents;
+
+  /// No description provided for @v2bNameRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t use that name. Please use letters only, for example Grace.'**
+  String get v2bNameRejected;
+
+  /// No description provided for @v2bAboutSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Setting up your account'**
+  String get v2bAboutSaving;
+
+  /// No description provided for @v2bBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get v2bBack;
+
+  /// No description provided for @v2aVerifyMoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify to read more'**
+  String get v2aVerifyMoreTitle;
+
+  /// No description provided for @v2aVerifyMoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified members can read full intros and see every photo. It takes about 2 minutes.'**
+  String get v2aVerifyMoreBody;
+
+  /// No description provided for @v2aVerifyMoreCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify now'**
+  String get v2aVerifyMoreCta;
+
+  /// No description provided for @v2aDiscoverLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Finding people for you'**
+  String get v2aDiscoverLoading;
+
+  /// No description provided for @v2aEditFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit my filters'**
+  String get v2aEditFilters;
+
+  /// No description provided for @v2aLimitAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See my interests'**
+  String get v2aLimitAction;
+
+  /// No description provided for @v2aCoachTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How Discover works'**
+  String get v2aCoachTitle;
+
+  /// No description provided for @v2aCoachBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart to send an interest, or the cross to pass. Tap a card for the full profile.'**
+  String get v2aCoachBody;
+
+  /// No description provided for @v2aGotIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get v2aGotIt;
+
+  /// No description provided for @v2aCheckAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Check again'**
+  String get v2aCheckAgain;
+
+  /// No description provided for @v2aProfileWhyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Why we matched you'**
+  String get v2aProfileWhyTitle;
+
+  /// No description provided for @v2aProfileFactsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Good to know'**
+  String get v2aProfileFactsTitle;
+
+  /// No description provided for @v2aToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get v2aToday;
+
+  /// No description provided for @v2aYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get v2aYesterday;
+
+  /// No description provided for @v2aMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a match!'**
+  String get v2aMatchTitle;
+
+  /// No description provided for @v2aMatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You and {name} both like each other. Say hello when you are ready.'**
+  String v2aMatchBody(String name);
+
+  /// No description provided for @v2aMatchSayHello.
+  ///
+  /// In en, this message translates to:
+  /// **'Say hello'**
+  String get v2aMatchSayHello;
+
+  /// No description provided for @v2aMatchLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get v2aMatchLater;
+
+  /// No description provided for @v2aInterestsEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse people'**
+  String get v2aInterestsEmptyAction;
+
+  /// No description provided for @v2aMatchesEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Find people to meet'**
+  String get v2aMatchesEmptyAction;
+
+  /// No description provided for @v2aInterestReadReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and reply'**
+  String get v2aInterestReadReply;
+
+  /// No description provided for @v2aInterestWrote.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} sent you an interest'**
+  String v2aInterestWrote(String name);
+
+  /// No description provided for @v2aMatchedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched {date}'**
+  String v2aMatchedOn(String date);
+
+  /// No description provided for @v2aYouSent.
+  ///
+  /// In en, this message translates to:
+  /// **'You: '**
+  String get v2aYouSent;
+
+  /// No description provided for @v2bVerifySheetTitleInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify to send your interest'**
+  String get v2bVerifySheetTitleInterest;
+
+  /// No description provided for @v2bVerifySheetTitleRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify to read the full profile'**
+  String get v2bVerifySheetTitleRead;
+
+  /// No description provided for @v2bVerifySheetTitleProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify to be seen by others'**
+  String get v2bVerifySheetTitleProfile;
+
+  /// No description provided for @v2bVerifySheetTitleGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify your identity'**
+  String get v2bVerifySheetTitleGeneric;
+
+  /// No description provided for @v2bVerifyWhyInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'People who contact others are verified, to keep everyone safe. It takes about 2 minutes.'**
+  String get v2bVerifyWhyInterest;
+
+  /// No description provided for @v2bVerifyWhyRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Full profiles are for verified members. It stops strangers copying people\'s profiles. It takes about 2 minutes.'**
+  String get v2bVerifyWhyRead;
+
+  /// No description provided for @v2bVerifyWhyProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone you meet here is verified, and so is everyone who sees you. It takes about 2 minutes.'**
+  String get v2bVerifyWhyProfile;
+
+  /// No description provided for @v2bVerifyWhyGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified members keep this a safe place for marriage. It takes about 2 minutes.'**
+  String get v2bVerifyWhyGeneric;
+
+  /// No description provided for @v2bVerifyPoint1.
+  ///
+  /// In en, this message translates to:
+  /// **'Have your ID ready: National ID, passport or driving permit.'**
+  String get v2bVerifyPoint1;
+
+  /// No description provided for @v2bVerifyPoint2.
+  ///
+  /// In en, this message translates to:
+  /// **'Our verification partner checks it. Your ID is never shown to any member.'**
+  String get v2bVerifyPoint2;
+
+  /// No description provided for @v2bVerifyPoint3.
+  ///
+  /// In en, this message translates to:
+  /// **'You can keep browsing while we check.'**
+  String get v2bVerifyPoint3;
+
+  /// No description provided for @v2bNotNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get v2bNotNow;
+
+  /// No description provided for @v2bKeepBrowsing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep browsing'**
+  String get v2bKeepBrowsing;
+
+  /// No description provided for @v2bVerifyPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re checking your ID'**
+  String get v2bVerifyPendingTitle;
+
+  /// No description provided for @v2bVerifyPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can keep browsing. We\'ll tell you when it\'s done. It usually takes a few minutes.'**
+  String get v2bVerifyPendingBody;
+
+  /// No description provided for @v2bVerifySeeStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'See status'**
+  String get v2bVerifySeeStatus;
+
+  /// No description provided for @v2bVerifyDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re verified'**
+  String get v2bVerifyDoneTitle;
+
+  /// No description provided for @v2bVerifyDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can go ahead now.'**
+  String get v2bVerifyDoneBody;
+
+  /// No description provided for @v2bContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get v2bContinue;
+
+  /// No description provided for @v2bVStepId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID type'**
+  String get v2bVStepId;
+
+  /// No description provided for @v2bVStepScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan ID'**
+  String get v2bVStepScan;
+
+  /// No description provided for @v2bVStepSelfie.
+  ///
+  /// In en, this message translates to:
+  /// **'Selfie'**
+  String get v2bVStepSelfie;
+
+  /// No description provided for @v2bVStepResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get v2bVStepResult;
+
+  /// No description provided for @v2bVStepSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Step {n} of {total}: {name}'**
+  String v2bVStepSemantics(int n, int total, String name);
+
+  /// No description provided for @v2bVerifyTimeNote.
+  ///
+  /// In en, this message translates to:
+  /// **'About 2 minutes'**
+  String get v2bVerifyTimeNote;
+
+  /// No description provided for @v2bCapturePrepHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'What happens next'**
+  String get v2bCapturePrepHeading;
+
+  /// No description provided for @v2bCapturePrep1.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the front of your ID.'**
+  String get v2bCapturePrep1;
+
+  /// No description provided for @v2bCapturePrep2.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a short selfie video.'**
+  String get v2bCapturePrep2;
+
+  /// No description provided for @v2bCapturePrep3.
+  ///
+  /// In en, this message translates to:
+  /// **'We tell you the result here.'**
+  String get v2bCapturePrep3;
+
+  /// No description provided for @v2bTipsHeading.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips for the next try'**
+  String get v2bTipsHeading;
+
+  /// No description provided for @v2bTipFlat.
+  ///
+  /// In en, this message translates to:
+  /// **'Put the ID flat on a plain, dark surface.'**
+  String get v2bTipFlat;
+
+  /// No description provided for @v2bTipGlare.
+  ///
+  /// In en, this message translates to:
+  /// **'Avoid glare and shadows. Daylight near a window works well.'**
+  String get v2bTipGlare;
+
+  /// No description provided for @v2bTipFrame.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill the frame and wait until the text looks sharp.'**
+  String get v2bTipFrame;
+
+  /// No description provided for @v2bTipGlasses.
+  ///
+  /// In en, this message translates to:
+  /// **'Take off glasses and hats.'**
+  String get v2bTipGlasses;
+
+  /// No description provided for @v2bTipFace.
+  ///
+  /// In en, this message translates to:
+  /// **'Face the camera straight on, in good light.'**
+  String get v2bTipFace;
+
+  /// No description provided for @v2bTipSteady.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold the phone steady at eye level.'**
+  String get v2bTipSteady;
+
+  /// No description provided for @v2bTipSlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow the moves on screen slowly.'**
+  String get v2bTipSlow;
+
+  /// No description provided for @v2bTipValid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use an ID that is still valid, or choose a different ID type.'**
+  String get v2bTipValid;
+
+  /// No description provided for @v2bTipDifferentId.
+  ///
+  /// In en, this message translates to:
+  /// **'If it keeps failing, try a different ID type.'**
+  String get v2bTipDifferentId;
+
+  /// No description provided for @v2bBannerVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify to send interests'**
+  String get v2bBannerVerifyTitle;
+
+  /// No description provided for @v2bBannerVerifyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'About 2 minutes. Your ID is never shown to anyone.'**
+  String get v2bBannerVerifyBody;
+
+  /// No description provided for @v2bBannerVerifyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify now'**
+  String get v2bBannerVerifyAction;
+
+  /// No description provided for @v2bBannerPendingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re checking your ID'**
+  String get v2bBannerPendingTitle;
+
+  /// No description provided for @v2bBannerPendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can keep browsing. We\'ll tell you the result.'**
+  String get v2bBannerPendingBody;
+
+  /// No description provided for @v2bBannerPendingAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See status'**
+  String get v2bBannerPendingAction;
+
+  /// No description provided for @v2bBannerFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t verify you yet'**
+  String get v2bBannerFailedTitle;
+
+  /// No description provided for @v2bBannerFailedBody.
+  ///
+  /// In en, this message translates to:
+  /// **'See what to try next.'**
+  String get v2bBannerFailedBody;
+
+  /// No description provided for @v2bBannerFailedAction.
+  ///
+  /// In en, this message translates to:
+  /// **'See what to do'**
+  String get v2bBannerFailedAction;
+
+  /// No description provided for @v2bConsentsAcceptContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept and continue'**
+  String get v2bConsentsAcceptContinue;
+
+  /// No description provided for @v2bVerifyResume.
+  ///
+  /// In en, this message translates to:
+  /// **'You started verifying earlier. Pick up where you left off.'**
+  String get v2bVerifyResume;
+
+  /// No description provided for @v2bMakeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Make your profile'**
+  String get v2bMakeTitle;
+
+  /// No description provided for @v2bMakeTime.
+  ///
+  /// In en, this message translates to:
+  /// **'About 3 minutes'**
+  String get v2bMakeTime;
+
+  /// No description provided for @v2bCompleteLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete later'**
+  String get v2bCompleteLater;
+
+  /// No description provided for @v2bMakeStepPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a photo'**
+  String get v2bMakeStepPhoto;
+
+  /// No description provided for @v2bMakeStepPhotoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'A clear photo of your face gets many more replies.'**
+  String get v2bMakeStepPhotoSub;
+
+  /// No description provided for @v2bMakeStepLooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you live and what you want'**
+  String get v2bMakeStepLooking;
+
+  /// No description provided for @v2bMakeStepLookingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'This helps us show you people who fit.'**
+  String get v2bMakeStepLookingSub;
+
+  /// No description provided for @v2bMakeStepIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'A few words about you'**
+  String get v2bMakeStepIntro;
+
+  /// No description provided for @v2bMakeStepIntroSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Other members read this when you send them an interest.'**
+  String get v2bMakeStepIntroSub;
+
+  /// No description provided for @v2bMakeStepQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Eight quick questions'**
+  String get v2bMakeStepQuestions;
+
+  /// No description provided for @v2bMakeStepQuestionsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap an answer. You can change them later.'**
+  String get v2bMakeStepQuestionsSub;
+
+  /// No description provided for @v2bMakeStepReady.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re nearly there'**
+  String get v2bMakeStepReady;
+
+  /// No description provided for @v2bPhotoEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a clear photo of your face'**
+  String get v2bPhotoEmpty;
+
+  /// No description provided for @v2bPhotoTake.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a photo'**
+  String get v2bPhotoTake;
+
+  /// No description provided for @v2bPhotoPick.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get v2bPhotoPick;
+
+  /// No description provided for @v2bPhotoTip1.
+  ///
+  /// In en, this message translates to:
+  /// **'Show your face clearly, on your own.'**
+  String get v2bPhotoTip1;
+
+  /// No description provided for @v2bPhotoTip2.
+  ///
+  /// In en, this message translates to:
+  /// **'Use good light and no sunglasses.'**
+  String get v2bPhotoTip2;
+
+  /// No description provided for @v2bPhotoTip3.
+  ///
+  /// In en, this message translates to:
+  /// **'Every photo is checked before others see it.'**
+  String get v2bPhotoTip3;
+
+  /// No description provided for @v2bPhotoChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re checking your photo. You can carry on.'**
+  String get v2bPhotoChecking;
+
+  /// No description provided for @v2bPhotoApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo approved'**
+  String get v2bPhotoApproved;
+
+  /// No description provided for @v2bPhotoRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t use this photo. Please try another.'**
+  String get v2bPhotoRejected;
+
+  /// No description provided for @v2bPhotoUploading.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading your photo...'**
+  String get v2bPhotoUploading;
+
+  /// No description provided for @v2bPhotoChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a different photo'**
+  String get v2bPhotoChange;
+
+  /// No description provided for @v2bVisibilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who can see your photos?'**
+  String get v2bVisibilityTitle;
+
+  /// No description provided for @v2bVisibilityEveryone.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone on Marriage Connect'**
+  String get v2bVisibilityEveryone;
+
+  /// No description provided for @v2bVisibilityEveryoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Members who are browsing can see your photos.'**
+  String get v2bVisibilityEveryoneHint;
+
+  /// No description provided for @v2bVisibilityVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified members only'**
+  String get v2bVisibilityVerified;
+
+  /// No description provided for @v2bVisibilityVerifiedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Only members who have verified their ID can see your photos.'**
+  String get v2bVisibilityVerifiedHint;
+
+  /// No description provided for @v2bVisibilityChange.
+  ///
+  /// In en, this message translates to:
+  /// **'You can change this any time in your profile.'**
+  String get v2bVisibilityChange;
+
+  /// No description provided for @v2bDistrictChoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your district'**
+  String get v2bDistrictChoose;
+
+  /// No description provided for @v2bDistrictSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search districts'**
+  String get v2bDistrictSearch;
+
+  /// No description provided for @v2bDistrictNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No district matches that.'**
+  String get v2bDistrictNoMatch;
+
+  /// No description provided for @v2bLookingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'What are you looking for?'**
+  String get v2bLookingLabel;
+
+  /// No description provided for @v2bIntroHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a few lines about yourself. Be warm and honest.'**
+  String get v2bIntroHelp;
+
+  /// No description provided for @v2bIntroChipsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to start a sentence'**
+  String get v2bIntroChipsLabel;
+
+  /// No description provided for @v2bIntroChip1.
+  ///
+  /// In en, this message translates to:
+  /// **'I work as'**
+  String get v2bIntroChip1;
+
+  /// No description provided for @v2bIntroChip2.
+  ///
+  /// In en, this message translates to:
+  /// **'In my free time I like to'**
+  String get v2bIntroChip2;
+
+  /// No description provided for @v2bIntroChip3.
+  ///
+  /// In en, this message translates to:
+  /// **'My family is'**
+  String get v2bIntroChip3;
+
+  /// No description provided for @v2bIntroChip4.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m looking for someone who'**
+  String get v2bIntroChip4;
+
+  /// No description provided for @v2bIntroChip5.
+  ///
+  /// In en, this message translates to:
+  /// **'In a marriage I value'**
+  String get v2bIntroChip5;
+
+  /// No description provided for @v2bIntroExampleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Example'**
+  String get v2bIntroExampleLabel;
+
+  /// No description provided for @v2bIntroExample.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m Grace, a nurse in Kampala. I enjoy cooking, music and long Sunday walks. My family is very close and I\'m a calm, hardworking person. I\'m looking for a kind, faithful man who wants a peaceful home and children one day.'**
+  String get v2bIntroExample;
+
+  /// No description provided for @v2bIntroCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {min} characters to start'**
+  String v2bIntroCount(int count, int min);
+
+  /// No description provided for @v2bIntroEnough.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s enough to continue. Add more if you like.'**
+  String get v2bIntroEnough;
+
+  /// No description provided for @v2bIntroSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you. A team checks every intro. You can carry on.'**
+  String get v2bIntroSubmitted;
+
+  /// No description provided for @v2bQuestionOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {n} of {total}'**
+  String v2bQuestionOf(int n, int total);
+
+  /// No description provided for @v2bQuestionMultiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose all that apply, then tap Next.'**
+  String get v2bQuestionMultiHint;
+
+  /// No description provided for @v2bNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get v2bNext;
+
+  /// No description provided for @v2bQuestionsSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t save {count} of your answers. Check your connection and try again.'**
+  String v2bQuestionsSaveFailed(int count);
+
+  /// No description provided for @v2bQuestionsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t load the questions.'**
+  String get v2bQuestionsLoadFailed;
+
+  /// No description provided for @v2bReadyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is ready'**
+  String get v2bReadyTitle;
+
+  /// No description provided for @v2bReadyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This is what other members will see.'**
+  String get v2bReadyBody;
+
+  /// No description provided for @v2bReadyVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'One last step: verify to go live'**
+  String get v2bReadyVerifyTitle;
+
+  /// No description provided for @v2bReadyVerifyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only verified members can be seen and send interests. It takes about 2 minutes.'**
+  String get v2bReadyVerifyBody;
+
+  /// No description provided for @v2bReadyVerifyCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify to go live'**
+  String get v2bReadyVerifyCta;
+
+  /// No description provided for @v2bReadyPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your photo or intro is still being checked. You can go live as soon as they are approved.'**
+  String get v2bReadyPending;
+
+  /// No description provided for @v2bLiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re live!'**
+  String get v2bLiveTitle;
+
+  /// No description provided for @v2bLiveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Members can now see your profile. Add the extras in your profile whenever you like. Nothing else is needed.'**
+  String get v2bLiveBody;
+
+  /// No description provided for @v2bLiveCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start browsing'**
+  String get v2bLiveCta;
+
+  /// No description provided for @v2bNextPhotoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your photo'**
+  String get v2bNextPhotoTitle;
+
+  /// No description provided for @v2bNextPhotoBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles with a clear photo get far more replies. It takes a minute.'**
+  String get v2bNextPhotoBody;
+
+  /// No description provided for @v2bNextLookingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Say where you live'**
+  String get v2bNextLookingTitle;
+
+  /// No description provided for @v2bNextLookingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us your district and what you are looking for.'**
+  String get v2bNextLookingBody;
+
+  /// No description provided for @v2bNextIntroTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Write a few words about you'**
+  String get v2bNextIntroTitle;
+
+  /// No description provided for @v2bNextIntroBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Other members read this when you send them an interest.'**
+  String get v2bNextIntroBody;
+
+  /// No description provided for @v2bNextQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer {count} quick questions'**
+  String v2bNextQuestionsTitle(int count);
+
+  /// No description provided for @v2bNextQuestionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'They help us show you people who fit.'**
+  String get v2bNextQuestionsBody;
+
+  /// No description provided for @v2bNextVerifyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify to go live'**
+  String get v2bNextVerifyTitle;
+
+  /// No description provided for @v2bNextVerifyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It takes about 2 minutes. Your ID is never shown to anyone.'**
+  String get v2bNextVerifyBody;
+
+  /// No description provided for @v2bNextGoLiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go live'**
+  String get v2bNextGoLiveTitle;
+
+  /// No description provided for @v2bNextGoLiveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is ready. Let members see it.'**
+  String get v2bNextGoLiveBody;
+
+  /// No description provided for @v2bNextMorePhotosTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add more photos'**
+  String get v2bNextMorePhotosTitle;
+
+  /// No description provided for @v2bNextMorePhotosBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Two or three photos help people get to know you.'**
+  String get v2bNextMorePhotosBody;
+
+  /// No description provided for @v2bNextMoreQuestionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer more questions'**
+  String get v2bNextMoreQuestionsTitle;
+
+  /// No description provided for @v2bNextMoreQuestionsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Each answer improves who we show you. Skip any you like.'**
+  String get v2bNextMoreQuestionsBody;
+
+  /// No description provided for @v2bNextDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a few more details'**
+  String get v2bNextDetailsTitle;
+
+  /// No description provided for @v2bNextDetailsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Work, education and languages. All optional.'**
+  String get v2bNextDetailsBody;
+
+  /// No description provided for @v2bNextDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile is complete'**
+  String get v2bNextDoneTitle;
+
+  /// No description provided for @v2bNextDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing left to add. Nice work.'**
+  String get v2bNextDoneBody;
+
+  /// No description provided for @v2bVisibilityCardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Who can see your photos'**
+  String get v2bVisibilityCardTitle;
+
+  /// No description provided for @v2bVisibilityEveryoneShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone'**
+  String get v2bVisibilityEveryoneShort;
+
+  /// No description provided for @v2bVisibilityVerifiedShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Verified only'**
+  String get v2bVisibilityVerifiedShort;
+
+  /// No description provided for @v2bVisibilitySaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Your photos are visible to {who}.'**
+  String v2bVisibilitySaved(String who);
+
+  /// No description provided for @v2bVisibilityWhoEveryone.
+  ///
+  /// In en, this message translates to:
+  /// **'everyone'**
+  String get v2bVisibilityWhoEveryone;
+
+  /// No description provided for @v2bVisibilityWhoVerified.
+  ///
+  /// In en, this message translates to:
+  /// **'verified members only'**
+  String get v2bVisibilityWhoVerified;
+
+  /// No description provided for @v2bEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit your profile'**
+  String get v2bEditTitle;
+
+  /// No description provided for @v2bEditIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Change anything, any time. Your profile keeps working while you edit.'**
+  String get v2bEditIntro;
+
+  /// No description provided for @v2bEditPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get v2bEditPhotos;
+
+  /// No description provided for @v2bEditPhotosHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {max} added'**
+  String v2bEditPhotosHint(int count, int max);
+
+  /// No description provided for @v2bEditIntroItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Your intro'**
+  String get v2bEditIntroItem;
+
+  /// No description provided for @v2bEditIntroHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What others read when you send an interest'**
+  String get v2bEditIntroHint;
+
+  /// No description provided for @v2bEditLooking.
+  ///
+  /// In en, this message translates to:
+  /// **'Where you live and what you want'**
+  String get v2bEditLooking;
+
+  /// No description provided for @v2bEditLookingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'District, intention and who you\'d like to meet'**
+  String get v2bEditLookingHint;
+
+  /// No description provided for @v2bEditQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get v2bEditQuestions;
+
+  /// No description provided for @v2bEditQuestionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} of {total} answered'**
+  String v2bEditQuestionsHint(int count, int total);
+
+  /// No description provided for @v2bEditDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'More about you'**
+  String get v2bEditDetails;
+
+  /// No description provided for @v2bEditDetailsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Work, education, languages. All optional'**
+  String get v2bEditDetailsHint;
+
+  /// No description provided for @v2bEditBasics.
+  ///
+  /// In en, this message translates to:
+  /// **'Name and marital status'**
+  String get v2bEditBasics;
+
+  /// No description provided for @v2bEditBasicsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first name as members see it'**
+  String get v2bEditBasicsHint;
+
+  /// No description provided for @v2bEditPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'See how others see you'**
+  String get v2bEditPreview;
+
+  /// No description provided for @v2bEditPreviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview and go live'**
+  String get v2bEditPreviewHint;
+
+  /// No description provided for @v2bEditDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get v2bEditDone;
+
+  /// No description provided for @v2bEditSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get v2bEditSaved;
 }
 
 class _AppLocalizationsDelegate

@@ -5,7 +5,11 @@ CATALOG: dict[str, dict[str, object]] = {
     "match_created": {"inbox": True, "body": "You have a new match"},
     "new_message": {"inbox": False, "body": "You have a new message"},
     "trial_ending_soon": {"inbox": True, "body": "Your free trial ends soon"},
-    "trial_ended": {"inbox": True, "body": "Your free trial has ended"},
+    # v2: browsing, chat in your matches and your free weekly interests carry on after the trial.
+    "trial_ended": {
+        "inbox": True,
+        "body": "Your free trial has ended. You can still browse, chat and send free interests.",
+    },
     "warning": {"inbox": True, "body": "Please review our community guidelines"},
     "appeal_decided": {"inbox": True, "body": "Your appeal has been reviewed"},
     "export_ready": {"inbox": True, "body": "Your data export is ready"},

@@ -16,7 +16,7 @@ const paywallRoute = '/membership/paywall';
 String restrictedCopy(AppLocalizations l, Capability c, Entitlements? e) {
   if (e != null && e.looksUnverified) return l.memberGateNotVerified;
   return switch (c) {
-    Capability.browse => l.memberGateBrowse,
+    Capability.browse || Capability.viewFullProfile => l.memberGateBrowse,
     Capability.sendInterest => l.memberGateSendInterest,
     Capability.acceptInterest => l.memberGateAcceptInterest,
     Capability.sendMessage => l.memberGateSendMessage,

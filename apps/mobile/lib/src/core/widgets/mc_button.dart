@@ -20,6 +20,7 @@ class McButton extends StatelessWidget {
     this.loading = false,
     this.icon,
     this.expand = true,
+    this.large = false,
     super.key,
   });
 
@@ -32,6 +33,9 @@ class McButton extends StatelessWidget {
   /// Fill the available width (default) or size to the label.
   final bool expand;
 
+  /// A 56 dp, bolder button for the one primary action of a screen.
+  final bool large;
+
   @override
   Widget build(BuildContext context) {
     final mc = context.mc;
@@ -39,12 +43,15 @@ class McButton extends StatelessWidget {
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(mc.radii.md),
     );
-    final min = Size(mc.space.minTarget, mc.space.minTarget);
+    final min = Size(mc.space.minTarget, large ? 56 : mc.space.minTarget);
     final padding = EdgeInsets.symmetric(
       horizontal: mc.space.md,
       vertical: mc.space.xs,
     );
-    final labelStyle = mc.text.label.copyWith(fontSize: 16);
+    final labelStyle = mc.text.label.copyWith(
+      fontSize: large ? 17 : 16,
+      fontWeight: large ? FontWeight.w700 : null,
+    );
 
     final style = switch (kind) {
       McButtonKind.primary => FilledButton.styleFrom(

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
 
@@ -6,7 +7,7 @@ final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => throw UnimplementedError('provided in bootstrap'),
 );
 
-/// Explicit UI states for the phone/OTP/consents steps (Bible §5.5).
+/// Explicit UI states for the phone and code steps (Bible §5.5).
 enum OnboardingStatus { idle, loading, error }
 
 class OnboardingState {
@@ -79,6 +80,7 @@ class OnboardingController extends Notifier<OnboardingState> {
         phone: phone,
         resendAvailableAt: DateTime.now().add(const Duration(seconds: 30)),
       );
+      ref.read(analyticsProvider).track(AnalyticsEvent.otpSent);
     }
     return ok ?? false;
   }
@@ -92,15 +94,20 @@ class OnboardingController extends Notifier<OnboardingState> {
       );
       return true;
     });
+    if (ok ?? false) {
+      ref.read(analyticsProvider).track(AnalyticsEvent.otpVerified);
+    }
     return ok ?? false;
   }
 
-  Future<bool> submitConsents(Map<String, bool> granted) async {
-    final ok = await _run(() async {
-      await _repo.recordConsents(granted: granted);
-      return true;
-    });
-    return ok ?? false;
+  /// Forgets a failed attempt so the next one starts clean (new code typed).
+  void clearFailure() {
+    if (state.failure != null || state.status == OnboardingStatus.error) {
+      state = state.copyWith(
+        status: OnboardingStatus.idle,
+        clearFailure: true,
+      );
+    }
   }
 }
 

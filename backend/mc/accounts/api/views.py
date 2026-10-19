@@ -321,3 +321,24 @@ class RecoverCompleteView(_PublicPost):
         v = self.parsed(request)
         recovery.complete(token=v["recovery_token"], code=v["code"], ip=client_ip(request))
         return Response({"status": "phone_changed"})
+
+
+class FunnelEventView(APIView):
+    """`POST /events {name, install_id?}`: privacy-safe funnel step from a signed-in OR anonymous client. A bearer
+    token is optional; anonymous callers identify themselves only by the random `install_id` their app generated."""
+
+    permission_classes = [AllowAny]
+
+    @extend_schema(request=s.FunnelEventSerializer, responses={202: dict}, auth=[])
+    def post(self, request):  # type: ignore[no-untyped-def]
+        data = s.FunnelEventSerializer(data=request.data)
+        reject_unknown_fields(data, request.data)
+        data.is_valid(raise_exception=True)
+        user = request.user if getattr(request.user, "is_authenticated", False) else None
+        services.record_funnel_event(
+            name=data.validated_data["name"],
+            install_id=data.validated_data.get("install_id"),
+            account=user,
+            ip=client_ip(request),
+        )
+        return Response({"status": "accepted"}, status=status.HTTP_202_ACCEPTED)

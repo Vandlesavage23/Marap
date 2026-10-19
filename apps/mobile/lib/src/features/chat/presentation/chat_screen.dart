@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
@@ -13,6 +14,7 @@ import 'package:marriage_connect/src/features/chat/data/chat_socket.dart';
 import 'package:marriage_connect/src/features/chat/domain/chat_message.dart';
 import 'package:marriage_connect/src/features/chat/presentation/composer.dart';
 import 'package:marriage_connect/src/features/chat/presentation/message_bubbles.dart';
+import 'package:marriage_connect/src/features/interests/presentation/member_avatar.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
 import 'package:marriage_connect/src/features/safety/presentation/safety_screens.dart';
 
@@ -38,7 +40,23 @@ class ChatScreen extends ConsumerWidget {
     });
     return Scaffold(
       appBar: AppBar(
-        title: Text(name ?? l.chatTitleFallback),
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            if (async.valueOrNull?.match case final m?) ...[
+              MemberAvatar(member: m.member, size: 40),
+              const SizedBox(width: 12),
+            ],
+            Flexible(
+              child: Text(
+                name ?? l.chatTitleFallback,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.mc.text.title,
+              ),
+            ),
+          ],
+        ),
         actions: [
           if (async.valueOrNull?.ended == false)
             PopupMenuButton<String>(
@@ -83,7 +101,7 @@ class ChatScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: async.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const _ChatSkeleton(),
           error: (e, _) {
             void retry() => ref.invalidate(provider);
             if (e is AppFailure) {
@@ -216,7 +234,11 @@ class _ChatBody extends ConsumerWidget {
           ),
         Expanded(
           child: count == 0
-              ? EmptyState(title: l.chatEmptyTitle, body: l.chatEmptyBody)
+              ? EmptyState(
+                  title: l.chatEmptyTitle,
+                  body: l.chatEmptyBody,
+                  kind: EmptyKind.noMatches,
+                )
               : ListView.builder(
                   reverse: true,
                   padding: const EdgeInsets.all(12),
@@ -240,11 +262,29 @@ class _ChatBody extends ConsumerWidget {
                         onDiscard: () => ctrl.discardFailed(p.clientMsgId),
                       );
                     }
-                    final m = state.messages[i - pending.length];
-                    return MessageBubble(
+                    final mi = i - pending.length;
+                    final m = state.messages[mi];
+                    final older = mi + 1 < state.messages.length
+                        ? state.messages[mi + 1]
+                        : null;
+                    final bubble = MessageBubble(
                       key: ValueKey(m.id),
                       message: m,
                       status: statusFor(m),
+                    );
+                    final a = m.createdAt.toLocal();
+                    final b = older?.createdAt.toLocal();
+                    final firstOfDay = b == null ||
+                        a.year != b.year ||
+                        a.month != b.month ||
+                        a.day != b.day;
+                    if (!firstOfDay) return bubble;
+                    return Column(
+                      key: ValueKey('day-${m.id}'),
+                      children: [
+                        ChatDateSeparator(day: a, now: now),
+                        bubble,
+                      ],
                     );
                   },
                 ),
@@ -270,19 +310,62 @@ class _Banner extends StatelessWidget {
   final IconData? icon;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18),
-                const SizedBox(width: 8),
-              ],
-              Expanded(child: Text(text)),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    return Material(
+      color: mc.colors.accentContainer,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: mc.space.md,
+          vertical: mc.space.xs + 2,
         ),
-      );
+        child: Row(
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: 18, color: mc.colors.onAccentContainer),
+              SizedBox(width: mc.space.xs),
+            ],
+            Expanded(
+              child: Text(
+                text,
+                style: mc.text.bodySmall
+                    .copyWith(color: mc.colors.onAccentContainer),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Loading placeholder: a few grey bubbles instead of a spinner.
+class _ChatSkeleton extends StatelessWidget {
+  const _ChatSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    final mc = context.mc;
+    Widget row(double w, {bool mine = false}) => Align(
+          alignment: mine
+              ? AlignmentDirectional.centerEnd
+              : AlignmentDirectional.centerStart,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: mc.space.sm),
+            child: SkeletonBox(width: w, height: 44, radius: 18),
+          ),
+        );
+    return Padding(
+      padding: EdgeInsets.all(mc.space.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          row(200),
+          row(140, mine: true),
+          row(240),
+          row(180, mine: true),
+        ],
+      ),
+    );
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
 
 /// Every kit component / state widget in its meaningful variants. The golden
@@ -130,7 +131,76 @@ final Map<String, Widget Function()> kitCases = {
   'state_restricted': () =>
       const RestrictedState(reason: 'Your membership has ended.'),
   'offline_banner': () => const OfflineBanner(),
+  // --- v2 visual kit ---
+  'state_empty_matches': () => const EmptyState(
+        title: 'No matches yet',
+        body: 'When someone you like likes you back, you will see them here.',
+        kind: EmptyKind.noMatches,
+        actionLabel: 'Find people to meet',
+        onAction: _noop,
+      ),
+  'state_empty_interests': () => const EmptyState(
+        title: 'No interests yet',
+        body: 'People who like your profile appear here, never hidden.',
+        kind: EmptyKind.noInterests,
+      ),
+  'photo_chip': () => const PhotoChip(
+        label: 'Marriage soon',
+        icon: Icons.favorite,
+      ),
+  'photo_dots': () => const PhotoDots(count: 4, index: 1, onPhoto: false),
+  'photo_profile_card': () => PhotoProfileCard(
+        photo: const SampleAvatar(seed: 'grace-nurse'),
+        displayName: 'Grace',
+        age: 29,
+        district: 'Kampala',
+        intention: 'Marriage soon',
+        whyLine: 'You both want children and value faith.',
+        verified: true,
+        photoCount: 3,
+        chips: const [
+          PhotoChip(label: 'Strong match', icon: Icons.thumb_up_alt_outlined),
+        ],
+      ),
+  'photo_profile_card_locked': () => PhotoProfileCard(
+        photo: const SampleAvatar(seed: 'moses-engineer', woman: false),
+        displayName: 'Moses',
+        age: 34,
+        district: 'Mbarara',
+        verified: true,
+        bottom: McButton(label: 'Verify to read more', onPressed: () {}),
+      ),
+  'skeleton_box': () => const SkeletonBox(width: 200, height: 24),
+  'skeleton_rows': () => const SkeletonRows(),
+  'mc_avatar': () => const McAvatar(name: 'Aisha', size: 64),
+  'mc_avatar_verified': () => const McAvatar(
+        name: 'Brian',
+        size: 64,
+        verified: true,
+      ),
+  'completeness_ring': () => const CompletenessRing(fraction: 0.65),
+  'mc_list_tile': () => McListTile(
+        icon: Icons.shield_outlined,
+        title: 'Safety centre',
+        subtitle: 'Tips, blocking and reporting',
+        onTap: () {},
+      ),
+  'coach_mark': () => CoachMark(
+        title: 'How Discover works',
+        message: 'Tap the heart to send an interest, or the cross to pass.',
+        dismissLabel: 'Got it',
+        onDismiss: () {},
+      ),
+  // --- illustrations (core/illustrations) ---
+  'brand_mark': () => const BrandMark(size: 56),
+  'verified_badge_art': () => const VerifiedBadgeArt(size: 48),
+  'sample_avatar': () => const SampleAvatar(seed: 'peter', size: 96),
+  'hero_illustration': () => const HeroIllustration(),
+  'empty_illustration': () =>
+      const EmptyIllustration(kind: EmptyKind.noMatches),
 };
+
+void _noop() {}
 
 /// Cases that fill the screen (own scroll/centre) and so are hosted without
 /// the padded top-aligned wrapper.
@@ -139,5 +209,10 @@ const fullScreenCases = {
   'state_error',
   'state_offline',
   'state_restricted',
+  'state_empty_matches',
+  'state_empty_interests',
   'bottom_sheet',
+  'photo_profile_card',
+  'photo_profile_card_locked',
+  'skeleton_rows',
 };
