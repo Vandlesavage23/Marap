@@ -30,10 +30,22 @@ BuildContext _ctx(WidgetTester t) => t.element(find.byType(Scaffold).last);
 
 Future<void> _settle(WidgetTester t) => t.pumpAndSettle();
 
+Future<void> _reveal(WidgetTester t, Finder f) async {
+  if (f.evaluate().isNotEmpty) {
+    await t.ensureVisible(f.first);
+    return;
+  }
+  await t.scrollUntilVisible(
+    f,
+    200,
+    scrollable: find.byType(Scrollable).first,
+  );
+}
+
 Future<void> _tapText(WidgetTester t, String text) async {
   final f = find.text(text);
+  await _reveal(t, f);
   expect(f, findsWidgets, reason: 'looking for "$text"');
-  await t.ensureVisible(f.first);
   await t.tap(f.first, warnIfMissed: false);
   await _settle(t);
 }
@@ -94,7 +106,7 @@ Future<void> main() async {
     await _settle(t);
     await t.tap(find.text(l.v2bIAmWoman));
     await t.pump();
-    await t.ensureVisible(find.text(l.v2bSelectAll));
+    await _reveal(t, find.text(l.v2bSelectAll));
     await t.tap(find.text(l.v2bSelectAll));
     await t.pump();
     taps += 4;

@@ -217,7 +217,15 @@ Future<SendInterestResult?> sendInterestFlow(
   required String displayName,
 }) async {
   final ref = ProviderScope.containerOf(context, listen: false);
-  final e = ref.read(entitlementProvider).valueOrNull;
+  // Know what the server says before choosing a sheet (a failed read falls
+  // through: the server still decides when the interest is sent).
+  Entitlements? e;
+  try {
+    e = await ref.read(entitlementProvider.future);
+  } on Object {
+    e = ref.read(entitlementProvider).valueOrNull;
+  }
+  if (!context.mounted) return null;
   if (e != null && e.looksUnverified) {
     await showVerifySheet(context, reason: VerifyReason.interest);
     return null;
