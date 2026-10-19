@@ -1,6 +1,8 @@
 // Persona simulations on the real router and screens, with fakes for the
 // server (see v2_world.dart). Counts screens and taps, and asserts the v2
 // promises: nothing asks for ID, payment or a trial before the first card.
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -144,7 +146,9 @@ Future<void> main() async {
     await pumpWorld(t, world, session: SessionState.signedIn);
     expect(find.textContaining('Amani'), findsWidgets);
     // Entitlements say the quota is used: the offer, never a dead end.
-    await sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani');
+    unawaited(
+      sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+    );
     await _settle(t);
     expect(find.text(l.v2bOfferTitle(3)), findsOneWidget);
     expect(find.text(l.v2bOfferRenews('Monday')), findsOneWidget);
