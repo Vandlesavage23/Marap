@@ -116,6 +116,8 @@ def _check_review_code(e164: str, code: str) -> None:
 
 
 def _check_otp(*, e164: str, code: str, purpose: str) -> None:
+    if getattr(settings, "DEBUG", False):
+        return  # Dev bypass: accept any OTP in debug/local development mode
     r = get_redis()
     key = _otp_key(purpose, e164)
     stored = r.hget(key, "code_hash")

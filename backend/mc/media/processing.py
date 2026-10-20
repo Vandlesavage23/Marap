@@ -8,7 +8,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import magic
-import pyvips
+try:
+    import pyvips
+except (ImportError, OSError):
+    pyvips = None  # Fallback to Pillow on systems without libvips binaries (e.g. Windows)
 from django.conf import settings
 
 ALLOWED_IMAGE_MIMES = {"image/jpeg", "image/png", "image/webp"}
@@ -58,23 +61,45 @@ def process_image(path: Path) -> ProcessedImage:
     if mime not in ALLOWED_IMAGE_MIMES:
         raise Rejected("unsupported_type")
     try:
-        probe = pyvips.Image.new_from_file(str(path), access="sequential", fail=True)
-        if probe.width * probe.height > settings.MEDIA_IMAGE_MAX_PIXELS:
-            raise Rejected("too_many_pixels")
-        # Decode fully (autorotate applies EXIF orientation *before* metadata is stripped).
-        image = pyvips.Image.new_from_file(str(path), fail=True).autorot()
-        edge = settings.MEDIA_IMAGE_MAX_EDGE
-        if max(image.width, image.height) > edge:
-            image = image.thumbnail_image(edge, height=edge, size="down")
-        if image.hasalpha():
-            image = image.flatten(background=[255, 255, 255])
-        if image.interpretation not in ("srgb", "b-w"):
-            image = image.colourspace("srgb")
-        data = image.write_to_buffer(".webp", Q=82, strip=True)
-        return ProcessedImage(data=bytes(data), width=image.width, height=image.height)
+        if pyvips is not None:
+            probe = pyvips.Image.new_from_file(str(path), access="sequential", fail=True)
+            if probe.width * probe.height > settings.MEDIA_IMAGE_MAX_PIXELS:
+                raise Rejected("too_many_pixels")
+            # Decode fully (autorotate applies EXIF orientation *before* metadata is stripped).
+            image = pyvips.Image.new_from_file(str(path), fail=True).autorot()
+            edge = settings.MEDIA_IMAGE_MAX_EDGE
+            if max(image.width, image.height) > edge:
+                image = image.thumbnail_image(edge, height=edge, size="down")
+            if image.hasalpha():
+                image = image.flatten(background=[255, 255, 255])
+            if image.interpretation not in ("srgb", "b-w"):
+                image = image.colourspace("srgb")
+            data = image.write_to_buffer(".webp", Q=82, strip=True)
+            return ProcessedImage(data=bytes(data), width=image.width, height=image.height)
+        else:
+            from io import BytesIO
+            from PIL import Image, ImageOps
+
+            with Image.open(path) as img:
+                if img.width * img.height > settings.MEDIA_IMAGE_MAX_PIXELS:
+                    raise Rejected("too_many_pixels")
+                img = ImageOps.exif_transpose(img)
+                edge = settings.MEDIA_IMAGE_MAX_EDGE
+                if max(img.width, img.height) > edge:
+                    img.thumbnail((edge, edge), Image.Resampling.LANCZOS)
+                if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+                    background = Image.new("RGB", img.size, (255, 255, 255))
+                    alpha = img.convert("RGBA").split()[3]
+                    background.paste(img.convert("RGB"), mask=alpha)
+                    img = background
+                elif img.mode != "RGB":
+                    img = img.convert("RGB")
+                buf = BytesIO()
+                img.save(buf, format="WEBP", quality=82)
+                return ProcessedImage(data=buf.getvalue(), width=img.width, height=img.height)
     except Rejected:
         raise
-    except pyvips.Error as exc:
+    except Exception as exc:
         raise Rejected("corrupt_image") from exc
 
 
