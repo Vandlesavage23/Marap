@@ -139,7 +139,6 @@ class _DemoHostState extends State<DemoHost> {
       child: App(
         builder: _wrap,
         themeMode: c.view.dark ? ThemeMode.dark : ThemeMode.system,
-        showDebugBanner: false,
       ),
     );
   }

@@ -98,10 +98,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (_, __) => const WelcomeScreen(),
         routes: [
-          GoRoute(
-            path: 'look-around',
-            builder: (_, __) => const LookAroundScreen(),
-          ),
           GoRoute(path: 'start', builder: (_, __) => const GuestStartScreen()),
           GoRoute(path: 'phone', builder: (_, __) => const PhoneScreen()),
           GoRoute(path: 'otp', builder: (_, __) => const OtpScreen()),

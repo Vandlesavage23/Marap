@@ -13,7 +13,7 @@ class App extends ConsumerWidget {
     super.key,
     this.builder,
     this.themeMode = ThemeMode.system,
-    this.showDebugBanner = true,
+    this.showDebugBanner = false,
   });
 
   /// Wraps every screen (Demo mode adds its ribbon and controls here). Null in

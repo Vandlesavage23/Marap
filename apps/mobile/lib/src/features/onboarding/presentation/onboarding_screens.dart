@@ -26,8 +26,8 @@ import 'package:marriage_connect/src/features/onboarding/presentation/onb_widget
 // 0. Welcome
 // ---------------------------------------------------------------------------
 
-/// Warm first screen. No account, no permission prompt, no payment. Two equal
-/// ways in: start now, or look around with clearly labelled samples first.
+/// Warm first screen. No account, no permission prompt, no payment. One clear way
+/// in: start now and browse real members as a guest.
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -57,12 +57,6 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
           McButton(
             label: l.v2bGetStarted,
             onPressed: () => context.go('/onboarding/start'),
-          ),
-          SizedBox(height: mc.space.xs),
-          McButton(
-            label: l.v2bLookAround,
-            kind: McButtonKind.secondary,
-            onPressed: () => context.go('/onboarding/look-around'),
           ),
           LinkButton(
             key: const Key('have-account'),
@@ -203,191 +197,6 @@ class _ValueRow extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// 1. Look around (samples only: never real member data)
-// ---------------------------------------------------------------------------
-
-class _Sample {
-  const _Sample(this.seed, {required this.woman});
-  final String seed;
-  final bool woman;
-}
-
-const _samples = <_Sample>[
-  _Sample('sample-amara', woman: true),
-  _Sample('sample-joel', woman: false),
-  _Sample('sample-esther', woman: true),
-  _Sample('sample-ronald', woman: false),
-  _Sample('sample-harriet', woman: true),
-  _Sample('sample-samuel', woman: false),
-];
-
-/// Six illustrated sample profiles that show what a card, the "why we matched
-/// you" line and the verified badge look like. Everything here is invented
-/// and labelled as a sample; real members are never shown to visitors.
-class LookAroundScreen extends StatelessWidget {
-  const LookAroundScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final mc = context.mc;
-    final texts = <(String, String, String)>[
-      (l.v2bSample1Name, l.v2bSample1Facts, l.v2bSample1Why),
-      (l.v2bSample2Name, l.v2bSample2Facts, l.v2bSample2Why),
-      (l.v2bSample3Name, l.v2bSample3Facts, l.v2bSample3Why),
-      (l.v2bSample4Name, l.v2bSample4Facts, l.v2bSample4Why),
-      (l.v2bSample5Name, l.v2bSample5Facts, l.v2bSample5Why),
-      (l.v2bSample6Name, l.v2bSample6Facts, l.v2bSample6Why),
-    ];
-    return OnbScaffold(
-      title: l.v2bLookTitle,
-      onBack: () => context.go('/onboarding'),
-      bottom: SafeArea(
-        top: false,
-        child: McButton(
-          label: l.v2bGetStarted,
-          onPressed: () => context.go('/onboarding/start'),
-        ),
-      ),
-      children: [
-        Semantics(
-          container: true,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: mc.colors.accentContainer,
-              borderRadius: BorderRadius.circular(mc.radii.md),
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(mc.space.md),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: mc.colors.onAccentContainer,
-                  ),
-                  SizedBox(width: mc.space.sm),
-                  Expanded(
-                    child: Text(
-                      l.v2bLookBanner,
-                      style: mc.text.subtitle.copyWith(
-                        color: mc.colors.onAccentContainer,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        SizedBox(height: mc.space.md),
-        for (final (i, s) in _samples.indexed) ...[
-          _SampleCard(
-            sample: s,
-            name: texts[i].$1,
-            facts: texts[i].$2,
-            why: texts[i].$3,
-          ),
-          SizedBox(height: mc.space.sm),
-        ],
-        Text(
-          l.v2bLookNote,
-          style: mc.text.bodySmall.copyWith(color: mc.colors.onSurfaceMuted),
-        ),
-      ],
-    );
-  }
-}
-
-class _SampleCard extends StatelessWidget {
-  const _SampleCard({
-    required this.sample,
-    required this.name,
-    required this.facts,
-    required this.why,
-  });
-
-  final _Sample sample;
-  final String name;
-  final String facts;
-  final String why;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = AppLocalizations.of(context);
-    final mc = context.mc;
-    return McCard(
-      semanticLabel: l.v2bSampleSemantics(name, facts, why),
-      padding: EdgeInsets.all(mc.space.sm),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(mc.radii.md),
-            child: SampleAvatar(
-              seed: sample.seed,
-              size: 84,
-              woman: sample.woman,
-            ),
-          ),
-          SizedBox(width: mc.space.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name, style: mc.text.title),
-                Text(
-                  facts,
-                  style: mc.text.bodySmall.copyWith(
-                    color: mc.colors.onSurfaceMuted,
-                  ),
-                ),
-                SizedBox(height: mc.space.xs),
-                Wrap(
-                  spacing: mc.space.xs,
-                  runSpacing: mc.space.xxs,
-                  children: [
-                    const VerificationBadge(),
-                    StatusChip(label: l.v2bSampleLabel),
-                  ],
-                ),
-                SizedBox(height: mc.space.xs),
-                Container(
-                  padding: EdgeInsets.all(mc.space.xs + 2),
-                  decoration: BoxDecoration(
-                    color: mc.colors.primaryContainer.withValues(alpha: 0.55),
-                    borderRadius: BorderRadius.circular(mc.radii.sm),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        size: 16,
-                        color: mc.colors.onPrimaryContainer,
-                      ),
-                      SizedBox(width: mc.space.xs),
-                      Expanded(
-                        child: Text(
-                          why,
-                          style: mc.text.bodySmall.copyWith(
-                            color: mc.colors.onPrimaryContainer,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

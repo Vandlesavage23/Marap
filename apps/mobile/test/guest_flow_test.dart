@@ -17,8 +17,18 @@ import 'package:marriage_connect/src/features/discovery/application/discovery_co
 import 'package:marriage_connect/src/features/discovery/data/guest_discovery_repository.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
 import 'package:marriage_connect/src/features/discovery/domain/paged.dart';
+import 'package:marriage_connect/src/features/discovery/presentation/discovery_screen.dart';
 import 'package:marriage_connect/src/features/onboarding/presentation/account_gate.dart';
 import 'package:marriage_connect/src/features/onboarding/presentation/onboarding_screens.dart';
+
+class _EmptyGuestApi implements GuestDiscoveryRepository {
+  @override
+  Future<Paged<Candidate>> page({
+    required String seeking,
+    String? pageToken,
+  }) async =>
+      const Paged(items: []);
+}
 
 class _FakeGuestApi implements GuestDiscoveryRepository {
   final calls = <(String, String?)>[];
@@ -166,6 +176,39 @@ void main() {
         ..devicePixelRatio = 1;
       addTearDown(t.view.reset);
     }
+
+    testWidgets('no members yet: an honest empty state, not fake people',
+        (t) async {
+      tall(t);
+      final prefs = MemoryPrefs();
+      await prefs.setString(guestGenderPrefKey, 'male');
+      await prefs.setString(guestBirthPrefKey, '1990-01-01');
+      await t.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localPrefsProvider.overrideWithValue(prefs),
+            sessionProvider.overrideWith(_SignedOut.new),
+            guestDiscoveryRepositoryProvider
+                .overrideWithValue(_EmptyGuestApi()),
+          ],
+          child: MaterialApp(
+            theme: buildTheme(Brightness.light),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const DiscoveryScreen(),
+          ),
+        ),
+      );
+      await t.pumpAndSettle();
+      final l = AppLocalizations.of(t.element(find.byType(Scaffold).first));
+      expect(find.text(l.guestEmptyTitle), findsOneWidget);
+      expect(find.text(l.guestGateCta), findsOneWidget);
+      expect(find.textContaining('Sample'), findsNothing);
+    });
 
     testWidgets('under 18: kind message, cannot start', (t) async {
       tall(t);

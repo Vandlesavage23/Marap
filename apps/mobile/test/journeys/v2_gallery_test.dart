@@ -129,12 +129,6 @@ void main() {
     );
     await shotWorld(
       t,
-      'flow_01_look_around',
-      session: SessionState.signedOut,
-      nav: (t, l) => _tap(t, l.v2bLookAround),
-    );
-    await shotWorld(
-      t,
       'flow_02_guest_start',
       session: SessionState.signedOut,
       nav: (t, l) => _tap(t, l.v2bGetStarted),

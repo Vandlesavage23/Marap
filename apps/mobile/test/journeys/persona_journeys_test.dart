@@ -75,7 +75,7 @@ Future<void> main() async {
     // Screen 1: welcome. No permission prompt, no payment, no ID, no phone.
     expect(find.text(l.v2bWelcomeTitle), findsOneWidget);
     expect(find.text(l.v2bGetStarted), findsOneWidget);
-    expect(find.text(l.v2bLookAround), findsOneWidget);
+    expect(find.text(l.guestHaveAccount), findsOneWidget);
     var taps = 0;
     await _tapButton(t, l.v2bGetStarted);
     taps++;

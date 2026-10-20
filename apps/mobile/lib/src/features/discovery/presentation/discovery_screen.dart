@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:marriage_connect/src/core/auth/guest_session.dart';
 import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
@@ -243,6 +244,14 @@ class _Deck extends ConsumerWidget {
     if (card == null) {
       if (state.nextCursor != null) return const DeckSkeleton();
       final seen = state.seen > 0;
+      if (ref.watch(guestSessionProvider) != null) {
+        return EmptyState(
+          title: seen ? l.guestDoneTitle : l.guestEmptyTitle,
+          body: seen ? l.guestDoneBody : l.guestEmptyBody,
+          actionLabel: l.guestGateCta,
+          onAction: () => context.go('/onboarding/phone'),
+        );
+      }
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

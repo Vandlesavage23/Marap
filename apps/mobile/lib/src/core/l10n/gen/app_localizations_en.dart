@@ -3315,6 +3315,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get guestHaveAccount => 'I already have an account';
 
   @override
+  String get guestEmptyTitle => 'We\'re just getting started here';
+
+  @override
+  String get guestEmptyBody =>
+      'No members to show yet. Create an account and we\'ll tell you when people who fit what you\'re looking for join.';
+
+  @override
+  String get guestDoneTitle => 'That\'s the preview';
+
+  @override
+  String get guestDoneBody =>
+      'Sign in or create an account to see more members and say hello.';
+
+  @override
   String get guestGateCta => 'Sign in or create an account';
 
   @override

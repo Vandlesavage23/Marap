@@ -39,7 +39,7 @@ void main() {
       expect(appRedirect(out, '/home'), '/onboarding');
       expect(appRedirect(out, '/verification'), '/onboarding');
       expect(appRedirect(out, '/onboarding/phone'), isNull);
-      expect(appRedirect(out, '/onboarding/look-around'), isNull);
+      expect(appRedirect(out, '/onboarding/start'), isNull);
       expect(appRedirect(out, '/onboarding/about'), '/onboarding');
     });
 

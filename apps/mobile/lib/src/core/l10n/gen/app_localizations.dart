@@ -5896,6 +5896,30 @@ abstract class AppLocalizations {
   /// **'I already have an account'**
   String get guestHaveAccount;
 
+  /// No description provided for @guestEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We\'re just getting started here'**
+  String get guestEmptyTitle;
+
+  /// No description provided for @guestEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'No members to show yet. Create an account and we\'ll tell you when people who fit what you\'re looking for join.'**
+  String get guestEmptyBody;
+
+  /// No description provided for @guestDoneTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'That\'s the preview'**
+  String get guestDoneTitle;
+
+  /// No description provided for @guestDoneBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account to see more members and say hello.'**
+  String get guestDoneBody;
+
   /// No description provided for @guestGateCta.
   ///
   /// In en, this message translates to:

@@ -82,10 +82,6 @@ Widget app(
         path: '/onboarding',
         builder: (_, __) => const WelcomeScreen(),
         routes: [
-          GoRoute(
-            path: 'look-around',
-            builder: (_, __) => const LookAroundScreen(),
-          ),
           GoRoute(path: 'start', builder: (_, __) => const GuestStartScreen()),
           GoRoute(path: 'phone', builder: (_, __) => const PhoneScreen()),
           GoRoute(path: 'otp', builder: (_, __) => const OtpScreen()),
@@ -172,7 +168,7 @@ void main() {
         expect(find.text(s), findsOneWidget);
       }
       expect(find.text(l.v2bGetStarted), findsOneWidget);
-      expect(find.text(l.v2bLookAround), findsOneWidget);
+      expect(find.text(l.guestHaveAccount), findsOneWidget);
       expect(events.events, [AnalyticsEvent.welcomeSeen]);
       // no payment, ID or permission wording on the first screen
       expect(find.textContaining('trial'), findsNothing);
@@ -203,24 +199,6 @@ void main() {
       await t.tap(find.text(l.guestHaveAccount));
       await t.pumpAndSettle();
       expect(find.text(l.v2bPhoneTitle), findsOneWidget);
-    });
-
-    testWidgets('Look around shows six labelled samples, then Get started',
-        (t) async {
-      _tall(t);
-      await t.pumpWidget(app(FakeAuth()));
-      await t.pumpAndSettle();
-      final l = await _l();
-      await t.tap(find.text(l.v2bLookAround));
-      await t.pumpAndSettle();
-      expect(find.text(l.v2bLookBanner), findsOneWidget);
-      expect(find.text(l.v2bSampleLabel), findsNWidgets(6));
-      expect(find.text(l.kitVerified), findsNWidgets(6));
-      expect(find.text(l.v2bSample1Name), findsOneWidget);
-      expect(find.text(l.v2bSample6Why), findsOneWidget);
-      await t.tap(find.text(l.v2bGetStarted));
-      await t.pumpAndSettle();
-      expect(find.text(l.guestStartTitle), findsOneWidget);
     });
   });
 
