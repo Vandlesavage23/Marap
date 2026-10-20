@@ -64,7 +64,7 @@ Future<void> main() async {
   }
 
   testWidgets(
-      'Grace: first launch to first card in 5 screens, then the '
+      'Grace: first launch to first card in 3 screens as a guest, then the '
       'whole free-first journey', (t) async {
     phone(t);
     final world = World()..seedCards();
@@ -72,7 +72,7 @@ Future<void> main() async {
     await pumpWorld(t, world);
     trail.note(t);
 
-    // Screen 1: welcome. No permission prompt, no payment, no ID.
+    // Screen 1: welcome. No permission prompt, no payment, no ID, no phone.
     expect(find.text(l.v2bWelcomeTitle), findsOneWidget);
     expect(find.text(l.v2bGetStarted), findsOneWidget);
     expect(find.text(l.v2bLookAround), findsOneWidget);
@@ -81,37 +81,57 @@ Future<void> main() async {
     taps++;
     trail.note(t);
 
-    // Screen 2: phone (+256 prefix, big field).
+    // Screen 2: who you are + birth date (kept on the phone), then browsing.
+    expect(find.text(l.guestStartTitle), findsOneWidget);
+    await t.tap(find.text(l.v2bIAmWoman));
+    await t.pump();
+    expect(find.byKey(const Key('guest-seeing')), findsOneWidget);
+    await t.tap(find.text(l.v2bBirthDateChoose));
+    await _settle(t);
+    await _tapButton(t, l.guestStartCta);
+    taps += 3;
+    trail.note(t);
+
+    // Screen 3: Discover as a GUEST: real (limited) cards, no account.
+    expect(find.textContaining('Amani'), findsWidgets);
+    expect(world.auth.calls, isEmpty);
+    expect(world.membership.trialKeys, isEmpty);
+    expect(find.text(l.v2bOfferTrial), findsNothing);
+
+    // The first act that needs an identity: the gate, not a wall.
+    unawaited(
+      sendInterestFlow(_ctx(t), profileId: 'c0', displayName: 'Amani'),
+    );
+    await _settle(t);
+    expect(find.text(l.guestGateTitleInterest), findsOneWidget);
+    await _tapButton(t, l.guestGateCta);
+    taps++;
+    trail.note(t);
+
+    // Phone, then the code (auto-submits on the 6th digit).
     expect(find.text('+256'), findsOneWidget);
     await t.enterText(find.byType(TextField), '772000111');
     await t.pump();
     await _tapButton(t, l.v2bSendCode);
-    taps++;
+    taps += 2;
     trail.note(t);
-
-    // Screen 3: code; auto-submits on the 6th digit (no button tap).
     expect(find.text(l.v2bCodeTitle), findsOneWidget);
     await t.enterText(find.byType(TextField).first, '123456');
     await _settle(t);
-    taps++;
     trail.note(t);
     expect(
       world.auth.calls,
       ['start:+256772000111', 'verify:+256772000111:123456'],
     );
 
-    // Screen 4: About you. Nothing is pre-ticked; consents on the same screen.
+    // About you: gender and birth date were remembered from the guest step.
     expect(find.text(l.v2bAboutTitle), findsOneWidget);
-    expect(find.text(l.v2bStepOf(2, 2)), findsOneWidget);
+    expect(find.text(l.v2bIAmWoman), findsOneWidget);
     await t.enterText(find.byType(TextField).first, 'Grace');
-    await t.tap(find.text(l.v2bBirthDateChoose));
-    await _settle(t);
-    await t.tap(find.text(l.v2bIAmWoman));
-    await t.pump();
     await _reveal(t, find.text(l.v2bSelectAll));
     await t.tap(find.text(l.v2bSelectAll));
     await t.pump();
-    taps += 4;
+    taps += 2;
     await _tapButton(t, l.v2bAboutCta);
     taps++;
     trail.note(t);
@@ -122,25 +142,24 @@ Future<void> main() async {
     expect(world.profile.patches.last['gender'], 'female');
     expect(world.profile.patches.last['birth_date'], '1998-04-12');
 
-    // Screen 5: Discover with real (limited) cards. First card reached.
+    // Back where the guest was going: that person's profile.
     expect(trail.paths, [
       '/onboarding',
+      '/onboarding/start',
+      '/discovery',
       '/onboarding/phone',
       '/onboarding/otp',
       '/onboarding/about',
-      '/discovery',
+      '/discovery/profile/c0',
     ]);
-    expect(trail.paths.length, lessThanOrEqualTo(5));
     expect(find.textContaining('Amani'), findsWidgets);
-    // Before the first card: nothing asked for ID, payment or a trial.
     for (final p in trail.paths) {
       expect(p, isNot(startsWith('/verification')));
       expect(p, isNot(startsWith('/membership')));
     }
-    expect(find.text(l.v2bOfferTrial), findsNothing);
     expect(world.verification, VerificationStage.notStarted);
     expect(world.trialUsed, isFalse);
-    expect(taps, lessThanOrEqualTo(12));
+    expect(taps, lessThanOrEqualTo(15));
     world.analytics
         .track(AnalyticsEvent.firstCardSeen); // discovery agent's hook
     expect(world.analytics.events.take(4), [

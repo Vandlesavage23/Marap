@@ -1,10 +1,6 @@
-import 'dart:io';
-
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:marriage_connect/src/core/storage/app_database_open.dart';
 
 part 'app_database.g.dart';
 
@@ -77,14 +73,9 @@ class CachedMessages extends Table {
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.e);
 
-  factory AppDatabase.open() => AppDatabase(
-        LazyDatabase(() async {
-          final dir = await getApplicationDocumentsDirectory();
-          return NativeDatabase.createInBackground(
-            File(p.join(dir.path, 'mc.sqlite')),
-          );
-        }),
-      );
+  /// The on-device database file (the app); a browser has no such file, so
+  /// the web build never calls this (Demo mode brings its own in-memory one).
+  factory AppDatabase.open() => AppDatabase(openAppDatabaseFile());
 
   /// Sign-out: drops the matches and chat-history caches. (The outbox is
   /// cleared by `OutboxRepository.clearAll`, which also frees queued media.)

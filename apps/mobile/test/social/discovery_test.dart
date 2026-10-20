@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
@@ -14,6 +15,7 @@ import 'package:marriage_connect/src/features/discovery/presentation/profile_scr
 import 'package:marriage_connect/src/features/discovery/presentation/progressive_image.dart';
 import 'package:marriage_connect/src/features/interests/application/interests_controllers.dart';
 
+import '../device_track/support.dart' show SessionStub;
 import 'fakes.dart';
 import 'helpers.dart';
 
@@ -25,6 +27,7 @@ Widget discoveryApp(
     routedApp(
       const DiscoveryScreen(),
       overrides: [
+        sessionProvider.overrideWith(() => SessionStub(SessionState.signedIn)),
         discoveryRepositoryProvider.overrideWithValue(repo),
         interestsRepositoryProvider
             .overrideWithValue(interests ?? FakeInterests()),

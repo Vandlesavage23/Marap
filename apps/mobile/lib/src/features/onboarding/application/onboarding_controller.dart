@@ -8,6 +8,11 @@ final authRepositoryProvider = Provider<AuthRepository>(
 );
 
 /// Explicit UI states for the phone and code steps (Bible §5.5).
+/// A one-line note shown under the code boxes. Null in every real build;
+/// Demo mode sets it ("Demo mode: any code works") so nobody waits for an SMS
+/// that will never come.
+final otpHintProvider = Provider<String?>((ref) => null);
+
 enum OnboardingStatus { idle, loading, error }
 
 class OnboardingState {

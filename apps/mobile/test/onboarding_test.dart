@@ -86,6 +86,7 @@ Widget app(
             path: 'look-around',
             builder: (_, __) => const LookAroundScreen(),
           ),
+          GoRoute(path: 'start', builder: (_, __) => const GuestStartScreen()),
           GoRoute(path: 'phone', builder: (_, __) => const PhoneScreen()),
           GoRoute(path: 'otp', builder: (_, __) => const OtpScreen()),
           GoRoute(path: 'about', builder: (_, __) => const AboutYouScreen()),
@@ -178,12 +179,28 @@ void main() {
       expect(find.textContaining('membership'), findsNothing);
     });
 
-    testWidgets('Get started goes to the phone screen', (t) async {
+    testWidgets('Get started goes to who-you-are, not to a phone number',
+        (t) async {
       _tall(t);
       await t.pumpWidget(app(FakeAuth()));
       await t.pumpAndSettle();
       final l = await _l();
       await t.tap(find.text(l.v2bGetStarted));
+      await t.pumpAndSettle();
+      expect(find.text(l.guestStartTitle), findsOneWidget);
+      expect(find.text(l.v2bPhoneTitle), findsNothing);
+    });
+
+    testWidgets('"I already have an account" goes to the phone screen',
+        (t) async {
+      _tall(t);
+      await t.pumpWidget(app(FakeAuth()));
+      await t.pumpAndSettle();
+      final l = await _l();
+      expect(find.byKey(const Key('have-account')), findsOneWidget);
+      await t.ensureVisible(find.text(l.guestHaveAccount));
+      await t.pump();
+      await t.tap(find.text(l.guestHaveAccount));
       await t.pumpAndSettle();
       expect(find.text(l.v2bPhoneTitle), findsOneWidget);
     });
@@ -203,7 +220,7 @@ void main() {
       expect(find.text(l.v2bSample6Why), findsOneWidget);
       await t.tap(find.text(l.v2bGetStarted));
       await t.pumpAndSettle();
-      expect(find.text(l.v2bPhoneTitle), findsOneWidget);
+      expect(find.text(l.guestStartTitle), findsOneWidget);
     });
   });
 

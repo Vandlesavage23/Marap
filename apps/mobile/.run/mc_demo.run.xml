@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <!-- Demo mode: the whole app on sample data. No backend, no SMS code, no ID check. -->
+  <configuration default="false" name="MC Demo (no backend)" type="FlutterRunConfigurationType" factoryName="Flutter">
+    <option name="additionalArgs" value="--flavor dev" />
+    <option name="filePath" value="$PROJECT_DIR$/lib/main_demo.dart" />
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,0 +1,32 @@
+{
+  // One click from the Run and Debug panel (VS Code with the Dart / Flutter
+  // extensions). "MC Demo (no backend)" needs nothing else running: no
+  // server, no SMS code, no ID check. See apps/mobile/README.md.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "MC Demo (no backend)",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/mobile/lib/main_demo.dart",
+      "cwd": "apps/mobile",
+      "args": ["--flavor", "dev"]
+    },
+    {
+      "name": "MC Dev (local backend)",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/mobile/lib/main_dev.dart",
+      "cwd": "apps/mobile",
+      "args": ["--flavor", "dev", "--dart-define-from-file=env/dev.json"]
+    },
+    {
+      "name": "MC Staging",
+      "type": "dart",
+      "request": "launch",
+      "program": "apps/mobile/lib/main_staging.dart",
+      "cwd": "apps/mobile",
+      "args": ["--flavor", "staging", "--dart-define-from-file=env/staging.json"]
+    }
+  ]
+}

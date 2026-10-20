@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
+import 'package:marriage_connect/src/core/auth/guest_session.dart';
+import 'package:marriage_connect/src/core/auth/pending_action.dart';
 import 'package:marriage_connect/src/core/clock.dart';
 import 'package:marriage_connect/src/core/illustrations/illustrations.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
@@ -54,13 +56,18 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
         children: [
           McButton(
             label: l.v2bGetStarted,
-            onPressed: () => context.go('/onboarding/phone'),
+            onPressed: () => context.go('/onboarding/start'),
           ),
           SizedBox(height: mc.space.xs),
           McButton(
             label: l.v2bLookAround,
             kind: McButtonKind.secondary,
             onPressed: () => context.go('/onboarding/look-around'),
+          ),
+          LinkButton(
+            key: const Key('have-account'),
+            label: l.guestHaveAccount,
+            onPressed: () => context.go('/onboarding/phone'),
           ),
         ],
       ),
@@ -245,7 +252,7 @@ class LookAroundScreen extends StatelessWidget {
         top: false,
         child: McButton(
           label: l.v2bGetStarted,
-          onPressed: () => context.go('/onboarding/phone'),
+          onPressed: () => context.go('/onboarding/start'),
         ),
       ),
       children: [
@@ -626,7 +633,15 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     // Let the router decide on real server state: About you for a new
     // account, straight into the app for a returning member.
     await ref.read(meProvider.notifier).reload();
-    if (mounted) context.go('/home');
+    if (!mounted) return;
+    // A new account still owes About you (the router sends it there from
+    // /home); a returning member goes back to what they were doing.
+    final me = ref.read(meProvider).valueOrNull;
+    context.go(
+      me?.basicProfileMissing ?? false
+          ? '/home'
+          : ref.read(pendingActionProvider.notifier).take(),
+    );
   }
 
   Future<void> _resend() async {
@@ -675,6 +690,21 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
           },
         ),
         SizedBox(height: mc.space.md),
+        if (ref.watch(otpHintProvider) case final hint?) ...[
+          Semantics(
+            liveRegion: true,
+            child: Container(
+              key: const Key('otp-hint'),
+              padding: EdgeInsets.all(mc.space.sm),
+              decoration: BoxDecoration(
+                color: mc.colors.primary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(hint, style: mc.text.bodySmall),
+            ),
+          ),
+          SizedBox(height: mc.space.sm),
+        ],
         if (s.loading)
           Semantics(
             liveRegion: true,
@@ -905,7 +935,9 @@ class _AboutYouScreenState extends ConsumerState<AboutYouScreen> {
     final ok = await ref.read(aboutYouProvider.notifier).submit();
     // The router sends a member with a profile into the app by itself; this
     // is the explicit path for the same decision.
-    if (ok && mounted) context.go('/home');
+    if (ok && mounted) {
+      context.go(ref.read(pendingActionProvider.notifier).take());
+    }
   }
 
   @override
@@ -1263,6 +1295,117 @@ class _GenderTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Welcome's "Get started": who you are and your birth date (18+), kept on the
+/// phone only, then straight into browsing as a guest. No phone number, no
+/// code, no account.
+class GuestStartScreen extends ConsumerStatefulWidget {
+  const GuestStartScreen({super.key});
+
+  @override
+  ConsumerState<GuestStartScreen> createState() => _GuestStartScreenState();
+}
+
+class _GuestStartScreenState extends ConsumerState<GuestStartScreen> {
+  String _gender = '';
+  DateTime? _birth;
+
+  int? get _age =>
+      _birth == null ? null : ageOn(_birth!, ref.read(clockProvider)());
+
+  bool get _under18 => _age != null && _age! < minAge;
+  bool get _valid => _gender.isNotEmpty && _age != null && !_under18;
+
+  Future<void> _pickDate() async {
+    final now = ref.read(clockProvider)();
+    final picked = await ref.read(birthDatePickerProvider)(
+      context,
+      initial: _birth ?? DateTime(now.year - 25, 6, 15),
+      first: DateTime(now.year - 100),
+      last: DateTime(now.year, now.month, now.day),
+    );
+    if (picked != null) setState(() => _birth = picked);
+  }
+
+  void _go() {
+    if (!_valid) return;
+    ref
+        .read(guestSessionProvider.notifier)
+        .start(gender: _gender, birthDate: _birth!);
+    context.go('/home');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final mc = context.mc;
+    final locale = Localizations.localeOf(context).toString();
+    return OnbScaffold(
+      onBack: () => context.go('/onboarding'),
+      bottom: SafeArea(
+        top: false,
+        child: McButton(
+          label: l.guestStartCta,
+          onPressed: _valid ? _go : null,
+        ),
+      ),
+      children: [
+        Semantics(
+          header: true,
+          child: Text(l.guestStartTitle, style: mc.text.headline),
+        ),
+        SizedBox(height: mc.space.xxs),
+        Text(
+          l.guestStartSub,
+          style: mc.text.body.copyWith(color: mc.colors.onSurfaceMuted),
+        ),
+        SizedBox(height: mc.space.lg),
+        Semantics(
+          container: true,
+          label: l.v2bIAm,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(l.v2bIAm, style: mc.text.label),
+              SizedBox(height: mc.space.xs),
+              _GenderChoice(
+                value: _gender,
+                onChanged: (v) => setState(() => _gender = v),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: mc.space.md),
+        _DateField(
+          label: l.v2bBirthDate,
+          value: _birth == null
+              ? null
+              : l.v2bBirthDateValue(
+                  DateFormat.yMMMMd(locale).format(_birth!),
+                  _age ?? 0,
+                ),
+          placeholder: l.v2bBirthDateChoose,
+          helper: l.v2bBirthDateHelp,
+          error: _under18,
+          onTap: _pickDate,
+        ),
+        if (_under18) ...[
+          SizedBox(height: mc.space.sm),
+          _KindMessage(title: l.v2bUnder18Title, body: l.v2bUnder18Body),
+        ],
+        if (_gender.isNotEmpty) ...[
+          SizedBox(height: mc.space.md),
+          Text(
+            '${l.guestLookingFor}: '
+            '${_gender == 'male' ? l.guestSeeingWomen : l.guestSeeingMen}',
+            key: const Key('guest-seeing'),
+            style: mc.text.body,
+          ),
+        ],
+      ],
     );
   }
 }

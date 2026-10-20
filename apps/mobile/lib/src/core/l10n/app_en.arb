@@ -1627,5 +1627,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "guestStartTitle": "Before you look around",
+  "guestStartSub": "Tell us who you are so we show the right people. No account and no phone number. This stays on your phone.",
+  "guestLookingFor": "You will see",
+  "guestSeeingWomen": "Women looking for marriage",
+  "guestSeeingMen": "Men looking for marriage",
+  "guestStartCta": "Start looking",
+  "guestHaveAccount": "I already have an account",
+  "guestGateCta": "Sign in or create an account",
+  "guestGateTitleInterest": "Sign in to say hello",
+  "guestGateBodyInterest": "An interest carries your introduction, so the other person needs to know a real member is writing. Signing in takes about a minute.",
+  "guestGateTitleChat": "Sign in to chat",
+  "guestGateBodyChat": "Chats happen between members who matched. Sign in to read and write messages.",
+  "guestGateTitleInterests": "Sign in to see your interests",
+  "guestGateBodyInterests": "Interests people send you wait here once you have an account.",
+  "guestGateTitleMatches": "Sign in to see your matches",
+  "guestGateBodyMatches": "When an interest is returned you become a match and can chat. Sign in to see yours.",
+  "guestGateTitleProfile": "Sign in to set up your profile",
+  "guestGateBodyProfile": "Your profile, photos and settings belong to your account.",
+  "guestGateTitleNotifications": "Sign in to see your notifications",
+  "guestGateBodyNotifications": "Updates about your interests and matches appear here once you have an account.",
+  "guestGateNote": "Browsing stays free and open. You only sign in when you want to reach someone."
 }

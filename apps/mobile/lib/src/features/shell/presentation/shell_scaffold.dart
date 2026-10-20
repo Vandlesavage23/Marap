@@ -5,7 +5,9 @@ import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/providers.dart';
 import 'package:marriage_connect/src/core/theme/app_theme.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/account_gate.dart';
 import 'package:marriage_connect/src/features/shell/application/shell_badges.dart';
+import 'package:marriage_connect/src/features/shell/shell_routes.dart';
 
 /// The four tabs, in order.
 enum ShellTab { discover, interests, matches, profile }
@@ -24,11 +26,27 @@ class ShellScaffold extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => ShellFrame(
         currentIndex: navigationShell.currentIndex,
-        onSelect: (i) => navigationShell.goBranch(
-          i,
-          // Tapping the current tab returns to its first screen.
-          initialLocation: i == navigationShell.currentIndex,
-        ),
+        onSelect: (i) async {
+          // Interests, Matches and Profile belong to an account: a guest gets
+          // the sign-in sheet and comes back to the tab afterwards.
+          if (i > 0) {
+            final ok = await requireAccount(
+              context,
+              switch (i) {
+                1 => GateReason.interests,
+                2 => GateReason.matches,
+                _ => GateReason.profile,
+              },
+              resumeRoute: shellTabPaths[i],
+            );
+            if (!ok) return;
+          }
+          navigationShell.goBranch(
+            i,
+            // Tapping the current tab returns to its first screen.
+            initialLocation: i == navigationShell.currentIndex,
+          );
+        },
         child: navigationShell,
       );
 }

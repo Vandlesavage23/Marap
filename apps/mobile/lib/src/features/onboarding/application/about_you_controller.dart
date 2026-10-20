@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:marriage_connect/src/core/analytics/analytics_client.dart';
+import 'package:marriage_connect/src/core/auth/guest_session.dart';
 import 'package:marriage_connect/src/core/clock.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
@@ -91,7 +92,16 @@ class AboutYouState {
 /// are recorded before the account is used (Q24).
 class AboutYouController extends Notifier<AboutYouState> {
   @override
-  AboutYouState build() => AboutYouState();
+  AboutYouState build() {
+    // Someone who browsed as a guest already said who they are.
+    final guest = ref.read(guestSessionProvider);
+    if (guest == null) return AboutYouState();
+    return AboutYouState(
+      gender: guest.gender,
+      birthDate: guest.birthDate,
+      age: ageOn(guest.birthDate, ref.read(clockProvider)()),
+    );
+  }
 
   void setName(String v) =>
       state = state.copyWith(firstName: v, clearFailure: true);

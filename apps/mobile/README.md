@@ -1,5 +1,39 @@
 # Marriage Connect mobile
 
+## How to see the UX (no backend, no SMS code)
+
+**Demo mode** runs the real app (real screens, router, controllers, validation) on an in-memory world of ~60 invented Ugandan
+members, with no server, no SMS, no ID check and no money. A `DEMO` strip down the right edge and a round controls button
+(also: tap the strip) are always on screen.
+
+| How | Do |
+| --- | --- |
+| **VS Code** | open the repo root, Run and Debug, pick **MC Demo (no backend)**, F5 (`.vscode/launch.json`) |
+| **Android Studio / IntelliJ** | open `apps/mobile`, pick **MC Demo (no backend)** in the run dropdown, Run (`.run/mc_demo.run.xml`) |
+| **Terminal (phone / emulator)** | `cd apps/mobile && flutter run --flavor dev -t lib/main_demo.dart` |
+| **Browser** | `cd apps/mobile && tool/prepare_demo_web.sh && flutter run -d chrome -t lib/main_demo.dart` |
+| **Browser, built + served** | `tool/serve_demo_web.sh --build` then open http://localhost:8080 (needs python3) |
+
+What you see: Welcome, then "I am a man / a woman" and your birth date (18+, kept on the phone), then straight into
+**Discover as a guest**: no phone number, no code, no account. Sign-in (phone + code, **any 6 digits work in demo** and the
+screen says so) is asked for only when you do something that needs an identity: send an interest, open Interests, Matches or
+Profile, notifications. After signing in you land back where you were. The membership offer appears only after the 3 free
+interests are used; never for a guest.
+
+The **Demo** controls sheet jumps to: Fresh visitor, **Guest browsing**, Signed in not verified (limited cards), Verified free member
+(2 of 3 interests used), Free quota used (membership offer), Member, Expired member (each resets the world and the router),
+and toggles slow network, offline, "fail the next request", "next ID check is refused", how long the ID check stays pending, text size
+100/150/200 % and dark mode. Start somewhere else with `--dart-define=DEMO_SCENARIO=member` (any scenario name).
+
+Real vs simulated: everything above the network is the shipped code (the real `Api*Repository` classes, Dio interceptors,
+chat socket client, outbox, drift database in memory). Simulated: the server (`lib/src/demo/demo_world.dart` mirrors the
+backend rules), the SMS code, the ID + selfie capture (a short "scanning" dialog), the camera/gallery (six built-in drawn
+photos), the app store (a Buy / Cancel dialog, then the plan is granted), push, voice notes, and a match replying ~3 s after you write.
+Demo mode refuses to start as the `prod` flavor, and nothing outside `lib/src/demo` imports it (a test checks both), so release
+builds never contain it. Web: the demo compiles and runs for the browser (`flutter build web -t lib/main_demo.dart`); the real app
+is a phone app and has no web target.
+
+
 Flutter 3.47.7 (pinned in `.fvmrc`). Feature-first layout under `lib/src` (Bible §5.3).
 
 ```bash

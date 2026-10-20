@@ -15,4 +15,5 @@ export 'brand_mark.dart';
 export 'empty_illustration.dart';
 export 'hero_illustration.dart';
 export 'sample_avatar.dart';
+export 'sample_avatar_url.dart';
 export 'verified_badge_art.dart';

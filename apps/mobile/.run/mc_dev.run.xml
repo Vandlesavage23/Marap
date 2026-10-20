@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <!-- Dev flavor against the local backend (docker compose + run_dev.py). -->
+  <configuration default="false" name="MC Dev (local backend)" type="FlutterRunConfigurationType" factoryName="Flutter">
+    <option name="additionalArgs" value="--flavor dev --dart-define-from-file=env/dev.json" />
+    <option name="filePath" value="$PROJECT_DIR$/lib/main_dev.dart" />
+    <method v="2" />
+  </configuration>
+</component>

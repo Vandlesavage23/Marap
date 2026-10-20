@@ -18,6 +18,7 @@ import 'package:marriage_connect/src/features/notifications/data/fcm_push_gatewa
 import 'package:marriage_connect/src/features/notifications/domain/push_gateway.dart';
 import 'package:marriage_connect/src/features/onboarding/application/onboarding_controller.dart';
 import 'package:marriage_connect/src/features/onboarding/data/auth_repository.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/account_gate.dart';
 import 'package:marriage_connect/src/features/profile/application/profile_tab_overrides.dart';
 import 'package:marriage_connect/src/features/verification/presentation/verify_widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -77,8 +78,15 @@ List<Override> appOverrides(Env env, BootstrapDeps deps) => [
       ),
       analyticsProvider.overrideWith(buildApiAnalytics),
       // "Verify to read more" on a locked card opens the contextual sheet.
-      verifyPromptProvider.overrideWithValue(
-        (context) => showVerifySheet(context, reason: VerifyReason.readMore),
+      // A guest is asked to sign in first (verification needs an account).
+      verifyPromptProvider.overrideWith(
+        (ref) => (context) async {
+          if (ref.read(sessionProvider) != SessionState.signedIn) {
+            await requireAccount(context, GateReason.interest);
+            return;
+          }
+          await showVerifySheet(context, reason: VerifyReason.readMore);
+        },
       ),
       // Profile tab: completeness ring, next best action, banners.
       ...profileTabOverrides(),

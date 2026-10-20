@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:marriage_connect/src/core/auth/guest_session.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/router/feature_routes.dart';
 import 'package:marriage_connect/src/features/me/application/me_controller.dart';
@@ -25,16 +26,26 @@ String? appRedirect(
   SessionState session,
   String location, {
   MeSnapshot? me,
+  bool guest = false,
 }) {
   if (session == SessionState.unknown) {
     return location == '/splash' ? null : '/splash';
   }
   final inOnboarding = location.startsWith('/onboarding');
   if (session == SessionState.signedOut) {
-    // About you needs an account; every other first-run screen is open.
-    return inOnboarding && location != '/onboarding/about'
-        ? null
-        : '/onboarding';
+    if (!guest) {
+      // About you needs an account; every other first-run screen is open.
+      return inOnboarding && location != '/onboarding/about'
+          ? null
+          : '/onboarding';
+    }
+    // A guest (chose who they are, no account) browses Discover and profiles;
+    // sign-in screens stay open; everything else asks for an account through
+    // the gate sheet, never by a redirect wall.
+    if (location == '/onboarding') return discoverRoute;
+    if (inOnboarding && location != '/onboarding/about') return null;
+    if (location.startsWith('/discovery')) return null;
+    return discoverRoute;
   }
   if (me == null) {
     // Signing in happens mid-onboarding: those screens keep working while
@@ -65,6 +76,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   ref
     ..listen(sessionProvider, (_, __) => refresh.ping())
     ..listen(meProvider, (_, __) => refresh.ping())
+    ..listen(guestSessionProvider, (_, __) => refresh.ping())
     ..onDispose(refresh.dispose);
   return GoRouter(
     navigatorKey: shellRootNavigatorKey,
@@ -74,6 +86,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ref.read(sessionProvider),
       state.matchedLocation,
       me: ref.read(meProvider).valueOrNull,
+      guest: ref.read(guestSessionProvider) != null,
     ),
     routes: [
       ...featureRoutes(),
@@ -89,6 +102,7 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'look-around',
             builder: (_, __) => const LookAroundScreen(),
           ),
+          GoRoute(path: 'start', builder: (_, __) => const GuestStartScreen()),
           GoRoute(path: 'phone', builder: (_, __) => const PhoneScreen()),
           GoRoute(path: 'otp', builder: (_, __) => const OtpScreen()),
           GoRoute(path: 'about', builder: (_, __) => const AboutYouScreen()),

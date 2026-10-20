@@ -5853,6 +5853,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{left} of {limit} free introductions left this week'**
   String v2bQuotaLeftThisWeek(int left, int limit);
+
+  /// No description provided for @guestStartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Before you look around'**
+  String get guestStartTitle;
+
+  /// No description provided for @guestStartSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us who you are so we show the right people. No account and no phone number. This stays on your phone.'**
+  String get guestStartSub;
+
+  /// No description provided for @guestLookingFor.
+  ///
+  /// In en, this message translates to:
+  /// **'You will see'**
+  String get guestLookingFor;
+
+  /// No description provided for @guestSeeingWomen.
+  ///
+  /// In en, this message translates to:
+  /// **'Women looking for marriage'**
+  String get guestSeeingWomen;
+
+  /// No description provided for @guestSeeingMen.
+  ///
+  /// In en, this message translates to:
+  /// **'Men looking for marriage'**
+  String get guestSeeingMen;
+
+  /// No description provided for @guestStartCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Start looking'**
+  String get guestStartCta;
+
+  /// No description provided for @guestHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'I already have an account'**
+  String get guestHaveAccount;
+
+  /// No description provided for @guestGateCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account'**
+  String get guestGateCta;
+
+  /// No description provided for @guestGateTitleInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to say hello'**
+  String get guestGateTitleInterest;
+
+  /// No description provided for @guestGateBodyInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'An interest carries your introduction, so the other person needs to know a real member is writing. Signing in takes about a minute.'**
+  String get guestGateBodyInterest;
+
+  /// No description provided for @guestGateTitleChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to chat'**
+  String get guestGateTitleChat;
+
+  /// No description provided for @guestGateBodyChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats happen between members who matched. Sign in to read and write messages.'**
+  String get guestGateBodyChat;
+
+  /// No description provided for @guestGateTitleInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your interests'**
+  String get guestGateTitleInterests;
+
+  /// No description provided for @guestGateBodyInterests.
+  ///
+  /// In en, this message translates to:
+  /// **'Interests people send you wait here once you have an account.'**
+  String get guestGateBodyInterests;
+
+  /// No description provided for @guestGateTitleMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your matches'**
+  String get guestGateTitleMatches;
+
+  /// No description provided for @guestGateBodyMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'When an interest is returned you become a match and can chat. Sign in to see yours.'**
+  String get guestGateBodyMatches;
+
+  /// No description provided for @guestGateTitleProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to set up your profile'**
+  String get guestGateTitleProfile;
+
+  /// No description provided for @guestGateBodyProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile, photos and settings belong to your account.'**
+  String get guestGateBodyProfile;
+
+  /// No description provided for @guestGateTitleNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to see your notifications'**
+  String get guestGateTitleNotifications;
+
+  /// No description provided for @guestGateBodyNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates about your interests and matches appear here once you have an account.'**
+  String get guestGateBodyNotifications;
+
+  /// No description provided for @guestGateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Browsing stays free and open. You only sign in when you want to reach someone.'**
+  String get guestGateNote;
 }
 
 class _AppLocalizationsDelegate

@@ -1,13 +1,29 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marriage_connect/src/core/auth/guest_session.dart';
+import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/network/providers.dart';
 import 'package:marriage_connect/src/features/discovery/data/api_discovery_repository.dart';
+import 'package:marriage_connect/src/features/discovery/data/guest_discovery_repository.dart';
 import 'package:marriage_connect/src/features/discovery/domain/candidate.dart';
 import 'package:marriage_connect/src/features/discovery/domain/discovery_repository.dart';
 
-final discoveryRepositoryProvider = Provider<DiscoveryRepository>(
-  (ref) => ApiDiscoveryRepository(ref.watch(dioProvider)),
+final guestDiscoveryRepositoryProvider = Provider<GuestDiscoveryRepository>(
+  (ref) => HttpGuestDiscoveryRepository(ref.watch(dioProvider)),
 );
+
+/// Members get their ranked deck; a visitor without an account gets the public
+/// limited deck for who they said they are looking for.
+final discoveryRepositoryProvider = Provider<DiscoveryRepository>((ref) {
+  if (ref.watch(sessionProvider) == SessionState.signedIn) {
+    return ApiDiscoveryRepository(ref.watch(dioProvider));
+  }
+  final guest = ref.watch(guestSessionProvider);
+  return GuestDeckRepository(
+    ref.watch(guestDiscoveryRepositoryProvider),
+    seeking: guest?.seeking ?? 'female',
+  );
+});
 
 /// Cards left to show. `items.first` is the current card.
 class DeckState {
@@ -63,7 +79,11 @@ class DiscoveryController extends AsyncNotifier<DeckState> {
   DiscoveryRepository get _repo => ref.read(discoveryRepositoryProvider);
 
   @override
-  Future<DeckState> build() => _firstPage();
+  Future<DeckState> build() {
+    // A new session (signing in from guest browsing) starts a new deck.
+    ref.watch(sessionProvider);
+    return _firstPage();
+  }
 
   Future<DeckState> _firstPage() async {
     final page = await _repo.page();

@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marriage_connect/src/core/illustrations/sample_avatar_url.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/features/discovery/application/media_prefs.dart';
 
@@ -13,6 +14,7 @@ typedef NetworkImageBuilder = Widget Function(
 );
 
 Widget _cachedImage(BuildContext context, String url, int decodeWidth) =>
+    SampleAvatarRef.tryParse(url)?.build() ??
     CachedNetworkImage(
       imageUrl: url,
       fit: BoxFit.cover,

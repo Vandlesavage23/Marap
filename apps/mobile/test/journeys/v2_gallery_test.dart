@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:marriage_connect/src/core/auth/guest_session.dart';
 import 'package:marriage_connect/src/core/auth/session_controller.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/features/membership/presentation/interest_gate.dart';
@@ -66,6 +67,13 @@ Future<void> shotWorld(
   t.platformDispatcher.clearPlatformBrightnessTestValue();
 }
 
+void _guest(World w) {
+  w.prefs
+    ..setString(guestGenderPrefKey, 'female')
+    ..setString(guestBirthPrefKey, '1998-04-12');
+  w.seedCards();
+}
+
 void _unverified(World w) {
   w.profileCreated = true;
   w.profile.fields.addAll({'display_name': 'Grace', 'gender': 'female'});
@@ -85,6 +93,33 @@ void _readyToMake(World w) {
 void main() {
   setUpAll(loadRealFonts);
 
+  testWidgets('guest browsing and the sign-in gate', (t) async {
+    await shotWorld(
+      t,
+      'guest_00_browse',
+      session: SessionState.signedOut,
+      setup: _guest,
+    );
+    await shotWorld(
+      t,
+      'guest_01_gate_interest',
+      session: SessionState.signedOut,
+      setup: _guest,
+      nav: (t, l) async {
+        await t.tap(find.byIcon(Icons.favorite).last);
+        await t.pumpAndSettle();
+      },
+    );
+    await shotWorld(
+      t,
+      'guest_02_gate_matches',
+      variants: [allVariants.first],
+      session: SessionState.signedOut,
+      setup: _guest,
+      nav: (t, l) => _tap(t, l.v2aNavMatches),
+    );
+  });
+
   testWidgets('00-04 first run', (t) async {
     await shotWorld(
       t,
@@ -100,16 +135,24 @@ void main() {
     );
     await shotWorld(
       t,
-      'flow_02_phone',
+      'flow_02_guest_start',
       session: SessionState.signedOut,
       nav: (t, l) => _tap(t, l.v2bGetStarted),
+    );
+    await shotWorld(
+      t,
+      'flow_02_phone',
+      session: SessionState.signedOut,
+      nav: (t, l) async {
+        await _tap(t, l.guestHaveAccount);
+      },
     );
     await shotWorld(
       t,
       'flow_03_code',
       session: SessionState.signedOut,
       nav: (t, l) async {
-        await _tap(t, l.v2bGetStarted);
+        await _tap(t, l.guestHaveAccount);
         await t.enterText(find.byType(TextField), '772000111');
         await t.pump();
         await _tap(t, l.v2bSendCode);
@@ -123,7 +166,7 @@ void main() {
       variants: [allVariants.first, allVariants[3]],
       session: SessionState.signedOut,
       nav: (t, l) async {
-        await _tap(t, l.v2bGetStarted);
+        await _tap(t, l.guestHaveAccount);
         await t.enterText(find.byType(TextField), '772000111');
         await t.pump();
         await _tap(t, l.v2bSendCode);

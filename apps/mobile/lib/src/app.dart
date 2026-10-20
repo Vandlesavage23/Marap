@@ -9,7 +9,21 @@ import 'package:marriage_connect/src/features/notifications/application/push_con
 import 'package:marriage_connect/src/features/settings/application/settings_controllers.dart';
 
 class App extends ConsumerWidget {
-  const App({super.key});
+  const App({
+    super.key,
+    this.builder,
+    this.themeMode = ThemeMode.system,
+    this.showDebugBanner = true,
+  });
+
+  /// Wraps every screen (Demo mode adds its ribbon and controls here). Null in
+  /// the real app.
+  final TransitionBuilder? builder;
+
+  final ThemeMode themeMode;
+
+  /// Flutter's own corner "DEBUG" banner (debug builds only).
+  final bool showDebugBanner;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -21,6 +35,9 @@ class App extends ConsumerWidget {
       // Wipes member data when a session ends outside Settings > Sign out.
       ..watch(sessionCleanupProvider);
     return MaterialApp.router(
+      debugShowCheckedModeBanner: showDebugBanner,
+      builder: builder,
+      themeMode: themeMode,
       onGenerateTitle: (c) => AppLocalizations.of(c).appName,
       theme: buildTheme(Brightness.light),
       darkTheme: buildTheme(Brightness.dark),

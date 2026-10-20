@@ -13,6 +13,7 @@ import 'package:marriage_connect/src/features/membership/application/membership_
 import 'package:marriage_connect/src/features/membership/domain/entitlements.dart';
 import 'package:marriage_connect/src/features/membership/presentation/entitlement_gate.dart';
 import 'package:marriage_connect/src/features/notifications/presentation/notification_priming.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/account_gate.dart';
 import 'package:marriage_connect/src/features/verification/presentation/verify_widgets.dart';
 
 /// "2 of 3 free introductions left, renews Monday" for the Send button, or
@@ -218,6 +219,15 @@ Future<SendInterestResult?> sendInterestFlow(
   required String profileId,
   required String displayName,
 }) async {
+  // A guest is asked to sign in first, and brought back to this profile.
+  if (!await requireAccount(
+    context,
+    GateReason.interest,
+    resumeRoute: '/discovery/profile/$profileId',
+  )) {
+    return null;
+  }
+  if (!context.mounted) return null;
   final ref = ProviderScope.containerOf(context, listen: false);
   // Know what the server says before choosing a sheet (a failed read falls
   // through: the server still decides when the interest is sent).

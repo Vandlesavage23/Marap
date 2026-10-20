@@ -17,6 +17,7 @@ import 'package:marriage_connect/src/features/discovery/presentation/swipe_card.
 import 'package:marriage_connect/src/features/discovery/presentation/why_sheet.dart';
 import 'package:marriage_connect/src/features/interests/presentation/social_failure.dart';
 import 'package:marriage_connect/src/features/membership/presentation/interest_gate.dart';
+import 'package:marriage_connect/src/features/onboarding/presentation/account_gate.dart';
 
 /// The hero of the app: one big photo card at a time, a large pass button and
 /// a large "send interest" button, skeletons while loading, and friendly
@@ -81,7 +82,17 @@ class DiscoveryScreen extends ConsumerWidget {
                       height: mc.space.minTarget,
                     ),
                     icon: const Icon(Icons.notifications_none),
-                    onPressed: () => context.push('/notifications'),
+                    onPressed: () async {
+                      if (await requireAccount(
+                        context,
+                        GateReason.notifications,
+                        resumeRoute: '/notifications',
+                      )) {
+                        if (context.mounted) {
+                          await context.push('/notifications');
+                        }
+                      }
+                    },
                   ),
                 ],
               ),

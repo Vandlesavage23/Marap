@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:marriage_connect/src/core/illustrations/sample_avatar_url.dart';
 import 'package:marriage_connect/src/core/l10n/gen/app_localizations.dart';
 import 'package:marriage_connect/src/core/network/app_failure.dart';
 import 'package:marriage_connect/src/core/widgets/widgets.dart';
@@ -167,6 +168,8 @@ class ProfilePhotoImage extends StatelessWidget {
       child: const Center(child: Icon(Icons.image_outlined)),
     );
     if (u == null) return placeholder;
+    final sample = SampleAvatarRef.tryParse(u);
+    if (sample != null) return sample.build();
     return Image.network(
       u,
       fit: fit,

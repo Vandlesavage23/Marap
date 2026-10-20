@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:marriage_connect/src/core/illustrations/sample_avatar_url.dart';
 import 'package:marriage_connect/src/features/discovery/application/media_prefs.dart';
 
 /// Warms the image cache for [url] at [width]. Replaceable so tests never
@@ -13,12 +14,15 @@ typedef ImagePreloader = Future<void> Function(
   int width,
 );
 
-Future<void> _precache(BuildContext context, String url, int width) =>
-    precacheImage(
-      ResizeImage(CachedNetworkImageProvider(url), width: width),
-      context,
-      onError: (_, __) {}, // the card shows its own placeholder/error
-    );
+Future<void> _precache(BuildContext context, String url, int width) async {
+  // Code-drawn sample photos (`demo://avatar/...`) have nothing to download.
+  if (SampleAvatarRef.tryParse(url) != null) return;
+  return precacheImage(
+    ResizeImage(CachedNetworkImageProvider(url), width: width),
+    context,
+    onError: (_, __) {}, // the card shows its own placeholder/error
+  );
+}
 
 final imagePreloaderProvider = Provider<ImagePreloader>((ref) => _precache);
 

@@ -3291,4 +3291,75 @@ class AppLocalizationsEn extends AppLocalizations {
   String v2bQuotaLeftThisWeek(int left, int limit) {
     return '$left of $limit free introductions left this week';
   }
+
+  @override
+  String get guestStartTitle => 'Before you look around';
+
+  @override
+  String get guestStartSub =>
+      'Tell us who you are so we show the right people. No account and no phone number. This stays on your phone.';
+
+  @override
+  String get guestLookingFor => 'You will see';
+
+  @override
+  String get guestSeeingWomen => 'Women looking for marriage';
+
+  @override
+  String get guestSeeingMen => 'Men looking for marriage';
+
+  @override
+  String get guestStartCta => 'Start looking';
+
+  @override
+  String get guestHaveAccount => 'I already have an account';
+
+  @override
+  String get guestGateCta => 'Sign in or create an account';
+
+  @override
+  String get guestGateTitleInterest => 'Sign in to say hello';
+
+  @override
+  String get guestGateBodyInterest =>
+      'An interest carries your introduction, so the other person needs to know a real member is writing. Signing in takes about a minute.';
+
+  @override
+  String get guestGateTitleChat => 'Sign in to chat';
+
+  @override
+  String get guestGateBodyChat =>
+      'Chats happen between members who matched. Sign in to read and write messages.';
+
+  @override
+  String get guestGateTitleInterests => 'Sign in to see your interests';
+
+  @override
+  String get guestGateBodyInterests =>
+      'Interests people send you wait here once you have an account.';
+
+  @override
+  String get guestGateTitleMatches => 'Sign in to see your matches';
+
+  @override
+  String get guestGateBodyMatches =>
+      'When an interest is returned you become a match and can chat. Sign in to see yours.';
+
+  @override
+  String get guestGateTitleProfile => 'Sign in to set up your profile';
+
+  @override
+  String get guestGateBodyProfile =>
+      'Your profile, photos and settings belong to your account.';
+
+  @override
+  String get guestGateTitleNotifications => 'Sign in to see your notifications';
+
+  @override
+  String get guestGateBodyNotifications =>
+      'Updates about your interests and matches appear here once you have an account.';
+
+  @override
+  String get guestGateNote =>
+      'Browsing stays free and open. You only sign in when you want to reach someone.';
 }
