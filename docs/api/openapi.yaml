@@ -407,6 +407,23 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/discovery/guest:
+    get:
+      operationId: api_v1_discovery_guest_retrieve
+      description: 'Signed-out browsing: GET /discovery/guest?seeking=female|male&cursor=
+        (no account, limited cards).'
+      tags:
+      - api
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/v1/events:
     post:
       operationId: api_v1_events_create

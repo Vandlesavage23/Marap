@@ -4,6 +4,7 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect, render
 from django.views.decorators.csrf import csrf_protect
@@ -48,7 +49,9 @@ def login(request: HttpRequest) -> HttpResponse:
         try:
             e164 = phone_lib.normalise(raw)
             # Members only: unknown numbers get the same page but no code is sent (no account enumeration).
-            if account_selectors.get_account_by_phone(e164) is not None or getattr(settings, "DEBUG", False):
+            if account_selectors.get_account_by_phone(e164) is not None or getattr(
+                settings, "DEBUG", False
+            ):
                 account_services.start_otp(phone=e164, purpose="login", ip=client_ip(request))
         except DomainError as exc:
             return _render(request, "login.html", 422, error=exc.detail)

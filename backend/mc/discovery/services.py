@@ -479,3 +479,68 @@ def purge_impressions(*, before) -> int:  # type: ignore[no-untyped-def]
     )
     deleted, _ = qs.delete()
     return deleted
+
+
+GUEST_MAX_CARDS = 40
+
+
+def guest_feed(
+    *, seeking: str, cursor: str | None, limit: int, ip: str | None, install_id: str | None
+) -> dict[str, Any]:
+    """Public, signed-out browsing (ADR-0009 amendment: look first, sign in later). LIMITED cards only — primary
+    photo (never a `verified_only` one), first name, age, district, intention — newest live profiles of the gender
+    being sought, at most `GUEST_MAX_CARDS` per person. Per-IP and per-device capped like unverified browsing."""
+    from mc.media import selectors as media_selectors
+    from mc.profiles.models import Photo, Profile
+    from mc.profiles.policies import photo_visible_to
+
+    ratelimit.hit_client(
+        "guest_browse",
+        ip=ip,
+        install_id=install_id,
+        limit=settings.BROWSE_PAGES_PER_IP_PER_DAY_UNVERIFIED,
+        window_seconds=24 * 3600,
+    )
+    try:
+        offset = max(0, int(cursor or 0))
+    except ValueError:
+        offset = 0
+    limit = max(1, min(limit, 20, GUEST_MAX_CARDS - offset)) if offset < GUEST_MAX_CARDS else 0
+    profiles = list(
+        Profile.objects.filter(
+            status=Profile.Status.LIVE, account__status="active", gender=seeking
+        ).order_by("-created_at", "id")[offset : offset + limit]
+    )
+    photos: dict[uuid.UUID, Photo] = {}
+    for ph in (
+        Photo.objects.filter(profile_id__in=[p.id for p in profiles], moderation_status="approved")
+        .select_related("media")
+        .order_by("profile_id", "position")
+    ):
+        photos.setdefault(ph.profile_id, ph)
+    items = []
+    for p in profiles:
+        first = photos.get(p.id)
+        shown = []
+        if first and photo_visible_to(viewer_verified=False, target=p, is_primary=True):
+            url = media_selectors.signed_url_prechecked(first.media)
+            if url:
+                shown.append({"url": url, "w": first.media.width, "h": first.media.height})
+        items.append(
+            {
+                "profile_id": str(p.id),
+                "display_name": p.display_name,
+                "age": profile_selectors.age_of(p),
+                "district": p.district,
+                "photos": shown,
+                "intention": p.intention,
+                "badges": profile_selectors.badges(first is not None),
+                "limited": True,
+            }
+        )
+    more = offset + len(profiles) < GUEST_MAX_CARDS and len(profiles) == limit and limit > 0
+    return {
+        "items": items,
+        "next_cursor": str(offset + limit) if more else None,
+        "sign_in_to_see_more": not more,
+    }

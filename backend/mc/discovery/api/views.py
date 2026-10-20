@@ -1,5 +1,7 @@
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -41,3 +43,25 @@ class FeedbackView(APIView):
             action=data.validated_data["action"],
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GuestDiscoveryView(APIView):
+    """Signed-out browsing: GET /discovery/guest?seeking=female|male&cursor= (no account, limited cards)."""
+
+    permission_classes = [AllowAny]
+    authentication_classes: list = []
+
+    @extend_schema(responses={200: dict})
+    def get(self, request):  # type: ignore[no-untyped-def]
+        seeking = request.query_params.get("seeking")
+        if seeking not in ("male", "female"):
+            raise ValidationError({"seeking": "Use male or female."})
+        return Response(
+            services.guest_feed(
+                seeking=seeking,
+                cursor=request.query_params.get("cursor") or None,
+                limit=parse_limit(request.query_params.get("limit")) or 10,
+                ip=client_ip(request),
+                install_id=request_install_id(request),
+            )
+        )
