@@ -23,7 +23,7 @@ from . import phone as phone_utils
 from . import selectors, tokens
 from .events import ConsentChanged, NewDeviceSignIn
 from .models import Account, ConsentRecord, Device, Session
-from .providers.sms import get_sms_provider
+from .providers.sms import get_sms_provider, otp_message
 from .tasks import send_new_device_alert
 
 log = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def start_otp(*, phone: str, purpose: str, ip: str) -> None:
     pipe.execute()
     get_sms_provider().send(
         to_e164=e164,
-        body=f"Your Marriage Connect code is {code}. Never share it with anyone.",
+        body=otp_message(code),
     )
     metrics.count_otp_send(e164)
 

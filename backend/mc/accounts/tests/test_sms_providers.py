@@ -87,3 +87,21 @@ def test_africas_talking_uses_sandbox_host_only_for_sandbox_username(monkeypatch
     capture(monkeypatch, {"SMSMessageData": {"Recipients": [{"statusCode": 403}]}})
     with pytest.raises(ProviderError):
         sms.AfricasTalkingSms().send(to_e164="+256772000001", body="x")
+
+
+def test_console_sms_prints_only_in_local_settings(settings, capsys):
+    settings.SETTINGS_MODULE = "config.settings.local"
+    sms.ConsoleSms().send(to_e164="+256772000001", body="Your Marriage Connect code is 123456.")
+    assert "123456" in capsys.readouterr().err
+    settings.SETTINGS_MODULE = "config.settings.prod"
+    with pytest.raises(ProviderError):
+        sms.ConsoleSms().send(to_e164="+256772000001", body="x")
+    assert capsys.readouterr().err == ""
+
+
+def test_sms_retriever_format_only_when_an_app_hash_is_configured(settings):
+    settings.SMS_RETRIEVER_APP_HASH = ""
+    assert sms.otp_message("123456").startswith("Your Marriage Connect code is 123456")
+    settings.SMS_RETRIEVER_APP_HASH = "FA+9qCX9VSu"
+    msg = sms.otp_message("123456")
+    assert msg.startswith("<#> ") and msg.endswith("\nFA+9qCX9VSu") and len(msg.encode()) <= 140

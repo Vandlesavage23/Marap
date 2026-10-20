@@ -34,6 +34,28 @@ class FakeSms:
         cls.fail = False
 
 
+def otp_message(code: str) -> str:
+    """The OTP SMS text. With `SMS_RETRIEVER_APP_HASH` set it uses Google's SMS Retriever format (starts with `<#>`, ends with
+    the 11-character app hash) so Android can read the code with no permission; otherwise plain text."""
+    text = f"Your Marriage Connect code is {code}. Never share it with anyone."
+    app_hash = settings.SMS_RETRIEVER_APP_HASH
+    return f"<#> {text}\n{app_hash}" if app_hash else text
+
+
+class ConsoleSms:
+    """LOCAL DEVELOPMENT ONLY: prints the message (including the OTP) to the server terminal so a developer can sign in
+    without an SMS provider. Refuses to run outside local/dev settings; never logs through the logging pipeline."""
+
+    ALLOWED = ("config.settings.local", "config.settings.dev")
+
+    def send(self, *, to_e164: str, body: str) -> None:
+        if settings.SETTINGS_MODULE not in self.ALLOWED:
+            raise ProviderError("ConsoleSms is for local development only")
+        import sys
+
+        print(f"\n[DEV SMS] to {to_e164}: {body}\n", file=sys.stderr, flush=True)
+
+
 class AfricasTalkingSms:
     """Default real provider (A). Credentials come from settings/Secrets Manager only."""
 

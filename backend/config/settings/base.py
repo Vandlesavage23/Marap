@@ -338,3 +338,6 @@ INSTALLED_APPS += ["mc.webcheckout"]
 BETA_INVITE_REQUIRED = env("BETA_INVITE_REQUIRED", "false").lower() == "true"
 INSTALLED_APPS += ["mc.beta"]
 INSTALLED_APPS += ["mc.flags"]
+
+# Android SMS Retriever (OTP autofill without permissions): the 11-char app hash for the signing key; empty = plain SMS.
+SMS_RETRIEVER_APP_HASH = env("SMS_RETRIEVER_APP_HASH", "")

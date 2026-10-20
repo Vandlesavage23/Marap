@@ -27,7 +27,7 @@ from . import constants, selectors, services
 from . import phone as phone_utils
 from .models import Account, RecoverySession
 from .providers.email import get_email_provider
-from .providers.sms import get_sms_provider
+from .providers.sms import get_sms_provider, otp_message
 
 if TYPE_CHECKING:
     pass
@@ -243,9 +243,7 @@ def start_new_phone(*, token: str, new_phone: str, ip: str) -> None:
         return  # no enumeration: the swap will fail at completion without saying why
     code = _new_code()
     _store_code(f"otp:newphone:{s.id}", code, payload=e164)
-    get_sms_provider().send(
-        to_e164=e164, body=f"Your Marriage Connect code is {code}. Never share it with anyone."
-    )
+    get_sms_provider().send(to_e164=e164, body=otp_message(code))
 
 
 def complete(*, token: str, code: str, ip: str) -> None:
